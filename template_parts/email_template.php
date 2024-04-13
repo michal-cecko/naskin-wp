@@ -267,7 +267,11 @@
                 else { ob_start(); ?>
 
                     <?php if ($sendingToEmployee) : ?>
-                        Zákazník zrušil rezerváciu nasledovného termínu:<br><br>
+                        <?php if ($type === "cancel-customer") : ?>
+                            Dobrý deň, Upozorňujeme, že zákazník zrušil rezerváciu nasledovného termínu:<br><br>
+                        <?php else : ?>
+                            Dobrý deň, toto je potrvdenie Vami zrušeného termínu rezerevácie:<br><br>
+                        <?php endif ?>
                         <b>Dátum a čas</b>: <?= $date->format("j.n.Y - H:i") ?><br>
                         <b>Služba</b>: <?= $serviceTitle . " (" . $servicePrice. "€)" ?><br>
                         <b>Pracovník</b>: <?= $employee->first_name ?><br>
@@ -278,19 +282,11 @@
                         <b>Telefón</b>: <?= $customer['phone'] ?><br>
                         <b>Email</b>: <?= $customer['email'] ?><br>
 
-                        <br>
-
-                        <?php if ($type === "cancel-customer") : ?>
-                            <b>Zrušil</b>: Zákazník<br>
-                        <?php else : ?>
-                            <b>Zrušil</b>: Administrátor<br>
-                        <?php endif ?>
-
                     <?php else : ?>
                         <?php if ($type === "cancel-customer") : ?>
                             Dobrý deň, na základe vášho podnetu bola Vaša registrácia zrušená.<br><br>
                         <?php else : ?>
-                            Dobrý deň, je nám to ľúto, ale Vaša rezervácia bola zrušená.<br><br>
+                            Dobrý deň, je nám to ľúto, ale nemôžeme vybaviť Vašu rezerváciu. Vaša rezervácia bola zrušená.<br><br>
                         <?php endif ?>
 
                         <b>DETAILY VAŠEJ REZERVÁCIE</b><br>
