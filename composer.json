@@ -1,0 +1,18 @@
+{
+    "name": "madelo/sucpsk",
+    "description": "SUCPSK template by © madelo",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Theme\\": "theme/"
+        }
+    },
+    "authors": [
+        {
+            "name": "michalcecko",
+            "email": "ceckomichal@gmail.com"
+        }
+    ],
+    "require": {
+    }
+}

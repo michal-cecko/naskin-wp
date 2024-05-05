@@ -1,18 +1,24 @@
 <?php
-    include "functions/functions_acf.php";
 
-    include "functions/functions_helper.php";
+//EDIT THIS FILE ONLY IF YOU NEED SOME GLOBAL FUNCTIONS
+// -> USE AS LITTLE GLOBAL FNs AS POSSIBLE -> USE MAIN AND THEME SINGLETONS INSTEAD.
+define('SAURUS_PATH', plugin_dir_path( dirname( __FILE__ , 2) ) . 'mu-plugins/wordpresaurus');
 
-    include "functions/functions_posttypes.php";
+// Include Saurus and Theme bootstrap
+require_once(SAURUS_PATH . '/inc/bootstrap.php');
+require_once(THEME_PATH . '/inc/bootstrap.php');
 
-    include "functions/functions_theme.php";
+// Create config singleton
+configModule();
 
-    include "functions/functions_calendar.php";
+// Create main
+main();
 
-    include "functions/functions_email.php";
+// Create theme
+theme();
 
-    include "functions/functions_userroles.php";
+// Create templates
+templates();
 
-    include "functions/functions_plugins.php";
-
-    include "functions/functions_rest.php";
+// Register REST routes -> has to be after init of main and theme bcs we define all routes during constructs of modules
+main()->api()->registerRoutes();

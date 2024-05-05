@@ -1,0 +1,48 @@
+html{
+    @include respond-above(xxl){
+        // font-size: 14px;
+    }
+    @media (max-width: 1440px){
+        font-size: 14px;
+    }
+    @include respond-below(xxl){
+        font-size: 14px;
+    }
+    @include respond-below(xl){
+        font-size: 14px;
+    }
+    @include respond-below(lg){
+        font-size: 14px;
+    }
+    @include respond-below(md){
+        font-size: 16px;
+    }
+}
+
+body{
+    color: $color_3;
+    font-family: $content-font;
+}
+
+.container{
+    @include respond-above(xxl){
+        max-width: 1440px;
+    }
+    @include respond-below(xxl){
+        max-width: 1280px;
+    }
+    @include respond-below(xl){
+        max-width: 960px;
+    }
+    @include respond-below(lg){
+        max-width: 720px;
+        padding-left: 1.125rem;
+        padding-right: 1.125rem;
+    }
+    @include respond-below(md){
+        max-width: 540px;
+    }
+    @include respond-below(sm){
+        max-width: 480px;
+    }
+}

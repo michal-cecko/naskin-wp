@@ -84,36 +84,6 @@ function printMenu($location)
     }
 }
 
-
-// ASSETS PATHS
-
-function image_path($uri = true)
-{
-    return ($uri ? get_template_directory_uri() : get_template_directory()) . "/assets/images";
-}
-
-function icon_path($uri = true)
-{
-    return ($uri ? get_template_directory_uri() : get_template_directory()) . "/assets/icons";
-}
-
-function script_path($uri = true)
-{
-    return ($uri ? get_template_directory_uri() : get_template_directory()) . "/assets/js";
-}
-
-function favicon_path($uri = true)
-{
-    return ($uri ? get_template_directory_uri() : get_template_directory()) . "/assets/favicon";
-}
-
-
-function js_json_decode($json)
-{
-    return json_decode(str_replace("\\", "", $json), true);
-}
-
-
 function getStartAndEndDateOfWeek($timestamp)
 {
     $currentDayOfWeek = date('N', $timestamp); // Get current day of the week (1 = Monday, 7 = Sunday)
@@ -121,20 +91,6 @@ function getStartAndEndDateOfWeek($timestamp)
     $weekEndDate = date('Y-m-d', strtotime("+" . (7 - $currentDayOfWeek) . " days", $timestamp)); // Calculate the end date of the current week
 
     return ["start" => $weekStartDate, "end" => $weekEndDate];
-}
-
-
-function getRandomString($length)
-{
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $randomString = '';
-
-    for ($i = 0; $i < $length; $i++) {
-        $index = rand(0, strlen($characters) - 1);
-        $randomString .= $characters[$index];
-    }
-
-    return $randomString;
 }
 
 function getMonthName($num)
@@ -177,34 +133,6 @@ function showNotification($text, $status = "success")
         <span><?= $text ?></span>
     </div>
     <?php return ob_get_clean();
-}
-
-function getEmployees($idsOnly = false)
-{
-    $args = [
-        'role' => 'employee',
-        'meta_query' => [
-            "relation" => "AND",
-            [
-                'key' => 'worktime_start',
-                'compare' => 'EXISTS',
-            ],
-            [
-                'key' => 'worktime_end',
-                'compare' => 'EXISTS',
-            ],
-            [
-                'key' => 'lunchtime_start',
-                'compare' => 'EXISTS',
-            ],
-            [
-                'key' => 'lunchtime_end',
-                'compare' => 'EXISTS',
-            ],
-        ],
-    ];
-    if ($idsOnly) $args['fields'] = "ID";
-    return get_users($args);
 }
 
 function getCurrentUserRole()

@@ -1,0 +1,33 @@
+$headline-font: "Inter", sans-serif;
+$subheadline-font: "Inter", sans-serif;
+$content-font: "Inter", sans-serif;
+
+$color_1: #F26101; // orange
+$color_2: #F2F2F2; // yellow
+$color_3: #000000; // black
+$color_4: #FFEFE4; // light orange
+$color_5: #808080; // light black
+$color_6: #FFFFFF; // white
+
+$color-list: (
+        $color_1,
+        $color_2,
+        $color_3,
+        $color_4,
+        $color_5,
+        $color_6
+);
+
+@for $i from 1 through 6 {
+  .text-color {
+    &--#{$i} {
+      color: nth($color-list, $i) !important;
+    }
+  }
+
+  .bg-color {
+    &--#{$i} {
+      background-color: nth($color-list, $i) !important;
+    }
+  }
+}
