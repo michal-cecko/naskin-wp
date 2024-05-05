@@ -11,7 +11,6 @@ use Theme\Services\Appointments\AppointmentService;
 
 class Appointments
 {
-
     use Validation;
 
     public function __construct()
