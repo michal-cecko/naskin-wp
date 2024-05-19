@@ -1,6 +1,6 @@
 export default class Commons {
     constructor() {
-        this.apiUrl = PHPVars.api_url;
+        this.apiUrl = PHPVars.api_base;
         this.baseUrl = PHPVars.home_url;
         this.templateDirUri = PHPVars.template_directory_uri;
         this.recaptchaKey = PHPVars.recaptcha_key;
@@ -30,6 +30,37 @@ export default class Commons {
         return this.utc(moment());
     }
 
+    postFetch(url, body, headers = {}) {
+        if (!url.startsWith('/')) url = '/' + url
+
+        return fetch( `${_thisClass.apiUrl}${url}`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                ...headers
+            },
+            body: JSON.stringify(body)  // Ensure the body is stringified
+        })
+    }
+
+    humanDurationFromMinutes(minutes) {
+        const duration = moment.duration(minutes, 'minutes');
+        const hours = duration.hours();
+        const mins = duration.minutes();
+
+        let formattedTime = '';
+        if (hours > 0) {
+            formattedTime += hours + 'h ';
+        }
+        if (mins > 0 || (hours === 0 && mins === 0)) {
+            formattedTime += mins + 'm';
+        }
+
+        return formattedTime.trim();
+    }
+
+
     utc(datetime) {
         const utcOffset = 60; // UTC+1
         let x = moment(datetime).utc().utcOffset(utcOffset);
@@ -47,15 +78,6 @@ export default class Commons {
             .join('&');
 
         return `${baseUrl}?${queryString}`;
-    }
-    async WPPostAjax(endpoint, body) {
-        if(!endpoint.startWith("/")) endpoint = "/" + endpoint;
-
-        return fetch(`${this.apiUrl}${endpoint}`, {
-            method: 'POST',
-            credentials: 'same-origin',
-            body: body,
-        });
     }
 
     validateEmail(email) {
@@ -96,5 +118,12 @@ export default class Commons {
 
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    createSwiper(selector, options) {
+        let node = document.querySelector(selector);
+        if (!node) return;
+
+        const swiper = new Swiper(selector, options);
     }
 }

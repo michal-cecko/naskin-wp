@@ -3,11 +3,7 @@
 namespace Theme\Models\Appointment;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Saurus\App\Modules\Wordpress\Models\Model;
-use Theme\Enum\AppointmentType;
-use Theme\Models\User\Employee;
-use Theme\PostTypes\Customer;
 use Theme\PostTypes\Service;
 
 class AppointmentService extends Model

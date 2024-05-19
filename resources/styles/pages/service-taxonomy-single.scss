@@ -1,0 +1,120 @@
+@import "../imports/scss-necessary";
+
+#servicesSlider {
+  padding: 10rem 0;
+  @include respond-below(md) {
+    padding: 5rem 0;
+  }
+
+  .service-category-name {
+    margin-bottom: 1.5rem;
+  }
+
+  .cennik-btn {
+    width: fit-content;
+    margin-bottom: 5rem;
+  }
+
+  .swiper-services-container {
+    position: relative;
+
+    .swiper-arr {
+      z-index: 10;
+      position: absolute;
+      top: 50%;
+      transform: translate(0, -50%);
+      width: 5rem;
+      height: 5rem;
+      background: $light_beige;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      @include hover(){
+        background: $dirty_beige;
+      }
+
+      svg {
+        path {
+          fill: $dark;
+        }
+      }
+
+      &--left {
+        left: -2.5rem;
+      }
+
+      &--right {
+        transform: translate(0, -50%) rotate(180deg);
+        right: -2.5rem;
+      }
+    }
+
+    @include respond-below(md) {
+      .swiper-arr {
+        width: 3.5rem;
+        height: 3.5rem;
+
+        svg {
+          width: 2.3rem;
+          height: 2.3rem;
+        }
+
+        &--left {
+          left: -1.75rem;
+        }
+
+        &--right {
+          right: -1.75rem;
+        }
+      }
+    }
+  }
+
+  .swiper-services {
+    position: relative;
+
+    .swiper-slide {
+      overflow: hidden;
+      background: $light_beige;
+      position: relative;
+      border-radius: 40px;
+
+      .service-card {
+        display: block;
+
+        .image-container {
+          width: 100%;
+          overflow: hidden;
+          height: 20rem;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+          }
+
+          @include hover() {
+            img {
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+
+      span {
+        height: 7.3rem;
+        display: block;
+        padding: 1.5rem;
+        color: $dark;
+        font-size: 1.4rem;
+        font-weight: 600;
+        text-align: center;
+      }
+    }
+  }
+}

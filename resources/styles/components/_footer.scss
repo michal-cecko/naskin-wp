@@ -1,0 +1,102 @@
+@import "../imports/scss-necessary";
+
+footer {
+  position: relative;
+
+  .white-part {
+    z-index: 2;
+    position: relative;
+    background: $white;
+    padding: 3rem 0;
+    .heading{
+      @include respond-below(xl) {
+        max-width: 20rem;
+      }
+    }
+  }
+
+  .img-container {
+    position: absolute;
+    top: -2rem;
+    left: 50%;
+    transform: translateX(-60%);
+    z-index: 6;
+    img {
+      height: auto;
+      width: 25rem;
+    }
+    @include respond-below(lg) {
+      display: none;
+    }
+  }
+
+  .beige-part {
+    z-index: 3;
+    position: relative;
+    padding: 3rem 0 6rem 0;
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      button, a {
+        max-width: 15rem;
+      }
+      img {
+        width: 200px;
+        height: auto;
+      }
+    }
+  }
+
+  .contact-part{
+    background: $white;
+    padding: 3rem;
+    width: 50vw;
+    border-radius: 14rem 0 0 14rem;
+    border: 1px solid $brownish_yellow;
+    display: flex;
+    position: absolute;
+    right: -3px;
+    z-index: 4;
+    justify-content: center;
+    align-items: center;
+    .wrapperis {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+      a {
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: $secondary_dark;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        svg {
+          width: 48px;
+          height: 48px;
+        }
+      }
+    }
+  }
+
+  @include respond-below(md) {
+    .white-part {
+      padding-bottom: 10rem;
+    }
+    .beige-part {
+      padding-top: 20rem;
+      padding-bottom: 3rem;
+    }
+    .contact-part {
+      top: 17%;
+      width: 90vw;
+    }
+  }
+
+  .copyright {
+    text-align: center;
+    color: $secondary_dark;
+    padding: 2rem 0 3rem 0;
+  }
+}

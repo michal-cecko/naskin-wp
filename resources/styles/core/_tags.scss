@@ -1,0 +1,57 @@
+.tag {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  line-height: 1.2;
+
+  &.tag--brownish_yellow {
+    background: $brownish_yellow;
+    color: $white;
+
+    @include hover() {
+      background: darken($brownish_yellow, 10%);
+      color: darken($white, 10%);
+    }
+  }
+
+  &.tag--white {
+    background: $white;
+    color: $brownish_yellow;
+
+    @include hover() {
+      background: darken($white, 5%);
+      color: darken($brownish_yellow, 10%);
+    }
+  }
+
+  &.tag--dirty_beige {
+    background: $dirty_beige;
+    color: $dark;
+
+    @include hover() {
+      background: darken($dirty_beige, 10%);
+      color: lighten($dark, 10%);
+    }
+  }
+
+  &.tag--normal {
+    padding: 10px 26px;
+    font-size: 1rem;
+    border-radius: 25px;
+  }
+
+  &.tag--small {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    border-radius: 20px;
+  }
+
+  &.tag--big {
+    padding: 16px 32px;
+    font-size: 1.5rem;
+    border-radius: 30px;
+  }
+}

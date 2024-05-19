@@ -1,0 +1,109 @@
+@import "../imports/scss-necessary";
+
+#cennik {
+
+  background-image: linear-gradient($light_beige, $white);
+  padding-bottom: 10rem;
+  @include respond-below(md) {
+    padding-bottom: 3rem;
+  }
+
+  .category-container {
+    .img-container {
+      width: 100vw;
+      height: 40rem;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      @include respond-below(md) {
+        height: 25rem;
+      }
+    }
+
+    .container {
+      margin-top: -20rem;
+      @include respond-below(md) {
+        margin-top: -15rem;
+      }
+
+      .scrollbox {
+        border-radius: 30px;
+        overflow: hidden;
+        margin-bottom: 8rem;
+        margin-top: 4rem;
+      }
+
+      .prices-container {
+        background: $white;
+        padding: 2rem;
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+
+          thead {
+            tr {
+              th {
+                font-size: 1.5rem;
+                padding: 1rem 0;
+                text-align: left;
+                color: $brownish_yellow;
+
+                &:nth-child(2),
+                &:nth-child(3) {
+                  width: 7rem;
+                  text-align: right;
+                }
+              }
+            }
+          }
+
+          tbody {
+            tr {
+              td {
+                color: $dark;
+                padding: 0.5rem 0.3rem;
+                font-size: 1.2rem;
+
+                &:nth-child(2),
+                &:nth-child(3) {
+                  text-align: right;
+                }
+              }
+
+              &:first-child {
+                td {
+                  padding-top: 1rem;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      @include respond-below(md) {
+        .scrollbox {
+          margin-left: -5vw;
+          overflow-x: auto;
+          overflow-y: hidden;
+          width: 90vw;
+
+          .prices-container {
+            min-width: 50rem;
+          }
+        }
+      }
+    }
+  }
+
+  > span {
+    text-align: center;
+    padding: 2rem 3rem;
+    width: 100%;
+    display: block;
+  }
+}

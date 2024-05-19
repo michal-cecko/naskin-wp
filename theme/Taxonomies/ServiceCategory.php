@@ -2,21 +2,37 @@
 
 namespace Theme\Taxonomies;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Saurus\App\Modules\Wordpress\Taxonomies\TaxonomyType;
 use Theme\PostTypes\Service;
 
-class ExampleCategory extends TaxonomyType
+class ServiceCategory extends TaxonomyType
 {
+    public function getImageAttribute(): string
+    {
+        return main()->assets()->static("images/services/{$this->term->slug}.jpg");
+    }
+
+    public function posts() : BelongsToMany
+    {
+        return $this->belongsToMany(
+            Service::class,
+            'term_relationships',
+            'term_taxonomy_id',
+            'object_id'
+        );
+    }
+
     public static function getTaxonomySlug(): string
     {
-        return "example-category";
+        return "service-category";
     }
 
     public static function registerCustomTaxonomy(): ?array
     {
         $labels = [
-            'name' => __('Kategórie kontaktov', THEME_DOMAIN),
-            'singular_name' => __('Kategória kontaktov', THEME_DOMAIN),
+            'name' => __('Kategórie služieb', THEME_DOMAIN),
+            'singular_name' => __('Kategória služieb', THEME_DOMAIN),
             'search_items' => __('Vyhľadať kategóriu', THEME_DOMAIN),
             'popular_items' => __('Populárne kategórie', THEME_DOMAIN),
             'all_items' => __('Všetky kategórie', THEME_DOMAIN),
@@ -34,7 +50,7 @@ class ExampleCategory extends TaxonomyType
         ];
 
         $args = [
-            'description' => __("Kategórie kontaktov", THEME_DOMAIN),
+            'description' => __("Kategórie služieb", THEME_DOMAIN),
             'public' => TRUE,
             'show_ui' => TRUE,
             'show_in_nav_menus' => TRUE,
@@ -44,7 +60,7 @@ class ExampleCategory extends TaxonomyType
             'hierarchical' => FALSE,
             'query_var' => self::getTaxonomySlug(),
             'rewrite' => [
-                'slug' => self::getTaxonomySlug(),
+                'slug' => "sluzby",
                 'with_front' => TRUE,
                 'hierarchical' => FALSE,
             ],

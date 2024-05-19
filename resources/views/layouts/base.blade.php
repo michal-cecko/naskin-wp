@@ -37,6 +37,10 @@
 
 <div class="app">
 
+    <div id="notifications"></div>
+
+    @include("parts.appointments.appointment-form")
+
     @section('content')
         @yield('content')
     @show

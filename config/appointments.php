@@ -8,5 +8,5 @@ return [
         'street' => 'Kosovska 18',
         'city' => 'Beograd',
         'zip' => '11000',
-    ]
+    ],
 ];

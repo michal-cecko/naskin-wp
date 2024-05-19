@@ -3,14 +3,12 @@
 namespace Theme\Models\Appointment;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Saurus\App\Modules\Wordpress\Models\Model;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
-use Theme\Models\User\Employee;
 use Theme\PostTypes\Customer;
-use Theme\PostTypes\Service;
+use Theme\Users\Employee;
 
 class Appointment extends Model
 {
@@ -18,8 +16,8 @@ class Appointment extends Model
 
     protected $fillable = [
         'employee_id',
-        'service_id',
-        'date',
+        'start_at',
+        'end_at',
         'customer_id',
         'note',
         'type',

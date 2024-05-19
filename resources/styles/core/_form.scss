@@ -1,0 +1,41 @@
+.input {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  font: $font-1;
+
+  input {
+    &::placeholder {
+      color: rgba($secondary_dark, 0.8);
+    }
+  }
+
+  &--text {
+    input {
+      width: 100%;
+    }
+    label {
+      display: block;
+    }
+  }
+
+  &--normal {
+    input {
+      border-radius: 0.625rem;
+      padding: 0.4rem 1.25rem;
+    }
+    label {
+      font-size: 0.9rem;
+      margin-bottom: 0.18rem;
+    }
+  }
+
+  &--light_beige {
+    input {
+      background-color: $light_beige;
+      border: none;
+      color: $dark;
+    }
+  }
+}

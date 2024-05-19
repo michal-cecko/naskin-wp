@@ -1,33 +1,35 @@
-$headline-font: "Inter", sans-serif;
-$subheadline-font: "Inter", sans-serif;
-$content-font: "Inter", sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+$font-1: "Quicksand", sans-serif;
+$font-2: "Josefin Sans", sans-serif;
 
-$color_1: #F26101; // orange
-$color_2: #F2F2F2; // yellow
-$color_3: #000000; // black
-$color_4: #FFEFE4; // light orange
-$color_5: #808080; // light black
-$color_6: #FFFFFF; // white
+$brownish_yellow: #D3932A;
+$white: #FFFFFF;
+$light_beige: #F7F0E8;
+$dirty_beige: #EAE1DA;
+$dark: #6D4A10;
+$secondary_dark: rgba($dark, 0.8);
 
-$color-list: (
-        $color_1,
-        $color_2,
-        $color_3,
-        $color_4,
-        $color_5,
-        $color_6
-);
+.text-yellow {
+    color: $brownish_yellow !important;
+}
 
-@for $i from 1 through 6 {
-  .text-color {
-    &--#{$i} {
-      color: nth($color-list, $i) !important;
-    }
-  }
+.text-white {
+    color: $white !important;
+}
 
-  .bg-color {
-    &--#{$i} {
-      background-color: nth($color-list, $i) !important;
-    }
-  }
+.text-dark {
+    color: $dark !important;
+}
+
+.bg-light-beige {
+    background-color: $light_beige !important;
+}
+
+.bg-dirty-beige {
+    background-color: $dirty_beige !important;
+}
+
+.bg-white {
+    background-color: $white !important;
 }

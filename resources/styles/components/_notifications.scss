@@ -1,0 +1,52 @@
+#notifications {
+  position: fixed;
+  top: 7rem;
+  right: 5rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 3000;
+  pointer-events: none;
+  align-items: flex-end;
+
+  .notification {
+    font-family: $font-1;
+    padding: 0.7rem 1.5rem;
+    color: white;
+    border-radius: 4rem;
+    margin-bottom: 1rem;
+    transform: translateX(1rem);
+    transition: 0.5s ease all;
+    opacity: 0;
+    max-width: 300px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.success {
+      background: #2e912e;
+    }
+
+    &.error {
+      background: #ec4747;
+    }
+
+    &.warning {
+      background: #ec9a47;
+    }
+
+    &.shown {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @include respond-below(md) {
+    right: 1rem;
+    .notification {
+      padding: 0.5rem 1rem;
+      margin-bottom: 0.65rem;
+      max-width: 90vw;
+    }
+  }
+}

@@ -2,9 +2,9 @@
 
 namespace Theme\Modules\Appointments;
 
-use Theme\Models\User\Employee;
-use Theme\Models\User\User;
 use Theme\PostTypes\Service;
+use Theme\Users\Employee;
+use Theme\Users\User;
 
 class AppointmentsDashboardView
 {
@@ -79,7 +79,7 @@ class AppointmentsDashboardView
             $employeesFinal->put($employee->ID, [
                 'id' => $employee->ID,
                 'name' => $employee->first_name,
-                'profileImage' => get_field("profile_image", "user_" . $employee->ID),
+                'profileImage' => $employee->profile_picture
             ]);
         }
 

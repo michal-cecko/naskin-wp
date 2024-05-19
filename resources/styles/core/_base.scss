@@ -1,7 +1,4 @@
 html{
-    @include respond-above(xxl){
-        // font-size: 14px;
-    }
     @media (max-width: 1440px){
         font-size: 14px;
     }
@@ -17,14 +14,61 @@ html{
     @include respond-below(md){
         font-size: 16px;
     }
+
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 body{
-    color: $color_3;
-    font-family: $content-font;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    color: $dark;
+    font-family: $font-1;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    line-height: 1.25;
+}
+
+button,
+input,
+select,
+textarea {
+    font-size: 100%;
+    font-family: inherit;
+    line-height: 1.15;
+    margin: 0;
+    outline: none;
+    &:focus {
+        outline: none;
+    }
+}
+
+a {
+    text-decoration: none;
+}
+
+ul,
+ol{
+    list-style-type: none;
+}
+
+section {
+    position: relative;
 }
 
 .container{
+    position: relative;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+    height: 100%;
+
     @include respond-above(xxl){
         max-width: 1440px;
     }
@@ -40,9 +84,11 @@ body{
         padding-right: 1.125rem;
     }
     @include respond-below(md){
-        max-width: 540px;
+        max-width: 90%;
     }
-    @include respond-below(sm){
-        max-width: 480px;
-    }
+}
+
+.section-id{
+    position: absolute;
+    margin-top: -10rem;
 }

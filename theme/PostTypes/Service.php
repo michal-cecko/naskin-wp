@@ -2,10 +2,43 @@
 
 namespace Theme\PostTypes;
 
+use Illuminate\Support\Collection;
 use Saurus\App\Modules\Wordpress\Posts\PostType;
+use Theme\Users\Employee;
 
 class Service extends PostType
 {
+    public function getDurationAttribute(): int
+    {
+        return (int) get_field("serv-duration", $this->id);
+    }
+
+    public function getPriceAttribute(): float
+    {
+        return (float) get_field("serv-price", $this->id);
+    }
+
+    public function getDescriptionAttribute() {
+        return get_field("serv-description", $this->id);
+    }
+
+    public function getImageAttribute() {
+        return get_field("serv-image", $this->id);
+    }
+
+    public function getEmployeesAttribute(): Collection
+    {
+        if ($this->employeesArr !== null) {
+            return $this->employeesArr;
+        }
+
+        $this->employeesArr = Employee::whereHas('meta', function($query) {
+            $query->where('meta_key', 'services')->where('meta_value', 'LIKE', "%:\"{$this->id}\";%");
+        })->get();
+
+        return $this->employeesArr;
+    }
+
     public static function getPostTypeSlug(): string
     {
         return "service";

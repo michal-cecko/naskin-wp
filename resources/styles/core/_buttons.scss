@@ -1,0 +1,68 @@
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 25px;
+  cursor: pointer;
+  text-decoration: none !important;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease;
+
+  &.btn--brownish_yellow {
+    background: $brownish_yellow;
+    color: $white;
+
+    @include hover() {
+      background: darken($brownish_yellow, 10%);
+      color: darken($white, 10%);
+    }
+
+    &:disabled {
+      background: lighten($brownish_yellow, 30%);
+      color: $secondary_dark;
+      cursor: not-allowed;
+    }
+  }
+
+  &.btn--white {
+    background: $white;
+    color: $brownish_yellow;
+
+    @include hover() {
+      background: darken($white, 5%);
+      color: darken($brownish_yellow, 10%);
+    }
+  }
+
+  &.btn--dirty_beige {
+    background: $dirty_beige;
+    color: $dark;
+
+    @include hover() {
+      background: darken($dirty_beige, 10%);
+      color: lighten($dark, 10%);
+    }
+  }
+
+  &.btn--normal {
+    padding: 7px 20px;
+    font-size: 1rem;
+    line-height: 1.2;
+    border-radius: 25px;
+  }
+
+  &.btn--small {
+    padding: 5px 15px;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    border-radius: 20px;
+  }
+
+  &.btn--big {
+    padding: 10px 25px;
+    font-size: 1.2rem;
+    line-height: 1.2;
+    border-radius: 30px;
+  }
+}

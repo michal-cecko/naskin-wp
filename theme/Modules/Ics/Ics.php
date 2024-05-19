@@ -9,7 +9,7 @@ class Ics
     private string $data;
     private string $name;
 
-    public function __construct($start, $end, $name, $description, $location)
+    public function setData($start, $end, $name, $description, $location): void
     {
         $this->name = $name;
         $uid = uniqid();

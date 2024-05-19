@@ -1,8 +1,6 @@
 <?php
 
-class ServicesDashboardTable
-{
-
+class ServicesDashboardTable {
     /**
      * Adds custom columns to the services table
      *
