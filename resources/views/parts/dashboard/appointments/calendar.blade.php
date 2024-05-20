@@ -1,7 +1,10 @@
 <div id="calendarContainer">
 
-    <input type="hidden" id="page-data" data-colors="@json($services['colors'])"
-           data-durations="@json($services['colors'])" data-employees="@json([$employees])">
+    <input type="hidden" id="page-data" data-colors='@json($services['colors'])'
+           data-durations='@json($services['colors'])' data-employees='@json([$employees])'>
+
+    <input type="hidden" id="logged-user" data-id="{{$currentUser->id}}"
+         data-name="{{$currentUser->first_name}}" data-role="{{$currentUser->role}}">
 
     <div class="header-wrapper mb-3 d-flex align-items-center justify-content-between flex-wrap">
         @if($currentUser->role !== "employee")
@@ -9,7 +12,7 @@
                 <div class="employee" @click="changeCurrentEmployeeView(-1)"
                      :class="chosenEmployeeOnView === -1 ? 'active' : ''">
                     <div class="img">
-                        {!! main()->assets()->svg("icons/icon-all_employees.svg") !!}
+                        {!! main()->assets()->svg("icons/admin/icon-all_employees.svg") !!}
                     </div>
                     <span>Všetci</span>
                 </div>
@@ -20,7 +23,7 @@
                             @if(!empty($employee['profileImage']))
                                 <img src="{{$employee['profileImage']}}" alt="Fotka">
                             @else
-                                {!! main()->assets()->svg("icons/icon-question_mark_admin.svg") !!}
+                                {!! main()->assets()->svg("icons/admin/icon-question_mark_admin.svg") !!}
                             @endif
                         </div>
                         <span>{{$employee['name']}}</span>
@@ -39,11 +42,11 @@
 
     <div id="calendar"></div>
 
-    @include("parts.dashboard.appointments.appointment-create-modal", ['services' => $services])
+    @include("parts.dashboard.appointments.modals.appointment-create-modal", ['services' => $services])
 
-    @include("parts.dashboard.appointments.appointment-edit-modal", ['services' => $services])
+    @include("parts.dashboard.appointments.modals.appointment-edit-modal", ['services' => $services])
 
-    @include("parts.dashboard.appointments.appointment-delete-modal")
+    @include("parts.dashboard.appointments.modals.appointment-delete-modal")
 </div>
 
 

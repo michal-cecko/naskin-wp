@@ -2,21 +2,26 @@
 
 namespace Theme\Modules\ICS;
 
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class Ics
 {
     private string $data;
     private string $name;
 
-    public function setData($start, $end, $name, $description, $location): void
+    public function setData(Carbon|string $start, Carbon|string $end, string $name, string $description = "", string $location = ""): void
     {
         $this->name = $name;
         $uid = uniqid();
 
         // Assuming $start is a valid date string
-        $startDateTime = Carbon::parse($start);
-        $endDateTime = Carbon::parse($end);
+        if(!$start instanceof Carbon) {
+            $startDateTime = Carbon::parse($start);
+        }
+
+        if(!$end instanceof Carbon) {
+            $endDateTime = Carbon::parse($end);
+        }
 
         // Check if it's currently in daylight saving time (summer time)
         if ($startDateTime->format('I')) {

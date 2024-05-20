@@ -2,13 +2,18 @@
 
 namespace Theme\Modules\Appointments;
 
+use Carbon\Carbon;
 use Exception;
 use Saurus\App\Enums\ApiMethod;
 use Saurus\App\Traits\Validation;
 use Theme\Enum\AppointmentType;
+use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Service;
-use Theme\Requests\Appointments\AppointmentAdminStoreRequest;
+use Theme\Requests\Appointments\Admin\AppointmentAdminStoreRequest;
+use Theme\Requests\Appointments\AppointmentCancelRequest;
+use Theme\Requests\Appointments\AppointmentICSRequest;
 use Theme\Requests\Appointments\AppointmentListAvailableDates;
+use Theme\Requests\Appointments\AppointmentSendNotificationsRequest;
 use Theme\Requests\Appointments\AppointmentStoreRequest;
 use Theme\Services\Appointments\AppointmentService;
 use Theme\Users\Employee;
@@ -24,8 +29,10 @@ class Appointments
 
     private function initRest(): void
     {
+        main()->api()->addApiEndpoint(ApiMethod::GET, "/appointment/ics", "appointment.ics", [$this, 'generateAppointmentICS']);
+        main()->api()->addApiEndpoint(ApiMethod::GET, "/appointment/send-notifications", "appointment.send-notifications", [$this, 'sendNotifications']);
+        main()->api()->addApiEndpoint(ApiMethod::GET, "/appointment/cancel", "appointment.customer-cancel", [$this, 'cancelAppointment']);
         main()->api()->addApiEndpoint(ApiMethod::POST, "/appointment/available-dates", "appointment.available_dates", [$this, 'getAvailableDates']);
-        main()->api()->addApiEndpoint(ApiMethod::POST, "/appointment/store-admin", "appointment.store-admin", [$this, 'storeAdmin']);
         main()->api()->addApiEndpoint(ApiMethod::POST, "/appointment/store", "appointment.store", [$this, 'store']);
     }
 
@@ -44,40 +51,71 @@ class Appointments
         wp_send_json_success($dates);
     }
 
-    /**
-     * @throws Exception
-     */
-    public function storeAdmin(AppointmentAdminStoreRequest $request): void
-    {
-        $data = $request->validated();
-
-        if ($data['type'] === AppointmentType::RESERVATION->value) {
-
-            $appointment = AppointmentService::createReservation(
-                employeeID: $data['employee_id'],
-                date: $data['date']['start'],
-                customer: $data['customer'],
-                note: $data['note'],
-                services: $data['services'],
-                notifyCustomer: true,
-                notifyEmployee: false
-            );
-
-        } else {
-
-            $appointment = AppointmentService::createVacation(
-                employeeID: $data['employee_id'],
-                date: $data['date']['start'],
-                note: $data['note'],
-            );
-
-        }
-    }
-
     public function store(AppointmentStoreRequest $request): void
     {
         $data = $request->validated();
 
+        $services = Service::whereIn("id", $data['services'])->get();
+        $startAt = Carbon::parse($data['date'] . " " . $data['time']);
+
+        //Pick one employee if random
+        $employeeID = $data['employees'][array_rand($data['employees'])];
+
+        $appointment = AppointmentService::createReservation(
+            employeeID: $employeeID,
+            startAt: $startAt,
+            customer: $data['customer'],
+            note: $data['note'] ?? null,
+            services: $services,
+            notifyCustomer: true,
+            notifyEmployee: true
+        );
+
+        if(!$appointment) {
+            wp_send_json_error(__('Nastala chyba pri vytváraní rezervácie. Dajte nám o tom vedieť, prosím.', THEME_DOMAIN), 500);
+        }
+
         wp_send_json_success($appointment);
+    }
+
+    public function cancelAppointment(AppointmentCancelRequest $request): void
+    {
+        $data = $request->validated();
+
+        $appointment = Appointment::find($data['i']);
+
+        if(!AppointmentService::checkCancelToken($appointment, $data['t'])) {
+            wp_redirect(home_url(). "?c=0");
+            exit();
+        }
+
+        AppointmentService::cancelAppointment($appointment);
+
+        wp_redirect(home_url(). "?c=1");
+        exit();
+    }
+
+    public function sendNotifications(AppointmentSendNotificationsRequest $request): void
+    {
+        $countSent = AppointmentService::notifyAllAppointments();
+
+        if($countSent > 0) {
+            wp_send_json_success("Notifikácie boli odoslané. Počet odoslaných: $countSent");
+        }
+
+        wp_send_json_success("Neboli odoslané žiadne notifikácie.");
+    }
+
+    public function generateAppointmentICS(AppointmentICSRequest $request): void
+    {
+        $data = $request->validated();
+
+        $appointment = Appointment::find($data['id']);
+
+        if(!$appointment) {
+            wp_send_json_error("Termín nebol nájdený.");
+        }
+
+        AppointmentService::generateICS($appointment);
     }
 }

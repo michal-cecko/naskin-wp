@@ -1,5 +1,8 @@
 <?php
 
+namespace Theme\Modules\Customers;
+
+use Carbon\Carbon;
 use Theme\PostTypes\Customer;
 
 class CustomersDashboardTable
@@ -42,7 +45,7 @@ class CustomersDashboardTable
                 break;
             case 'last_appointment':
                 $date = get_field('cust_last-appointment', $post_id);
-                echo !empty($date) ? $date : "-";
+                echo !empty($date) ? Carbon::parse($date)->format("j.n.Y") : "-";
                 break;
         }
     }

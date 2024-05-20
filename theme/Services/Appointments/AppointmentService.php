@@ -2,12 +2,13 @@
 
 namespace Theme\Services\Appointments;
 
+use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Saurus\App\Services\Customers\CustomerService;
 use Theme\Enum\AppointmentEmailType;
+use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
 use Theme\Mail\AppointmentCancelledCustomer;
 use Theme\Mail\AppointmentCancelledEmployee;
@@ -16,6 +17,7 @@ use Theme\Mail\AppointmentCreatedEmployee;
 use Theme\Mail\AppointmentRemindCustomer;
 use Theme\Mail\AppointmentUpdatedCustomer;
 use Theme\Models\Appointment\Appointment;
+use Theme\Modules\ICS\Ics;
 use Theme\PostTypes\Customer;
 use Theme\Services\Employees\EmployeeService;
 use Theme\Users\Employee;
@@ -26,7 +28,7 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function createReservation(int $employeeID, string $date, iterable $customer, ?string $note = null, iterable $services = [], bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
+    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, ?string $note = null, iterable $services = [], bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
     {
 
         if (empty($customer['id'])) {
@@ -35,9 +37,13 @@ class AppointmentService
             $customer = Customer::find($customer['id']);
         }
 
+        $duration = $services->sum("duration");
+        $endAt = $startAt->copy()->addMinutes($duration);
+
         $appointment = Appointment::create([
             'employee_id' => $employeeID,
-            'date' => $date,
+            'start_at' => $startAt,
+            'end_at' => $endAt,
             'customer_id' => $customer->id,
             'note' => $note,
             'type' => AppointmentType::RESERVATION,
@@ -60,7 +66,7 @@ class AppointmentService
         }
 
         if ($notifyEmployee) {
-            if (!self::notifyCustomer($appointment, AppointmentEmailType::CREATED)) {
+            if (!self::notifyEmployee($appointment, AppointmentEmailType::CREATED)) {
                 main()->log()->warning("Failed to send type::CREATED email to customer for appointment with ID: {$appointment->id}");
             }
         }
@@ -69,11 +75,12 @@ class AppointmentService
 
     }
 
-    public static function createVacation(int $employeeID, string $date, ?string $note = null): Appointment
+    public static function createVacation(int $employeeID, Carbon $startAt, Carbon $endAt, ?string $note = null): Appointment
     {
         $appointment = Appointment::create([
             'employee_id' => $employeeID,
-            'date' => $date,
+            'start_at' => $startAt,
+            'end_at' => $startAt,
             'note' => $note,
             'type' => AppointmentType::VACATION,
         ]);
@@ -83,7 +90,11 @@ class AppointmentService
 
     private static function generateCancelToken(): string
     {
-        return Str::random(12);
+        do {
+            $token = Str::random(12);
+        } while(!Appointment::where("cancel_token", $token)->first());
+
+        return $token;
     }
 
     /**
@@ -129,7 +140,7 @@ class AppointmentService
             return false;
         }
 
-        $email = $appointment->customer?->email;
+        $email = $appointment->employee?->email;
 
         if (empty($email)) {
             return false;
@@ -160,7 +171,9 @@ class AppointmentService
                 $query->where('employee_id', $currentEmployee->id)
                     ->whereDate('start_at', '>=', $currentDate->toDateString())
                     ->orWhereDate('end_at', '>', $currentDate->toDateString());
-            })->where("employee_id", $currentEmployee->id)->get();
+            })->where("employee_id", $currentEmployee->id)
+                ->where("status", AppointmentStatus::OK)
+                ->get();
 
             $obsadeneArr = [];
             foreach ($appointments as $appointment) {
@@ -216,7 +229,7 @@ class AppointmentService
                     $currentEnd = $currentTime->modify("+" . $serviceDuration . " minutes")->format("H:i");
 
                     //echo "termin: from" . $currentStart . " to $currentEnd\n";
-                    if($lunchStart && $lunchEnd) {
+                    if ($lunchStart && $lunchEnd) {
                         $canEnd = $currentEnd <= $lunchStart || $currentStart >= $lunchEnd;
                         if (!$canEnd) {
                             continue;
@@ -254,7 +267,7 @@ class AppointmentService
 
                     if (!empty($timeToAdd)) {
                         if (!empty($termin) && !empty($termin['employees'])) {
-                            if(($timeToAdd['employees'][0] ?? false) && !in_array($timeToAdd['employees'][0], $termin['employees'])) {
+                            if (($timeToAdd['employees'][0] ?? false) && !in_array($timeToAdd['employees'][0], $termin['employees'])) {
                                 $timeToAdd['employees'] = array_merge($timeToAdd['employees'], $termin['employees']);
                             }
                         }
@@ -276,5 +289,59 @@ class AppointmentService
         endwhile;
 
         return collect($finalDates);
+    }
+
+    public static function checkCancelToken(Appointment $appointment, string $token): bool
+    {
+        return $appointment->cancel_token === $token;
+    }
+
+    public static function cancelAppointment($appointment, bool $notifyCustomer = false, bool $notifyEmployee = false): void
+    {
+        $appointment->update(['status' => AppointmentStatus::CANCELLED]);
+
+        if($notifyEmployee) {
+            self::notifyEmployee($appointment, AppointmentEmailType::CANCELLED);
+        }
+
+        if($notifyCustomer) {
+            self::notifyCustomer($appointment, AppointmentEmailType::CANCELLED);
+        }
+    }
+
+    public static function notifyAllAppointments() : int {
+        $appointments = Appointment::where("has_been_reminded", false)
+            ->where("status", AppointmentStatus::OK)
+            ->where("type", AppointmentType::RESERVATION)
+            ->whereDate('start_at', '<=', Carbon::now()->addDay()->toDateString())
+            ->get();
+
+        if(!$appointments->count()) {
+            return 0;
+        }
+
+        $notified = 0;
+        foreach ($appointments as $appointment) {
+            if(self::notifyCustomer($appointment, AppointmentEmailType::REMIND)) {
+                $appointment->update(['has_been_reminded' => true]);
+                $notified++;
+            }
+        }
+
+        return $notified;
+    }
+
+    public static function generateICS(Appointment $appointment): void
+    {
+        $name = "NASKIN - Rezervácia";
+
+        theme()->ics()->setData(
+            start: $appointment->startAt,
+            end: $appointment->endAt,
+            name: $name,
+            location: get_field("address", "options")
+        );
+
+        theme()->ics()->show();
     }
 }

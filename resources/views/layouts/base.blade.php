@@ -37,7 +37,11 @@
 
 <div class="app">
 
-    <div id="notifications"></div>
+    <div id="notifications">
+        @section('dynamic-notifications')
+            @yield('dynamic-notifications')
+        @show
+    </div>
 
     @include("parts.appointments.appointment-form")
 

@@ -21,6 +21,8 @@ export default defineConfig({
                 'resources/scripts/admin.js',
                 'resources/scripts/components/admin/calendar.js',
 
+                'resources/styles/admin/employee_role.scss',
+                'resources/styles/admin/calendar.scss',
                 'resources/styles/admin/admin.scss',
 
 

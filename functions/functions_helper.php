@@ -124,22 +124,3 @@ function getShortDayName($num)
 {
     return substr(getDayName($num), 0, 3);
 }
-
-function showNotification($text, $status = "success")
-{
-    ob_start(); ?>
-    <div class="notificaiton">
-        <?= svgIcon(icon_path(false) . "/icon-check.svg") ?>
-        <span><?= $text ?></span>
-    </div>
-    <?php return ob_get_clean();
-}
-
-function getCurrentUserRole()
-{
-    $current_user = wp_get_current_user();
-    if (!empty($current_user->roles)) {
-        return $current_user->roles[0];
-    }
-    return null;
-}

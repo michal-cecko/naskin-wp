@@ -1,6 +1,6 @@
 <?php
 
-namespace Theme\Requests\Appointments;
+namespace Theme\Requests\Appointments\Admin;
 
 use Illuminate\Validation\Rule;
 use Saurus\App\Requests\Request;
@@ -11,20 +11,12 @@ use Theme\Enum\AppointmentType;
 use Theme\PostTypes\Customer;
 use Theme\PostTypes\Service;
 
-class AppointmentAdminStoreRequest extends Request {
-
-    public function authorize() : bool {
-        if(is_wp_error(main()->api()->getUserViaSessionCookie())) {
-            return false;
-        }
-
-        return true;
-    }
+class AppointmentAdminStoreRequest extends AuthenticatedAdminRequest {
 
     public function rules(): array {
 
         return [
-            'employee_id' => ['required', 'integer', new Exists("wp_users", "ID")],
+            'employee_id' => ['required', 'integer', new Exists("users", "ID")],
 
             'date' => 'required|array',
             'date.start' => 'required|date',

@@ -3,6 +3,7 @@
 
 #homepageHero {
   height: 50vh;
+  min-height: 30rem;
   overflow: hidden;
 
   @include respond-below(md) {

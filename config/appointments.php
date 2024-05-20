@@ -9,4 +9,6 @@ return [
         'city' => 'Beograd',
         'zip' => '11000',
     ],
+    'cron-notifications-token' => '***REMOVED***',
+    'cron-ics-token' => '***REMOVED***',
 ];

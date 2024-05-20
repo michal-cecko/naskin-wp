@@ -36,25 +36,15 @@ class Appointment extends Model
             return null;
         }
 
-        return main()->api()->getApiEndpointUrl(routeName: "appointment.customer-cancel", routeParams: ['id' => $this->id, 'token' => $this->cancel_token]);
+        return main()->api()->getApiEndpointUrl(routeName: "appointment.customer-cancel", routeParams: ['i' => $this->id, 't' => $this->cancel_token]);
     }
 
     public function getIcsUrlAttribute() : ?string {
-        $date = $this->date;
-
-        if($this->date->isPast()) {
+        if($this->start_at->isPast()) {
             return null;
         }
 
-        $servicesDuration = $this->services->sum('duration');
-
-        $start = $date->format("Y-m-d H:i");
-        $date = $date->modify("+" . $servicesDuration . " minutes");
-        $end = $date->format("Y-m-d H:i");
-
-        $title = get_bloginfo("name") . " - " . "rezervácia";
-
-        return main()->api()->getApiEndpointUrl(routeName: "appointment.generate-ics", routeParams: ['start' => $start, 'end' => $end, 'title' => $title]);
+        return main()->api()->getApiEndpointUrl(routeName: "appointment.ics", routeParams: ['id' => $this->id, 't' => config("appointments.cron-ics-token")]);
     }
 
     public function employee(): BelongsTo

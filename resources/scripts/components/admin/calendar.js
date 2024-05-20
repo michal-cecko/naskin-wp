@@ -77,14 +77,16 @@ class ReservationCalendar extends Commons {
                 this.resetAppointmentToDeleteVariable()
             },
             mounted() {
+                let pageData = document.getElementById('page-data')?.dataset ?? {}
+                this.loggedInEmployee = document.getElementById('logged-user')?.dataset ?? {}
+
                 this.createModal = new bootstrap.Modal(document.getElementById('createAppointmentModal'))
                 this.editModal = new bootstrap.Modal(document.getElementById('editAppointmentModal'))
                 this.deleteModal = new bootstrap.Modal(document.getElementById('deleteAppointmentModal'))
 
-                let employees = JSON.parse(document.getElementById('employees').dataset.employees)
+                let employees = JSON.parse(pageData?.employees)
                 this.employees = Object.assign({}, employees);
 
-                this.loggedInEmployee = document.getElementById('logged-user').dataset;
                 let loggedInId = parseInt(this.loggedInEmployee.id);
                 if (this.loggedInEmployee.role === "administrator" || !this.employees[loggedInId]) {
                     this.chosenEmployeeOnView = -1;
@@ -96,8 +98,8 @@ class ReservationCalendar extends Commons {
                     this.chosenEmployeeOnView = this.chosenEmployeeInForms = loggedInId;
                 }
 
-                this.serviceColors = JSON.parse(document.getElementById('services-colors').dataset.colors)
-                this.serviceDurations = JSON.parse(document.getElementById('services-durations').dataset.durations)
+                this.serviceColors = JSON.parse(pageData?.colors)
+                this.serviceDurations = JSON.parse(pageData?.durations)
                 this.initCalendar()
             },
             methods: {

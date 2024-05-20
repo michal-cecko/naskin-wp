@@ -2,10 +2,6 @@
 
 namespace Theme\Modules\Setup;
 
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use Theme\Models\Appointment;
-
 class BladeDirectives
 {
     public function __construct()

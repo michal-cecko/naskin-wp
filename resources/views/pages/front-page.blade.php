@@ -1,11 +1,20 @@
+@php use Theme\Helpers\ThemeHelper; @endphp
+
 @extends('layouts.base')
 
+@section("dynamic-notifications")
+    <?php
+    if (isset($_GET['c'])) {
+        if ($_GET['c'] == "1") {
+            ThemeHelper::showNotification("Vaša rezervácia bola úspešne zrušená.", "success")
+        } else {
+            ThemeHelper::showNotification("Nastala chyba pri rušení Vašej rezervácie. Kontaktujte nás.", "error")
+        }
+    }
+    ?>
+@endsection
+
 @section('content')
-    <div class="notification-container">
-        <?php if (isset($_GET['c']) && $_GET['c'] == "1") showNotification("Vaša rezervácia bola úspešne zrušená.", "success") ?>
-    </div>
-
-
 
     <section id="homepageHero">
         <div class="img-container">
@@ -17,7 +26,9 @@
                     <img class="hero-logo" src="{{main()->assets()->static("images/logos/logo-golden.png")}}"
                          alt="NASKINcare">
                     <h4 class="heading">Potešte svoje telo aj&nbsp;dušu</h4>
-                    <button type="button" class="btn btn--big btn--brownish_yellow" data-js-toggle-reservation-modal>Objednať sa</button>
+                    <button type="button" class="btn btn--big btn--brownish_yellow" data-js-toggle-reservation-modal>
+                        Objednať sa
+                    </button>
                 </div>
             </div>
             <div class="socials">
@@ -130,7 +141,8 @@
 
                         <h4 class="heading">Cukrový nástrek</h4>
                         <p class="body-text">Potrebujete rýchlo a bezpečne zhnednúť ?</p>
-                        <a href="{{site_url()}}/cennik/#cukrovy-nastrek" class="btn btn--dirty_beige btn--normal">Cenník</a>
+                        <a href="{{site_url()}}/cennik/#cukrovy-nastrek"
+                           class="btn btn--dirty_beige btn--normal">Cenník</a>
                     </div>
                 </div>
             </div>
@@ -151,7 +163,9 @@
             </div>
             <div class="info-container">
                 <h2 class="heading">Kde nás nájdete</h2>
-                <p class="body-text">Nákupné centrum M-park<br>Centrum 8, 1. poschodie<br>017 01 Považská Bystrica</p>
+                <p class="body-text">
+                    {!! get_field("address", "options") !!}
+                </p>
                 <a href="{{$trasaLink}}" class="btn btn--brownish_yellow btn--normal" target="_blank">Ukázať trasu</a>
             </div>
         </div>

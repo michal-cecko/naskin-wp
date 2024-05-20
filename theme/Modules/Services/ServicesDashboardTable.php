@@ -1,5 +1,9 @@
 <?php
 
+namespace Theme\Modules\Services;
+
+use Theme\Taxonomies\ServiceCategory;
+
 class ServicesDashboardTable {
     /**
      * Adds custom columns to the services table
@@ -10,6 +14,7 @@ class ServicesDashboardTable {
     {
         unset($columns['date']);
 
+        $columns['category'] = 'Kategória';
         $columns['description'] = 'Popis';
         $columns['price'] = 'Cena';
         $columns['date'] = 'Dátum';
@@ -25,11 +30,14 @@ class ServicesDashboardTable {
     public function custom_services_column_data($column, $post_id): void
     {
         switch ($column) {
+            case 'category':
+                echo get_the_terms($post_id, ServiceCategory::getTaxonomySlug())[0]?->name ?? "Bez kategórie";
+                break;
             case 'price':
-                echo get_field('serv-price', $post_id) . "€";
+                echo !empty($price = get_field('serv-price', $post_id)) ? $price . "€" : "Bez ceny";
                 break;
             case 'description':
-                echo get_field('serv-description', $post_id);
+                echo !empty($popis = get_field('serv-description', $post_id)) ? $popis : "Bez popisu";
                 break;
         }
     }

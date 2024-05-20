@@ -26,6 +26,20 @@ export default class Commons {
         });
     }
 
+    notify(text, type = "success") {
+        let container = document.getElementById("notifications")
+        const div = document.createElement('div');
+        div.classList.add('notification', type, "shown");
+        div.innerHTML = text;
+        container.appendChild(div);
+        setTimeout(function () {
+            div.classList.remove("shown");
+            setTimeout(function () {
+                div.remove();
+            }, 500);
+        }, 3000);
+    }
+
     getCurrentTimestamp() {
         return this.utc(moment());
     }

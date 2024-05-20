@@ -1,5 +1,7 @@
 <?php
 
+namespace Theme\Modules\Customers;
+
 use Theme\PostTypes\Customer;
 
 class Customers {

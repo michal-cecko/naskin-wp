@@ -16,7 +16,7 @@ class AppointmentStoreRequest extends Request {
 
         return [
             'employees' => ['required', 'array'],
-            'employees.*' => ['required', 'integer', new Exists("wp_users", "ID")],
+            'employees.*' => ['required', 'integer', new Exists("users", "ID")],
 
             'date' => 'required|date|max:255',
             'time' => 'required|string|max:255',

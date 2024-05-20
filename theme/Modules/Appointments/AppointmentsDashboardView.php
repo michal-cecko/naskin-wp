@@ -8,6 +8,30 @@ use Theme\Users\User;
 
 class AppointmentsDashboardView
 {
+    public User $currentUser;
+
+    public function __construct()
+    {
+        $this->currentUser = $this->getCurrentUser();
+    }
+
+    /**
+     * Redirects all employees to appointments
+     *
+     * @action admin_init
+     *
+     * @return void
+     */
+    public function redirect_to_appointments(): void
+    {
+        if( in_array($this->currentUser?->role, ['together-employee', 'employee']) ) {
+            global $pagenow;
+            if ( $pagenow === 'index.php' ) {
+                wp_redirect( admin_url( 'edit.php?post_type=appointment' ) );
+                exit();
+            }
+        }
+    }
 
     /**
      * Add custom dashboard page link to sidebar menu
@@ -20,7 +44,7 @@ class AppointmentsDashboardView
         add_menu_page(
             page_title: __('Termíny', THEME_DOMAIN),
             menu_title: __('Termíny', THEME_DOMAIN),
-            capability: 'appointment_cap',
+            capability: 'administrator',
             menu_slug: 'appointments',
             callback: [$this, 'render_appointments_table'],
             icon_url: 'dashicons-calendar-alt',
@@ -39,7 +63,7 @@ class AppointmentsDashboardView
 
         $data['services'] = $this->getServices();
         $data['employees'] = $this->getEmployees();
-        $data['currentUser'] = $this->getCurrentUser();
+        $data['currentUser'] = $this->currentUser;
 
         return $data;
     }
@@ -71,7 +95,11 @@ class AppointmentsDashboardView
 
     private function getEmployees(): iterable
     {
-        $arr = Employee::all();
+        if( $this->currentUser?->role !== 'employee') {
+            $arr = Employee::all();
+        } else {
+            $arr = [Employee::find($this->currentUser?->id)];
+        }
 
         $employeesFinal = collect([]);
 
