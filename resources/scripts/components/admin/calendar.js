@@ -46,6 +46,7 @@ class ReservationCalendar extends Commons {
                 freeAppColor: "#0b99a6",
                 serviceColors: {},
                 serviceDurations: {},
+                services: {},
 
                 createModal: null,
                 editModal: null,
@@ -58,6 +59,7 @@ class ReservationCalendar extends Commons {
                 chosenEmployeeOnView: null,
                 chosenEmployeeInForms: null,
                 employees: null,
+                employeeServices: {},
 
                 buttonLoader: false,
 
@@ -87,6 +89,9 @@ class ReservationCalendar extends Commons {
                 let employees = JSON.parse(pageData?.employees)
                 this.employees = Object.assign({}, employees);
 
+                let services = JSON.parse(pageData?.services)
+                this.services = Object.assign({}, services);
+
                 let loggedInId = parseInt(this.loggedInEmployee.id);
                 if (this.loggedInEmployee.role === "administrator" || !this.employees[loggedInId]) {
                     this.chosenEmployeeOnView = -1;
@@ -100,7 +105,8 @@ class ReservationCalendar extends Commons {
 
                 this.serviceColors = JSON.parse(pageData?.colors)
                 this.serviceDurations = JSON.parse(pageData?.durations)
-                this.initCalendar()
+                this.initCalendar();
+                this.setServiceList();
             },
             methods: {
                 hideOptions() {
@@ -133,11 +139,11 @@ class ReservationCalendar extends Commons {
                         nowIndicator: true,
                         select: function (info) {
                             // Show the modal
-                            _thisVue.resetModals()
-                            _thisVue.appointment.datetime = {
+                            //_thisVue.resetModals()
+                            _thisVue.$set(_thisVue.appointment, 'datetime', {
                                 start: moment(info.start).format("YYYY-MM-DD HH:mm:ss"),
                                 end: moment(info.end).format("YYYY-MM-DD HH:mm:ss"),
-                            }
+                            });
                             _thisVue.createModal.show();
                         },
                         longPressDelay: longPressDelay,
@@ -161,9 +167,9 @@ class ReservationCalendar extends Commons {
                                     day: 'numeric',
                                     omitCommas: true
                                 },
-                                slotDuration: '00:15:00', // set slotDuration to 15 minutes
-                                slotMinTime: '05:00:00', // set minimum time to 5am
-                                slotMaxTime: '22:00:00', // set maximum time to 10pm
+                                slotDuration: '00:05:00',
+                                slotMinTime: '03:00:00',
+                                slotMaxTime: '23:00:00',
                             },
                         },
 
@@ -203,6 +209,9 @@ class ReservationCalendar extends Commons {
                             let view = info.view.type;
                             let props = event.extendedProps;
 
+                            console.log(props)
+                            console.log("aaa")
+
                             let html = '<div class="event-content-container ' + view + '"><div class="time">' + moment(event.start).format('HH:mm') + ' - ' + moment(event.end).format('HH:mm') + '</div>';
                             html += '<div class="title">' + event.title + '</div>';
 
@@ -214,7 +223,7 @@ class ReservationCalendar extends Commons {
                             if (props.type === "free") {
 
                             } else {
-                                html += '<div class="service">' + props.service + '</div>';
+                                html += '<div class="service">' + props.services.map((item) => this.services[parseInt(item)]?.title).join(", ") + '</div>';
                                 if (view === "timeGridWeek") {
                                 }
                                 //day
@@ -234,6 +243,8 @@ class ReservationCalendar extends Commons {
                                 html += '<div class="note">' + note + '</div>';
                             }
                             html += '</div>';
+
+                            console.log(html)
 
                             return {
                                 html: html,
@@ -286,48 +297,56 @@ class ReservationCalendar extends Commons {
                 },
 
                 async createAppointment() {
-                    let data = new FormData();
-                    let employeeID = parseInt(this.chosenEmployeeInForms);
-                    data.append("notify", this.notify)
-                    data.append("employeeID", employeeID)
-                    data.append("appointment", JSON.stringify(this.appointment))
-                    data.append("action", "make_appointment")
-                    data.append("nonce", _thisClass.nonce)
-
-                    try {
-                        this.buttonLoader = true;
-                        let response = await _thisClass.WPPostAjax(data);
-                        let responseData = await response.json();
-
-                        this.calendar.addEvent({
-                            title: this.appointment.type === "free" ? "Voľno" : this.appointment.customer.name,
+                    let body = {
+                        notify: this.notify ? 1 : 0,
+                        employeeID: parseInt(this.chosenEmployeeInForms),
+                        date: {
                             start: this.appointment.datetime.start,
                             end: this.appointment.datetime.end,
-                            extendedProps: {
-                                id: responseData.id,
-                                type: this.appointment.type,
-                                note: this.appointment.note,
-                                service: responseData.service,
-                                serviceID: this.appointment.serviceID,
-                                employee: this.loggedInEmployee.name,
-                                employeeID: employeeID,
-                                customer: this.appointment.customer,
-                            },
-                            color: this.getActiveColor(this.appointment.type, this.appointment.serviceID),
-                            textColor: '#ffffff'
-                        });
-                        this.buttonLoader = false;
-
-                        this.createModal.hide();
-                        this.resetModals()
-
-                        return true;
-                    } catch (error) {
-                        console.error(error);
-                        return false;
+                        },
+                        type: this.appointment.type === "free" ? "free" : "reservation",
                     }
+
+                    if (this.appointment.type !== "free") {
+                        console.log(this.appointment.services)
+                        body.services = this.appointment.services
+                        body.customer = this.appointment.customer
+                        body.note = this.appointment.note
+                    }
+
+                    this.buttonLoader = true;
+
+                    await _thisClass.postFetch("/appointment/store-admin", body)
+                        .then(response => response.json())
+                        .then(response => {
+
+                            this.calendar.addEvent({
+                                title: this.appointment.type === "free" ? "Voľno" : this.appointment.customer.name,
+                                start: this.appointment.datetime.start,
+                                end: this.appointment.datetime.end,
+                                extendedProps: {
+                                    id: response.data.id,
+                                    type: this.appointment.type,
+                                    note: this.appointment.note,
+                                    services: this.appointment.services,
+                                    employee: this.loggedInEmployee.name,
+                                    employeeID: this.employeeID,
+                                    customer: this.appointment.customer,
+                                },
+                                color: this.getActiveColor(),
+                                textColor: '#ffffff'
+                            });
+                            this.buttonLoader = false;
+
+                            this.createModal.hide();
+                            this.resetModals()
+                        });
+
+
+                    return true;
                 },
 
+                /*TODO*/
                 async editAppointment() {
                     if (!this.editingAppointment) return;
 
@@ -363,7 +382,7 @@ class ReservationCalendar extends Commons {
                                 employeeID: employeeID,
                                 customer: this.appointment.customer,
                             },
-                            color: this.getActiveColor(this.appointment.type, this.appointment.serviceID),
+                            color: this.getActiveColor(),
                             textColor: '#ffffff'
                         });
 
@@ -378,6 +397,7 @@ class ReservationCalendar extends Commons {
                     }
                 },
 
+                /*TODO*/
                 async removeAppointment() {
                     let data = new FormData();
                     data.append("id", this.appointmentToDelete.extendedProps.id)
@@ -404,17 +424,17 @@ class ReservationCalendar extends Commons {
                         employeeID: employeeID,
                         timestamp: timestamp,
                         dateRange: dateRange,
-                        action: "get_appointments",
-                        nonce: _thisClass.nonce,
                     };
-                    console.log(params)
-                    return fetch(_thisClass.addParamsToUrl(params, _thisClass.ajaxURL))
+
+                    return fetch(_thisClass.addParamsToUrl(params, `${_thisClass.apiUrl}/appointment/table`))
                         .then(response => response.json())
                         .then(response => {
                             let appointments = [];
                             for (const [ID, appointment] of Object.entries(response.appointments)) {
                                 let title = "Voľno"
-                                if (appointment.type !== "free") title = appointment.customer.name
+                                if (appointment.type !== "free") {
+                                    title = appointment.customer.name
+                                }
 
                                 appointments.push({
                                     title: title,
@@ -424,13 +444,12 @@ class ReservationCalendar extends Commons {
                                         id: ID,
                                         type: appointment.type,
                                         note: appointment.note,
-                                        service: appointment.service,
-                                        serviceID: appointment.serviceID,
+                                        services: appointment.services,
                                         employee: appointment.employee,
                                         employeeID: appointment.employeeID,
                                         customer: appointment.customer,
                                     },
-                                    color: this.getActiveColor(appointment.type, appointment.serviceID),
+                                    color: this.getActiveColor(appointment.type, Object.values(appointment.services)[0]),
                                     textColor: '#ffffff'
                                 })
                             }
@@ -460,10 +479,8 @@ class ReservationCalendar extends Commons {
                     }
                     let params = {
                         search: searchTerm,
-                        action: "get_customers",
-                        nonce: _thisClass.nonce,
                     };
-                    return fetch(_thisClass.addParamsToUrl(params, _thisClass.ajaxURL))
+                    return fetch(_thisClass.addParamsToUrl(params, `${_thisClass.apiUrl}/customers/search`))
                         .then(response => response.json())
                         .then(response => {
                             this.customers = response.data;
@@ -501,7 +518,9 @@ class ReservationCalendar extends Commons {
                 exchangeAppointmentsOnView(appointments) {
                     let _thisVue = this
                     this.removeAppsFromViewOnly()
+                    console.log("new apps: ", appointments)
                     appointments.forEach(function (event) {
+                        console.log(event)
                         _thisVue.calendar.addEvent(event);
                     });
                 },
@@ -519,7 +538,7 @@ class ReservationCalendar extends Commons {
 
                     if (type !== "free") {
                         this.appointment.customer = appToEdit.extendedProps.customer
-                        this.appointment.serviceID = appToEdit.extendedProps.serviceID
+                        this.appointment.services = appToEdit.extendedProps.services
                     }
                     this.chosenEmployeeInForms = appToEdit.extendedProps.employeeID
                     this.appointment.type = appToEdit.extendedProps.type
@@ -536,7 +555,7 @@ class ReservationCalendar extends Commons {
                         customer: {},
                         datetime: {},
                         type: "appointment",
-                        serviceID: "",
+                        services: [],
                     }
                 },
 
@@ -552,24 +571,68 @@ class ReservationCalendar extends Commons {
                     this.appointmentToDelete = null
                 },
 
-                getActiveColor(appointmentType, serviceID) {
-                    return appointmentType === "free" ? this.freeAppColor : this.serviceColors[serviceID]
+                getActiveColor(appointmentType = null, service = null) {
+                    if(!appointmentType) {
+                        appointmentType = this.appointment.type
+                    }
+
+                    if(!service) {
+                        service = Object.values(this.appointment.services)[0]
+                    }
+
+                    console.log(service)
+
+                    return appointmentType === "free" ? this.freeAppColor : this.serviceColors[service?.service_category_id]
+                },
+
+                getTotalDuration(serviceIDs) {
+                    let duration = 0;
+                    serviceIDs.forEach(id => {
+                       duration += this.serviceDurations[id]
+                    });
+                    return duration
+                },
+
+                setServiceList() {
+                    const filteredObj = {};
+
+                    let allowedServices = this.employees?.[this.chosenEmployeeInForms]?.allowed_services ?? null;
+
+                    if(allowedServices) {
+                        for (const key in this.services) {
+                            if ((allowedServices).includes(parseInt(key))) {
+                                filteredObj[key] = this.services[key];
+                            }
+                        }
+                    }
+
+                    console.log(this.chosenEmployeeInForms, this.employees, allowedServices , filteredObj);
+
+                    this.employeeServices = filteredObj;
                 }
             },
             watch: {
-                'appointment.serviceID'(newID) {
+                chosenEmployeeInForms(newID) {
+                    console.log("NEW EMP: " + newID)
+                    this.setServiceList()
+                },
+                'appointment.services'(newServices) {
+                    console.log("NEWSERV", newServices)
                     let start = this.appointment.datetime.start
                     if (start && this.appointment.type === "appointment") {
-                        this.appointment.datetime.end = moment(start, 'YYYY-MM-DD HH:mm:ss').add(parseInt(this.serviceDurations[newID]), "minutes").format("YYYY-MM-DD HH:mm:ss")
+                        this.appointment.datetime.end = moment(start, 'YYYY-MM-DD HH:mm:ss').add(this.getTotalDuration(newServices), "minutes").format("YYYY-MM-DD HH:mm:ss")
                     }
                 },
                 'appointment.datetime.start'(newStart) {
-                    let start = this.appointment.datetime.start
-                    let serviceID = this.appointment.serviceID
-                    if (serviceID && start && this.appointment.type === "appointment") {
-                        this.appointment.datetime.end = moment(start, 'YYYY-MM-DD HH:mm:ss').add(parseInt(this.serviceDurations[serviceID]), "minutes").format("YYYY-MM-DD HH:mm:ss")
+                    let start = newStart
+                    let services = this.appointment?.services ?? [];
+                    if (services.length && start && this.appointment.type === "appointment") {
+                        this.appointment.datetime.end = moment(start, 'YYYY-MM-DD HH:mm:ss').add(this.getTotalDuration(services), "minutes").format("YYYY-MM-DD HH:mm:ss")
                     }
                 },
+                'appointment.datetime'(newdaco) {
+                    console.log("NEW", newdaco)
+                }
             }
         });
     }

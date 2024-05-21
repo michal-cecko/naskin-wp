@@ -264,6 +264,13 @@ $activeColor: #b1bb5b;
       }
 
       .field-container {
+
+        &.services-field {
+          select {
+            height: 12rem;
+          }
+        }
+
         label {
           font-size: 0.85rem;
           font-weight: 600;

@@ -1,7 +1,7 @@
 <div id="calendarContainer">
 
-    <input type="hidden" id="page-data" data-colors='@json($services['colors'])'
-           data-durations='@json($services['colors'])' data-employees='@json([$employees])'>
+    <input type="hidden" id="page-data" data-colors='@json($services['colors'])' data-services='@json($services['services'])'
+           data-durations='@json($services['durations'])' data-employees='@json($employees)'>
 
     <input type="hidden" id="logged-user" data-id="{{$currentUser->id}}"
          data-name="{{$currentUser->first_name}}" data-role="{{$currentUser->role}}">
@@ -42,9 +42,9 @@
 
     <div id="calendar"></div>
 
-    @include("parts.dashboard.appointments.modals.appointment-create-modal", ['services' => $services])
+    @include("parts.dashboard.appointments.modals.appointment-create-modal", ['services' => $services['service_categories']])
 
-    @include("parts.dashboard.appointments.modals.appointment-edit-modal", ['services' => $services])
+    @include("parts.dashboard.appointments.modals.appointment-edit-modal", ['services' => $services['service_categories']])
 
     @include("parts.dashboard.appointments.modals.appointment-delete-modal")
 </div>

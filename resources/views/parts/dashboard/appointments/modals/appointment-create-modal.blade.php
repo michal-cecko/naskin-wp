@@ -31,26 +31,21 @@
                             </select>
                         </div>
                     </div>
+                    <div class="part col-12" v-show="appointment.type === 'appointment'">
+                        <div class="field-container services-field mb-3">
+                            <label for="service">Služby</label>
+                            <select v-model="appointment.services" class="form-control" id="service" multiple>
+                                <option :value="service.id" v-for="service in employeeServices">
+                                    @{{service.title}} / @{{service.duration}}min / @{{service.price}}€
+                                </option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="part col-12" :class="appointment.type === 'appointment' ? 'col-md-6' : ''">
                         <div class="field-container mb-3">
                             <label for="start" class="form-label">Začiatok</label>
                             <input v-model="appointment.datetime.start" onfocus="this.showPicker()" step="1800"
                                    type="datetime-local" class="form-control" id="start" name="start">
-                        </div>
-                    </div>
-                    <div class="part col-12" v-show="appointment.type === 'appointment'"
-                         :class="appointment.type === 'appointment' ? 'col-md-6' : ''">
-                        <div class="field-container mb-3">
-                            <label for="service">Služba</label>
-                            <select v-model="appointment.serviceID" class="form-control" id="service">
-                                @if(!empty($services))
-                                    @foreach($services as $service)
-                                        <option value="{{ $service->id }}" @selected($loop->index === 0)>
-                                            {{$service->title}}
-                                        </option>
-                                    @endforeach
-                                @endif
-                            </select>
                         </div>
                     </div>
                     <div class="part col-12" :class="appointment.type === 'appointment' ? 'col-md-6' : ''">
@@ -82,6 +77,7 @@
                             </div>
                         </div>
                     </div>
+                    <span style="font-size: 0.85rem; color: #999; margin-bottom: 0.6rem">alebo</span>
                     <div class="part col-md-4 col-12">
                         <div class="field-container mb-3">
                             <label for="name" class="form-label">Meno a priezvisko</label>

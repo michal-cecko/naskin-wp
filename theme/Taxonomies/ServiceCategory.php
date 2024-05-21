@@ -8,9 +8,17 @@ use Theme\PostTypes\Service;
 
 class ServiceCategory extends TaxonomyType
 {
+    const DEFAULT_COLOR = "#000000";
+
     public function getImageAttribute(): string
     {
         return main()->assets()->static("images/services/{$this->term->slug}.jpg");
+    }
+
+    public function getColorAttribute(): string
+    {
+        $color = get_field("color", self::getTaxonomySlug() . "_" . $this->term_id);
+        return !empty($color) ? $color : self::DEFAULT_COLOR;
     }
 
     public function posts() : BelongsToMany

@@ -6,6 +6,17 @@ use Theme\PostTypes\Service;
 
 class Employee extends User
 {
+    public function getAllowedServiceIdsAttribute(): iterable
+    {
+        $serviceIDs = get_field("services", "user_{$this->id}");
+
+        if(empty($serviceIDs)) {
+            return [];
+        }
+
+        return $serviceIDs;
+    }
+
     public function getAllowedServicesAttribute(): iterable
     {
         $serviceIDs = get_field("services", "user_{$this->id}");

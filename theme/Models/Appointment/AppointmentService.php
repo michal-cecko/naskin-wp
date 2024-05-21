@@ -5,6 +5,7 @@ namespace Theme\Models\Appointment;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Saurus\App\Modules\Wordpress\Models\Model;
 use Theme\PostTypes\Service;
+use Theme\Taxonomies\ServiceCategory;
 
 class AppointmentService extends Model
 {
@@ -25,6 +26,18 @@ class AppointmentService extends Model
 
     public function service(): BelongsTo
     {
-        return $this->belongsTo(Service::class);
+        return $this->belongsTo(Service::class, "service_id", "ID");
+    }
+
+    public function getServiceCategoryAttribute() {
+        if(!$this->relationLoaded("service")) {
+            $this->load("service");
+        }
+
+        return $this->service?->service_category;
+    }
+
+    public function getServiceCategoryIdAttribute() {
+        return $this->service?->service_category_id;
     }
 }

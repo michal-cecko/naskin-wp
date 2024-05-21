@@ -22,7 +22,7 @@ class AppointmentStoreRequest extends Request {
             'time' => 'required|string|max:255',
 
             'services' => ['required', 'array'],
-            'services.*' => ['required', 'integer', new PostExists(postModel: Service::getPostTypeSlug())],
+            'services.*' => ['required', 'integer', new PostExists(postModel: Service::class)],
 
             'customer' => ['required', 'array'],
             'customer.name' => ['required', 'string', 'max:255'],

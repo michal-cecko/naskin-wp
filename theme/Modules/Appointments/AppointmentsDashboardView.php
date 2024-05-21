@@ -3,12 +3,13 @@
 namespace Theme\Modules\Appointments;
 
 use Theme\PostTypes\Service;
+use Theme\Taxonomies\ServiceCategory;
 use Theme\Users\Employee;
 use Theme\Users\User;
 
 class AppointmentsDashboardView
 {
-    public User $currentUser;
+    public ?User $currentUser;
 
     public function __construct()
     {
@@ -74,20 +75,34 @@ class AppointmentsDashboardView
 
     private function getServices(): array
     {
-        $services = Service::all();
+        $services = Service::with("taxonomies.term")->get();
 
-        $servicesArray = [];
+        $serviceCategories = [];
         $colorsArray = [];
         $durationsArray = [];
 
         foreach ($services as $service) {
-            $servicesArray[$service->id] = $service->name;
-            $colorsArray[$service->id] = $service->color;
+            $cat = $service->service_category;
+            $catID = $cat?->term_id ?? "uncategorized";
+            if(!isset($serviceCategories[$catID])) $serviceCategories[$catID] = [
+                'name' => $cat?->name ?? "Bez kategórie",
+                'services' => []
+            ];
+            $services[$service->id] = [
+                'id' => $service->id,
+                'title' => $service->title,
+                'duration' => $service->duration,
+                'price' => $service->price,
+                'category_id' => $catID
+            ];
+            $serviceCategories[$catID]['services'][$service->id] = $services[$service->id];
+            $colorsArray[$catID] = $cat?->color ?? "#000000";
             $durationsArray[$service->id] = $service->duration;
         }
 
         return [
-            'services' => $servicesArray,
+            'services' => $services,
+            'service_categories' => $serviceCategories,
             'colors' => $colorsArray,
             'durations' => $durationsArray
         ];
@@ -107,7 +122,8 @@ class AppointmentsDashboardView
             $employeesFinal->put($employee->ID, [
                 'id' => $employee->ID,
                 'name' => $employee->first_name,
-                'profileImage' => $employee->profile_picture
+                'profileImage' => $employee->profile_picture,
+                'allowed_services' => $employee->allowed_service_ids
             ]);
         }
 

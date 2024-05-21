@@ -44,10 +44,10 @@ export default class Commons {
         return this.utc(moment());
     }
 
-    postFetch(url, body, headers = {}) {
+    async postFetch(url, body, headers = {}) {
         if (!url.startsWith('/')) url = '/' + url
 
-        return fetch( `${_thisClass.apiUrl}${url}`, {
+        return fetch( `${this.apiUrl}${url}`, {
             method: 'POST',
             credentials: 'same-origin',
             headers: {

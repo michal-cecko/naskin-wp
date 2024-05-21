@@ -1,6 +1,6 @@
 <?php
 
-namespace Theme\Requests\Appointments\Admin;
+namespace Theme\Requests;
 
 use Illuminate\Validation\Rule;
 use Saurus\App\Requests\Request;

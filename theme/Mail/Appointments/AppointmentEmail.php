@@ -1,6 +1,6 @@
 <?php
 
-namespace Theme\Mail;
+namespace Theme\Mail\Appointments;
 
 use Saurus\App\Modules\Mail\Mailable;
 use Theme\Models\Appointment\Appointment;

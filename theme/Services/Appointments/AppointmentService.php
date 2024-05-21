@@ -6,29 +6,26 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Saurus\App\Services\Customers\CustomerService;
 use Theme\Enum\AppointmentEmailType;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
-use Theme\Mail\AppointmentCancelledCustomer;
-use Theme\Mail\AppointmentCancelledEmployee;
-use Theme\Mail\AppointmentCreatedCustomer;
-use Theme\Mail\AppointmentCreatedEmployee;
-use Theme\Mail\AppointmentRemindCustomer;
-use Theme\Mail\AppointmentUpdatedCustomer;
+
+use Theme\Mail\Appointments\Customer\AppointmentCancelledCustomer;
+use Theme\Mail\Appointments\Customer\AppointmentCreatedCustomer;
+use Theme\Mail\Appointments\Customer\AppointmentRemindCustomer;
+use Theme\Mail\Appointments\Customer\AppointmentUpdatedCustomer;
 use Theme\Models\Appointment\Appointment;
-use Theme\Modules\ICS\Ics;
 use Theme\PostTypes\Customer;
+use Theme\Services\Customers\CustomerService;
 use Theme\Services\Employees\EmployeeService;
 use Theme\Users\Employee;
 
 class AppointmentService
 {
-
     /**
      * @throws Exception
      */
-    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, ?string $note = null, iterable $services = [], bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
+    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
     {
 
         if (empty($customer['id'])) {
@@ -37,8 +34,10 @@ class AppointmentService
             $customer = Customer::find($customer['id']);
         }
 
-        $duration = $services->sum("duration");
-        $endAt = $startAt->copy()->addMinutes($duration);
+        if(!$endAt) {
+            $duration = $services->sum("duration");
+            $endAt = $startAt->copy()->addMinutes($duration);
+        }
 
         $appointment = Appointment::create([
             'employee_id' => $employeeID,
@@ -46,18 +45,28 @@ class AppointmentService
             'end_at' => $endAt,
             'customer_id' => $customer->id,
             'note' => $note,
+            'status' => AppointmentStatus::OK,
             'type' => AppointmentType::RESERVATION,
             'cancel_token' => self::generateCancelToken()
         ]);
 
         $appointment->load(["employee", "services"]);
 
-        $lastAppointment = Carbon::parse(get_field('cust_last-appointment', $customer->ID));
-        if ($lastAppointment->lt($appointment->date)) {
-            CustomerService::updateLastAppointmentDate($customer, $appointment->date->format("Y-m-d H:i"));
+        $lastAppointment = get_field('cust_last-appointment', $customer->ID);
+        $lastAppointmentC = Carbon::parse($lastAppointment);
+        if (empty($lastAppointment) || $lastAppointmentC->lt($appointment->start_at)) {
+            CustomerService::updateLastAppointmentDate($customer, $appointment->start_at->format("Y-m-d H:i"));
         }
 
-        $appointment->services()->attach($services);
+        foreach ($services as $service) {
+            \Theme\Models\Appointment\AppointmentService::create([
+                'appointment_id' => $appointment->id,
+                'service_id' => $service->id,
+                'duration' => $service->duration,
+                'name' => $service->title,
+                'price' => $service->price,
+            ]);
+        }
 
         if ($notifyCustomer) {
             if (!self::notifyCustomer($appointment, AppointmentEmailType::CREATED)) {
@@ -81,6 +90,7 @@ class AppointmentService
             'employee_id' => $employeeID,
             'start_at' => $startAt,
             'end_at' => $startAt,
+            'status' => AppointmentStatus::OK,
             'note' => $note,
             'type' => AppointmentType::VACATION,
         ]);
@@ -92,7 +102,7 @@ class AppointmentService
     {
         do {
             $token = Str::random(12);
-        } while(!Appointment::where("cancel_token", $token)->first());
+        } while(Appointment::where("cancel_token", $token)->first());
 
         return $token;
     }
@@ -155,6 +165,7 @@ class AppointmentService
         $employees = EmployeeService::getEmployeesWithServices($services);
         $weekenedWork = get_field('weekend_work', 'option') ?? ['saturday' => false, 'sunday' => false];
         $daysAvailableToReserve = get_field('days_available_to_reserve', 'option') ?? 60;
+        $breaks = self::getBreaks();
 
         $finalDates = [];
         $b = 0;
@@ -178,7 +189,7 @@ class AppointmentService
             $obsadeneArr = [];
             foreach ($appointments as $appointment) {
                 $startAt = $appointment->start_at;
-                $endAt = $appointment->end_at;
+                $endAt = $appointment->end_at_with_break;
                 $obsadeneArr[$startAt->format("Y-m-d")][] = ['start' => $startAt->format("H:i"), "end" => $endAt->format("H:i")];
             };
 
@@ -222,8 +233,6 @@ class AppointmentService
                 //echo "Lunch from: " . $lunchStart . " to " . $lunchEnd . "\n";
 
                 while ($currentTime->format("H:i") < $workEndWhile) :
-
-                    //$currentTime = $currentTime->modify("+30 minutes");
 
                     $currentStart = $currentTime->format("H:i");
                     $currentEnd = $currentTime->modify("+" . $serviceDuration . " minutes")->format("H:i");
@@ -291,6 +300,29 @@ class AppointmentService
         return collect($finalDates);
     }
 
+    public static function getBreaks() {
+        $breaks = get_field("breaks_after_appointment", "option") ?? [];
+
+        usort($breaks, function($a, $b) {
+            return $a['duration'] <=> $b['duration'];
+        });
+
+
+        return $breaks;
+    }
+
+    private static function getBreakForDuration($duration, $breaks = []) {
+        if(empty($breaks)) {
+            $breaks = self::getBreaks();
+        }
+
+        foreach ($breaks as $break) {
+            if($duration <= $break['duration']) {
+                return $break;
+            }
+        }
+    }
+
     public static function checkCancelToken(Appointment $appointment, string $token): bool
     {
         return $appointment->cancel_token === $token;
@@ -298,6 +330,11 @@ class AppointmentService
 
     public static function cancelAppointment($appointment, bool $notifyCustomer = false, bool $notifyEmployee = false): void
     {
+        if($appointment->type === AppointmentType::VACATION) {
+            $appointment->delete();
+            return;
+        }
+
         $appointment->update(['status' => AppointmentStatus::CANCELLED]);
 
         if($notifyEmployee) {

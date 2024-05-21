@@ -1,8 +1,9 @@
 <?php
 
-namespace Theme\Mail;
+namespace Theme\Mail\Appointments\Employee;
 
 use Saurus\App\Modules\Mail\Mailable;
+use Theme\Mail\Appointments\AppointmentEmail;
 use Theme\Models\Appointment\Appointment;
 
 class AppointmentCreatedEmployee extends AppointmentEmail

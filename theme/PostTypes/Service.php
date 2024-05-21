@@ -4,6 +4,7 @@ namespace Theme\PostTypes;
 
 use Illuminate\Support\Collection;
 use Saurus\App\Modules\Wordpress\Posts\PostType;
+use Theme\Taxonomies\ServiceCategory;
 use Theme\Users\Employee;
 
 class Service extends PostType
@@ -24,6 +25,18 @@ class Service extends PostType
 
     public function getImageAttribute() {
         return get_field("serv-image", $this->id);
+    }
+
+    public function getServiceCategoryAttribute() {
+        if(!$this->relationLoaded("taxonomies.term")) {
+            $this->load("taxonomies.term");
+        }
+
+        return $this->taxonomies->firstWhere("taxonomy", ServiceCategory::getTaxonomySlug())?->term;
+    }
+
+    public function getServiceCategoryIdAttribute() {
+        return $this->service_category?->term_id;
     }
 
     public function getEmployeesAttribute(): Collection

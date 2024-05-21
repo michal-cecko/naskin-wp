@@ -3,37 +3,38 @@
 namespace Theme\Requests\Appointments\Admin;
 
 use Illuminate\Validation\Rule;
-use Saurus\App\Requests\Request;
 use Saurus\App\Rules\Exists;
 use Saurus\App\Rules\PostExists;
-use Saurus\App\Rules\RecaptchaPasses;
 use Theme\Enum\AppointmentType;
 use Theme\PostTypes\Customer;
 use Theme\PostTypes\Service;
+use Theme\Requests\AuthenticatedAdminRequest;
 
 class AppointmentAdminStoreRequest extends AuthenticatedAdminRequest {
 
     public function rules(): array {
 
         return [
-            'employee_id' => ['required', 'integer', new Exists("users", "ID")],
+            'employeeID' => ['required', 'integer', new Exists("users", "ID")],
 
             'date' => 'required|array',
             'date.start' => 'required|date',
             'date.end' => 'required|date',
 
-            'type' => ['required', Rule::enum(AppointmentType::class)],
+            'type' => ['required', 'in:' . implode(",", AppointmentType::stringCases())],
 
             'services' => ['required_if:type,' . AppointmentType::RESERVATION->value, 'array'],
-            'services.*' => ['required_if:type,' . AppointmentType::RESERVATION->value, 'integer', new PostExists(postModel: Service::getPostTypeSlug())],
+            'services.*' => ['required_if:type,' . AppointmentType::RESERVATION->value, 'integer', new PostExists(postModel: Service::class)],
 
             'customer' => ['required_if:type,' . AppointmentType::RESERVATION->value, 'array'],
-            'customer.id' => ['sometimes', 'nullable', 'integer', new PostExists(postModel: Customer::getPostTypeSlug())],
+            'customer.id' => ['sometimes', 'nullable', 'integer', new PostExists(postModel: Customer::class)],
             'customer.name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'customer.email' => ['sometimes', 'nullable', 'email:rfc,dns', 'max:255'],
             'customer.phone' => ['sometimes', 'nullable', 'string', 'max:255'],
 
-            'note' => 'required|string|max:1000',
+            'note' => 'sometimes|nullable|string|max:1000',
+
+            'notify' => ['required', 'boolean']
         ];
 
     }

@@ -6,9 +6,9 @@
     <?php
     if (isset($_GET['c'])) {
         if ($_GET['c'] == "1") {
-            ThemeHelper::showNotification("Vaša rezervácia bola úspešne zrušená.", "success")
+            ThemeHelper::showNotification("Vaša rezervácia bola úspešne zrušená.", "success");
         } else {
-            ThemeHelper::showNotification("Nastala chyba pri rušení Vašej rezervácie. Kontaktujte nás.", "error")
+            ThemeHelper::showNotification("Nastala chyba pri rušení Vašej rezervácie. Kontaktujte nás.", "error");
         }
     }
     ?>

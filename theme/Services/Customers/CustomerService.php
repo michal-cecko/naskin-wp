@@ -1,10 +1,14 @@
 <?php
 
-namespace Saurus\App\Services\Customers;
+namespace Theme\Services\Customers;
 
 use Theme\PostTypes\Customer;
 
 class CustomerService {
+
+    public static function getCustomersForCalendar() {
+
+    }
 
     public static function createCustomer(string $name, string $email, ?string $phone = null) {
 

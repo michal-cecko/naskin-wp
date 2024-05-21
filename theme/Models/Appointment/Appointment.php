@@ -18,6 +18,7 @@ class Appointment extends Model
         'employee_id',
         'start_at',
         'end_at',
+        'break',
         'customer_id',
         'note',
         'type',
@@ -29,6 +30,8 @@ class Appointment extends Model
     protected $casts = [
         'type' => AppointmentType::class,
         'status' => AppointmentStatus::class,
+        'start_at' => "datetime",
+        'end_at' => "datetime",
     ];
 
     public function getCancelUrlAttribute() : ?string {
@@ -37,6 +40,14 @@ class Appointment extends Model
         }
 
         return main()->api()->getApiEndpointUrl(routeName: "appointment.customer-cancel", routeParams: ['i' => $this->id, 't' => $this->cancel_token]);
+    }
+
+    public function getEndAtWithBreakAttribute() {
+        if(!$this->break) {
+            return $this->end_at;
+        }
+
+        return $this->end_at->addMinutes($this->break);
     }
 
     public function getIcsUrlAttribute() : ?string {
@@ -49,7 +60,7 @@ class Appointment extends Model
 
     public function employee(): BelongsTo
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class, "employee_id", "ID");
     }
 
     public function services(): HasMany
@@ -59,6 +70,6 @@ class Appointment extends Model
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Customer::class, "customer_id", "ID");
     }
 }
