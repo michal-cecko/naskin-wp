@@ -16,6 +16,7 @@ use Theme\Mail\Appointments\Customer\AppointmentRemindCustomer;
 use Theme\Mail\Appointments\Customer\AppointmentUpdatedCustomer;
 use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Customer;
+use Theme\PostTypes\Service;
 use Theme\Services\Customers\CustomerService;
 use Theme\Services\Employees\EmployeeService;
 use Theme\Users\Employee;
@@ -59,13 +60,7 @@ class AppointmentService
         }
 
         foreach ($services as $service) {
-            \Theme\Models\Appointment\AppointmentService::create([
-                'appointment_id' => $appointment->id,
-                'service_id' => $service->id,
-                'duration' => $service->duration,
-                'name' => $service->title,
-                'price' => $service->price,
-            ]);
+            self::addServiceToAppointment($appointment, $service);
         }
 
         if ($notifyCustomer) {
@@ -84,6 +79,66 @@ class AppointmentService
 
     }
 
+    /**
+     * @throws Exception
+     */
+    public static function updateReservation(Appointment|int $appointment, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], bool $notifyCustomer = false): ?Appointment
+    {
+        $eager = ["services", "customer"];
+        if(is_int($appointment)) {
+            $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->with($eager)->first();
+            if(!$appointment) return null;
+        } else {
+            $appointment->load($eager);
+        }
+
+
+        $appointment->update([
+            'start_at' => $startAt,
+            'end_at' => $endAt,
+            'note' => $note,
+        ]);
+
+        if(!$appointment->start_at->equalTo($startAt)) {
+            $lastAppointment = get_field('cust_last-appointment', $appointment->customer->ID);
+            $lastAppointmentC = Carbon::parse($lastAppointment);
+            if (empty($lastAppointment) || $lastAppointmentC->lt($appointment->start_at)) {
+                CustomerService::updateLastAppointmentDate($appointment->customer, $appointment->start_at->format("Y-m-d H:i"));
+            }
+        }
+
+        $appointmentServiceIds = $appointment->services->pluck("service_id");
+        $submittedServiceIds = $services->pluck("id");
+        foreach ($services as $submittedService) {
+            if(!$appointmentServiceIds->contains($submittedService->id)) {
+                if(self::addServiceToAppointment($appointment, $submittedService)) {
+                    $appointmentServiceIds->push($submittedService->id);
+                }
+            }
+        }
+        $appointment->services()->whereNotIn("appointment_services.service_id", $submittedServiceIds->toArray())->delete();
+
+        if ($notifyCustomer) {
+            if (!self::notifyCustomer($appointment, AppointmentEmailType::UPDATED)) {
+                main()->log()->warning("Failed to send type::UPDATED email to customer for appointment with ID: {$appointment->id}");
+            }
+        }
+
+        return $appointment;
+
+    }
+
+    public static function addServiceToAppointment(Appointment $appointment, Service $service): ?\Theme\Models\Appointment\AppointmentService
+    {
+        return \Theme\Models\Appointment\AppointmentService::create([
+            'appointment_id' => $appointment->id,
+            'service_id' => $service->id,
+            'duration' => $service->duration,
+            'name' => $service->title,
+            'price' => $service->price,
+        ]);
+    }
+
     public static function createVacation(int $employeeID, Carbon $startAt, Carbon $endAt, ?string $note = null): Appointment
     {
         $appointment = Appointment::create([
@@ -93,6 +148,22 @@ class AppointmentService
             'status' => AppointmentStatus::OK,
             'note' => $note,
             'type' => AppointmentType::VACATION,
+        ]);
+
+        return $appointment;
+    }
+
+    public static function updateVacation(Appointment|int $appointment, Carbon $startAt, Carbon $endAt = null, ?string $note = null): ?Appointment
+    {
+        if(is_int($appointment)) {
+            $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->first();
+            if(!$appointment) return null;
+        }
+
+        $appointment->update([
+            'start_at' => $startAt,
+            'end_at' => $endAt,
+            'note' => $note,
         ]);
 
         return $appointment;

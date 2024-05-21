@@ -85,7 +85,7 @@ class AppointmentsDashboardView
             $cat = $service->service_category;
             $catID = $cat?->term_id ?? "uncategorized";
             if(!isset($serviceCategories[$catID])) $serviceCategories[$catID] = [
-                'name' => $cat?->name ?? "Bez kategórie",
+                'name' => $cat?->term?->name ?? "Bez kategórie",
                 'services' => []
             ];
             $services[$service->id] = [

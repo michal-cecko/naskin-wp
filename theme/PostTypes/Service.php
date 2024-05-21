@@ -32,11 +32,11 @@ class Service extends PostType
             $this->load("taxonomies.term");
         }
 
-        return $this->taxonomies->firstWhere("taxonomy", ServiceCategory::getTaxonomySlug())?->term;
+        return ServiceCategory::find($this->taxonomies->firstWhere("taxonomy", ServiceCategory::getTaxonomySlug())?->term_id);
     }
 
     public function getServiceCategoryIdAttribute() {
-        return $this->service_category?->term_id;
+        return $this->service_category?->term?->term_id;
     }
 
     public function getEmployeesAttribute(): Collection

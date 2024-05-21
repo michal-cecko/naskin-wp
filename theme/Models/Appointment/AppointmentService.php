@@ -19,6 +19,11 @@ class AppointmentService extends Model
         'price',
     ];
 
+    protected $appends = [
+        "service_category",
+        "service_category_id",
+    ];
+
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);

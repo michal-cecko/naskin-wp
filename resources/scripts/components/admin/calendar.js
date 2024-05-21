@@ -125,7 +125,7 @@ class ReservationCalendar extends Commons {
                     let _thisVue = this
 
                     let now = _thisClass.getCurrentTimestamp()
-                    let appointments = await this.fetchAppointments(now, this.chosenEmployeeOnView, "week");
+                    let appointments = await this.fetchAppointments(now, this.chosenEmployeeOnView, "timeGridWeek");
 
                     const calendarEl = document.getElementById('calendar')
 
@@ -217,13 +217,14 @@ class ReservationCalendar extends Commons {
 
                             if (_thisVue.chosenEmployeeOnView === -1) {
                                 if (_thisVue.employees[props.employeeID])
-                                    html += '<div class="employee">employee: ' + _thisVue.employees[props.employeeID].name + '</div>';
+                                    html += '<div class="employee">Vybaví: ' + _thisVue.employees[props.employeeID].name + '</div>';
                             }
 
                             if (props.type === "free") {
 
                             } else {
-                                html += '<div class="service">' + props.services.map((item) => this.services[parseInt(item)]?.title).join(", ") + '</div>';
+                                console.log("servicesssss", props.services)
+                                html += '<div class="service">' + props.services.map((item) =>item?.title).join(", ") + '</div>';
                                 if (view === "timeGridWeek") {
                                 }
                                 //day
@@ -270,8 +271,9 @@ class ReservationCalendar extends Commons {
                             _thisVue.dateRange.end = end
 
                             let fetchStart = _thisClass.utc(moment(start).add(1, "hour"))
-                            let appointments = await _thisVue.fetchAppointments(fetchStart, _thisVue.chosenEmployeeOnView, view.type)
-                            _thisVue.exchangeAppointmentsOnView(appointments)
+                            console.log("SHOULD REFETCH")
+                            //let appointments = await _thisVue.fetchAppointments(fetchStart, _thisVue.chosenEmployeeOnView, view.type)
+                            //_thisVue.exchangeAppointmentsOnView(appointments)
                         }
                     })
                     calendar.on('datesSet', async function (info) {
@@ -320,6 +322,13 @@ class ReservationCalendar extends Commons {
                         .then(response => response.json())
                         .then(response => {
 
+                            this.buttonLoader = false;
+
+                            if(!response.success) {
+                                console.error(response)
+                                return false;
+                            }
+
                             this.calendar.addEvent({
                                 title: this.appointment.type === "free" ? "Voľno" : this.appointment.customer.name,
                                 start: this.appointment.datetime.start,
@@ -329,14 +338,13 @@ class ReservationCalendar extends Commons {
                                     type: this.appointment.type,
                                     note: this.appointment.note,
                                     services: this.appointment.services,
-                                    employee: this.loggedInEmployee.name,
+                                    employee: this.employees?.[this.chosenEmployeeInForms]?.name,
                                     employeeID: this.employeeID,
                                     customer: this.appointment.customer,
                                 },
                                 color: this.getActiveColor(),
                                 textColor: '#ffffff'
                             });
-                            this.buttonLoader = false;
 
                             this.createModal.hide();
                             this.resetModals()
@@ -346,77 +354,92 @@ class ReservationCalendar extends Commons {
                     return true;
                 },
 
-                /*TODO*/
                 async editAppointment() {
                     if (!this.editingAppointment) return;
 
-                    let data = new FormData();
-                    let employeeID = parseInt(this.chosenEmployeeInForms);
-
-                    data.append("id", this.editingAppointment.extendedProps.id)
-                    data.append("notify", this.notify)
-                    data.append("employeeID", employeeID)
-                    data.append("appointment", JSON.stringify(this.appointment))
-                    data.append("action", "edit_appointment")
-                    data.append("nonce", _thisClass.nonce)
-
-                    try {
-                        this.buttonLoader = true;
-                        let response = await _thisClass.WPPostAjax(data);
-                        let responseData = await response.json();
-
-                        this.editingAppointment.remove();
-                        this.editingAppointment = null;
-
-                        this.calendar.addEvent({
-                            title: this.appointment.type === "free" ? "Voľno" : this.appointment.customer.name,
+                    let data = {
+                        id: this.editingAppointment.extendedProps.id,
+                        notify: this.notify,
+                        type: this.appointment.type,
+                        date: {
                             start: this.appointment.datetime.start,
                             end: this.appointment.datetime.end,
-                            extendedProps: {
-                                id: responseData.id,
-                                type: this.appointment.type,
-                                note: this.appointment.note,
-                                service: responseData.service,
-                                serviceID: this.appointment.serviceID,
-                                employee: this.loggedInEmployee.name,
-                                employeeID: employeeID,
-                                customer: this.appointment.customer,
-                            },
-                            color: this.getActiveColor(),
-                            textColor: '#ffffff'
-                        });
-
-                        this.buttonLoader = false;
-                        this.editModal.hide();
-                        this.resetModals()
-
-                        return true;
-                    } catch (error) {
-                        console.error(error);
-                        return false;
+                        },
                     }
+
+                    if (this.appointment.type !== "free") {
+                        data.services = this.appointment.services
+                        data.note = this.appointment.note
+                    }
+
+                    this.buttonLoader = true;
+
+                    await _thisClass.postFetch("/appointment/edit-admin", data)
+                        .then(response => response.json())
+                        .then(response => {
+
+                            if (!response.success) {
+                                console.error(response)
+                                return false;
+                            }
+
+                            let responseData = response.data
+
+                            this.editingAppointment.remove();
+                            this.editingAppointment = null;
+
+                            let event = {
+                                title: this.appointment.type === "free" ? "Voľno" : this.appointment.customer.name,
+                                start: this.appointment.datetime.start,
+                                end: this.appointment.datetime.end,
+                                extendedProps: {
+                                     id: responseData.appointment.id,
+                                    type: this.appointment.type,
+                                    note: this.appointment.note,
+                                    services: responseData.services?.length ? responseData.services.map((item) => {
+                                        item.id, item.title, item.price, item.duration, item.category_id}) : {},
+                                    employee: this.employees?.[this.chosenEmployeeInForms]?.name,
+                                    employeeID: responseData.employee_id ?? this.chosenEmployeeInForms,
+                                    customer: this.appointment.customer ?? {},
+                                },
+                                color: this.getActiveColor(),
+                                textColor: '#ffffff'
+                            }
+
+                            console.log(responseData, event)
+
+                            this.calendar.addEvent(event);
+
+                            this.buttonLoader = false;
+                            this.editModal.hide();
+                            this.resetModals()
+
+                            return true;
+                        });
                 },
 
-                /*TODO*/
                 async removeAppointment() {
-                    let data = new FormData();
-                    data.append("id", this.appointmentToDelete.extendedProps.id)
-                    data.append("notify", this.notify)
-                    data.append("action", "remove_appointment")
-                    data.append("nonce", _thisClass.nonce)
-                    try {
-                        this.buttonLoader = true;
-                        let response = await _thisClass.WPPostAjax(data)
-                        response = await response.json();
-                        this.appointmentToDelete.remove()
-                        this.deleteModal.hide();
-                        this.notify = false;
-                        this.buttonLoader = false;
-                        console.log(response)
-                    } catch (error) {
-                        console.error(error);
-                        return null;
+                    let data = {
+                        id: this.appointmentToDelete.extendedProps.id,
+                        notify: this.notify,
                     }
+
+                    this.buttonLoader = true;
+
+                    await _thisClass.postFetch("/appointment/cancel-admin", data)
+                        .then(response => response.json())
+                        .then(response => {
+                            this.buttonLoader = false;
+
+                            if (!response.success) {
+                                console.error(response)
+                                return
+                            }
+
+                            this.appointmentToDelete.remove()
+                            this.deleteModal.hide();
+                            this.notify = false;
+                        });
                 },
 
                 fetchAppointments(timestamp, employeeID, dateRange = "timeGridWeek") {
@@ -429,12 +452,17 @@ class ReservationCalendar extends Commons {
                     return fetch(_thisClass.addParamsToUrl(params, `${_thisClass.apiUrl}/appointment/table`))
                         .then(response => response.json())
                         .then(response => {
+
+                            console.log(response)
+
                             let appointments = [];
-                            for (const [ID, appointment] of Object.entries(response.appointments)) {
+                            for (const [ID, appointment] of Object.entries(response.data.appointments)) {
                                 let title = "Voľno"
                                 if (appointment.type !== "free") {
                                     title = appointment.customer.name
                                 }
+
+                                console.log(appointment)
 
                                 appointments.push({
                                     title: title,
@@ -444,12 +472,12 @@ class ReservationCalendar extends Commons {
                                         id: ID,
                                         type: appointment.type,
                                         note: appointment.note,
-                                        services: appointment.services,
+                                        services: appointment.services.map((appService => this.services[appService.service_id])) ?? {},
                                         employee: appointment.employee,
                                         employeeID: appointment.employeeID,
-                                        customer: appointment.customer,
+                                        customer: appointment.customer ?? null,
                                     },
-                                    color: this.getActiveColor(appointment.type, Object.values(appointment.services)[0]),
+                                    color: this.getActiveColor(appointment.type, Object.values(appointment.services ?? {})[0]),
                                     textColor: '#ffffff'
                                 })
                             }
@@ -538,16 +566,18 @@ class ReservationCalendar extends Commons {
 
                     if (type !== "free") {
                         this.appointment.customer = appToEdit.extendedProps.customer
-                        this.appointment.services = appToEdit.extendedProps.services
+                        this.appointment.services = appToEdit.extendedProps.services.map((service) => service.id)
                     }
+
                     this.chosenEmployeeInForms = appToEdit.extendedProps.employeeID
-                    this.appointment.type = appToEdit.extendedProps.type
+                    this.appointment.type = type
                     this.appointment.note = appToEdit.extendedProps.note
                     this.appointment.datetime = {
                         start: moment(appToEdit.start).format("YYYY-MM-DD HH:mm:ss"),
                         end: moment(appToEdit.end).format("YYYY-MM-DD HH:mm:ss"),
                     }
-                    console.log(this.appointment.datetime)
+
+                    console.log(appToEdit, this.appointment)
                 },
 
                 resetAppointmentVariable() {
@@ -572,11 +602,11 @@ class ReservationCalendar extends Commons {
                 },
 
                 getActiveColor(appointmentType = null, service = null) {
-                    if(!appointmentType) {
+                    if (!appointmentType) {
                         appointmentType = this.appointment.type
                     }
 
-                    if(!service) {
+                    if (!service) {
                         service = Object.values(this.appointment.services)[0]
                     }
 
@@ -588,7 +618,7 @@ class ReservationCalendar extends Commons {
                 getTotalDuration(serviceIDs) {
                     let duration = 0;
                     serviceIDs.forEach(id => {
-                       duration += this.serviceDurations[id]
+                        duration += this.serviceDurations[id]
                     });
                     return duration
                 },
@@ -598,7 +628,7 @@ class ReservationCalendar extends Commons {
 
                     let allowedServices = this.employees?.[this.chosenEmployeeInForms]?.allowed_services ?? null;
 
-                    if(allowedServices) {
+                    if (allowedServices) {
                         for (const key in this.services) {
                             if ((allowedServices).includes(parseInt(key))) {
                                 filteredObj[key] = this.services[key];
@@ -606,7 +636,7 @@ class ReservationCalendar extends Commons {
                         }
                     }
 
-                    console.log(this.chosenEmployeeInForms, this.employees, allowedServices , filteredObj);
+                    console.log(this.chosenEmployeeInForms, this.employees, allowedServices, filteredObj);
 
                     this.employeeServices = filteredObj;
                 }
@@ -619,14 +649,14 @@ class ReservationCalendar extends Commons {
                 'appointment.services'(newServices) {
                     console.log("NEWSERV", newServices)
                     let start = this.appointment.datetime.start
-                    if (start && this.appointment.type === "appointment") {
+                    if (start && this.appointment.type === "reservation") {
                         this.appointment.datetime.end = moment(start, 'YYYY-MM-DD HH:mm:ss').add(this.getTotalDuration(newServices), "minutes").format("YYYY-MM-DD HH:mm:ss")
                     }
                 },
                 'appointment.datetime.start'(newStart) {
                     let start = newStart
                     let services = this.appointment?.services ?? [];
-                    if (services.length && start && this.appointment.type === "appointment") {
+                    if (services.length && start && this.appointment.type === "reservation") {
                         this.appointment.datetime.end = moment(start, 'YYYY-MM-DD HH:mm:ss').add(this.getTotalDuration(services), "minutes").format("YYYY-MM-DD HH:mm:ss")
                     }
                 },
