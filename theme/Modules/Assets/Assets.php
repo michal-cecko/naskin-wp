@@ -8,7 +8,7 @@ use Theme\Users\User;
 
 class Assets extends SaurusAssets
 {
-    private User $user;
+    private ?User $user;
 
     public function __construct()
     {
