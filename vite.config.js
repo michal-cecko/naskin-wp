@@ -29,6 +29,7 @@ export default defineConfig({
 
                 // Frontend styles + scripts
                 'resources/scripts/general.js',
+                'resources/scripts/components/service-taxonomy-single.js',
                 'resources/scripts/components/header.js',
                 'resources/scripts/components/reservation-form.js',
                 'resources/styles/imports/general.scss',

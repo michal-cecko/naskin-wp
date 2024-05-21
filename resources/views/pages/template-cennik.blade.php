@@ -8,6 +8,8 @@
 
             @continue($category->publishedPosts->isEmpty())
 
+            <div class="anchor" id="{{$category->slug}}"></div>
+
             <div class="category-container">
                 <div class="img-container">
                     <img src="{{main()->assets()->static("images/cennik/service-{$category->slug}.jpg")}}"

@@ -6,16 +6,10 @@ use Theme\PostTypes\Customer;
 
 class CustomerService {
 
-    public static function getCustomersForCalendar() {
+    public static function createOrFindCustomer(string $name, string $email, ?string $phone = null) {
 
-    }
-
-    public static function createCustomer(string $name, string $email, ?string $phone = null) {
-
-        if(Customer::hasMeta(['cust_email' => $email])->exists()) {
-            wp_send_json_error([
-                'message' => __("Customer with email $email already exists.", THEME_DOMAIN),
-            ], 400);
+        if($customer = Customer::hasMeta(['cust_email' => $email])->first()) {
+            return $customer;
         }
 
         $id = wp_insert_post([

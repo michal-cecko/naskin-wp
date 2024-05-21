@@ -1,4 +1,4 @@
-#notifications {
+.custom-notifications {
   position: fixed;
   top: 7rem;
   right: 5rem;
@@ -8,7 +8,7 @@
   pointer-events: none;
   align-items: flex-end;
 
-  .notification {
+  .custom-notification {
     font-family: $font-1;
     padding: 0.7rem 1.5rem;
     color: white;
@@ -23,15 +23,15 @@
       margin-bottom: 0;
     }
 
-    &.success {
+    &.n-success {
       background: #2e912e;
     }
 
-    &.error {
+    &.n-error {
       background: #ec4747;
     }
 
-    &.warning {
+    &.n-warning {
       background: #ec9a47;
     }
 
@@ -43,7 +43,7 @@
 
   @include respond-below(md) {
     right: 1rem;
-    .notification {
+    .custom-notification {
       padding: 0.5rem 1rem;
       margin-bottom: 0.65rem;
       max-width: 90vw;

@@ -27,9 +27,10 @@ export default class Commons {
     }
 
     notify(text, type = "success") {
-        let container = document.getElementById("notifications")
+        type = "n-" + type
+        let container = document.getElementById("customNotifications")
         const div = document.createElement('div');
-        div.classList.add('notification', type, "shown");
+        div.classList.add('custom-notification', type, "shown");
         div.innerHTML = text;
         container.appendChild(div);
         setTimeout(function () {

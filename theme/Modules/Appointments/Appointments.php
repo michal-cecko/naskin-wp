@@ -71,6 +71,8 @@ class Appointments
             notifyEmployee: true
         );
 
+        wp_send_json_success("aegwerghw");
+
         if(!$appointment) {
             wp_send_json_error(__('Nastala chyba pri vytváraní rezervácie. Dajte nám o tom vedieť, prosím.', THEME_DOMAIN), 500);
         }

@@ -30,7 +30,7 @@ class AppointmentService
     {
 
         if (empty($customer['id'])) {
-            $customer = CustomerService::createCustomer($customer['name'], $customer['email'], $customer['phone'] ?? null);
+            $customer = CustomerService::createOrFindCustomer($customer['name'], $customer['email'], $customer['phone'] ?? null);
         } else {
             $customer = Customer::find($customer['id']);
         }

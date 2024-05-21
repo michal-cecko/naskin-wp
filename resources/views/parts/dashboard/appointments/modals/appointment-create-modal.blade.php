@@ -26,9 +26,10 @@
                     <div class="part col-12" :class="appointment.type === 'reservation' ? 'col-md-6' : ''">
                         <div class="field-container mb-3">
                             <label for="type">Typ</label>
+                            @{{ appointment.type }}
                             <select v-model="appointment.type" class="form-control" id="type">
                                 <option value="{{AppointmentType::VACATION->value}}">Voľno</option>
-                                <option value="{{AppointmentType::RESERVATION->value}}" selected>Termín</option>
+                                <option value="{{AppointmentType::RESERVATION->value}}">Termín</option>
                             </select>
                         </div>
                     </div>

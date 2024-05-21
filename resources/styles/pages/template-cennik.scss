@@ -80,6 +80,10 @@
                   padding-top: 1rem;
                 }
               }
+
+              &:nth-child(even) {
+                background: $light_beige;
+              }
             }
           }
         }

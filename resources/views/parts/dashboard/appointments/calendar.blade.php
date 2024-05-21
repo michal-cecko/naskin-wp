@@ -1,5 +1,6 @@
-<div id="calendarContainer">
+<div id="customNotifications" class="custom-notifications"></div>
 
+<div id="calendarContainer">
     <input type="hidden" id="page-data" data-colors='@json($services['colors'])' data-services='@json($services['services'])'
            data-durations='@json($services['durations'])' data-employees='@json($employees)'>
 

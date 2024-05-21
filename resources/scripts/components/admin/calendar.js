@@ -299,6 +299,27 @@ class ReservationCalendar extends Commons {
                 },
 
                 async createAppointment() {
+
+                    if(!this.appointment.datetime.end) {
+                        _thisClass.notify("Zadajte koniec služby.", "error")
+                        return;
+                    }
+
+                    if(!this.appointment.datetime.start) {
+                        _thisClass.notify("Zadajte začiatok služby.", "error")
+                        return;
+                    }
+
+                    if(this.appointment.type !== "free" && this.appointment.services.length === 0) {
+                        _thisClass.notify("Vyberte aspoň jednu službu.", "error")
+                        return;
+                    }
+
+                    if( this.appointment.type !== "free" && !this.appointment.customer?.id && (!this.appointment.customer?.email || !this.appointment.customer?.name) ) {
+                        _thisClass.notify("Vyberte zákazníka alebo zadajte údaje nového.", "error")
+                        return;
+                    }
+
                     let body = {
                         notify: this.notify ? 1 : 0,
                         employeeID: parseInt(this.chosenEmployeeInForms),
@@ -310,7 +331,6 @@ class ReservationCalendar extends Commons {
                     }
 
                     if (this.appointment.type !== "free") {
-                        console.log(this.appointment.services)
                         body.services = this.appointment.services
                         body.customer = this.appointment.customer
                         body.note = this.appointment.note
@@ -584,7 +604,7 @@ class ReservationCalendar extends Commons {
                     this.appointment = {
                         customer: {},
                         datetime: {},
-                        type: "appointment",
+                        type: "reservation",
                         services: [],
                     }
                 },

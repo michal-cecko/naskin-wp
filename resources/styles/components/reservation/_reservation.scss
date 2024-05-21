@@ -317,6 +317,16 @@ $contentWidthDualGap: 2rem;
           .services-grid {
             display: grid;
             grid-template-columns: repeat(2, 50%);
+            max-height: 25rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 3rem;
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
+            scrollbar-width: none; /* Firefox */
+            &::-webkit-scrollbar {
+              width: 0; /* Remove scrollbar space */
+              background: transparent; /* Optional: just make scrollbar invisible */
+            }
 
             .service {
               display: flex;
@@ -532,6 +542,10 @@ $contentWidthDualGap: 2rem;
               justify-content: center;
               align-items: center;
               &::before{
+
+                //Turned off
+                display: none !important;
+
                 margin-right: 0.35rem;
                 content: "";
                 display: block;

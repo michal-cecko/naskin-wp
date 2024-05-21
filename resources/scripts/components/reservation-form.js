@@ -344,6 +344,11 @@ class ReservationForm extends Commons {
                                 }
                                 _this.resetReservation()
                             })
+                            .catch(error => {
+                                _this.sending = false;
+                                _thisClass.notify("Nastala chyba pri odosielaní rezervácie. Skúste to prosím znova, alebo nás kontaktujte.")
+                                console.error(error)
+                            });
                     },
                     saveContactInfoToCookie() {
                         this.customer.note = ""

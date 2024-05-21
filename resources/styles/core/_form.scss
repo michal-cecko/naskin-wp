@@ -4,11 +4,17 @@
   align-items: center;
   position: relative;
   font: $font-1;
+  transition: all 0.3s ease;
 
   input {
+    transition: all 0.3s ease;
     &::placeholder {
       color: rgba($secondary_dark, 0.8);
     }
+  }
+
+  label {
+    transition: all 0.3s ease;
   }
 
   &--text {
@@ -17,6 +23,17 @@
     }
     label {
       display: block;
+    }
+
+    &.error {
+      input {
+        background: $error_bg !important;
+        color: $error !important;
+      }
+      label {
+        color: $error !important;
+      }
+
     }
   }
 

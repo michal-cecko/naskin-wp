@@ -45,7 +45,7 @@ class AppointmentsDashboardView
         add_menu_page(
             page_title: __('Termíny', THEME_DOMAIN),
             menu_title: __('Termíny', THEME_DOMAIN),
-            capability: 'administrator',
+            capability: 'manage_options',
             menu_slug: 'appointments',
             callback: [$this, 'render_appointments_table'],
             icon_url: 'dashicons-calendar-alt',
@@ -75,13 +75,13 @@ class AppointmentsDashboardView
 
     private function getServices(): array
     {
-        $services = Service::with("taxonomies.term")->get();
+        $servicesArr = Service::with("taxonomies.term")->get();
 
         $serviceCategories = [];
         $colorsArray = [];
         $durationsArray = [];
 
-        foreach ($services as $service) {
+        foreach ($servicesArr as $service) {
             $cat = $service->service_category;
             $catID = $cat?->term_id ?? "uncategorized";
             if(!isset($serviceCategories[$catID])) $serviceCategories[$catID] = [
