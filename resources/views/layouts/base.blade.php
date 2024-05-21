@@ -37,7 +37,7 @@
 
 <div class="app">
 
-    <div id="customNotifications" class="custom-notification">
+    <div id="customNotifications" class="custom-notifications">
         @section('dynamic-notifications')
             @yield('dynamic-notifications')
         @show

@@ -17,10 +17,14 @@ class Ics
         // Assuming $start is a valid date string
         if(!$start instanceof Carbon) {
             $startDateTime = Carbon::parse($start);
+        } else {
+            $startDateTime = $start;
         }
 
         if(!$end instanceof Carbon) {
             $endDateTime = Carbon::parse($end);
+        } else {
+            $endDateTime = $end;
         }
 
         // Check if it's currently in daylight saving time (summer time)

@@ -71,13 +71,11 @@ class Appointments
             notifyEmployee: true
         );
 
-        wp_send_json_success("aegwerghw");
-
         if(!$appointment) {
             wp_send_json_error(__('Nastala chyba pri vytváraní rezervácie. Dajte nám o tom vedieť, prosím.', THEME_DOMAIN), 500);
         }
 
-        wp_send_json_success($appointment);
+        wp_send_json_success("Rezervácia bola úspešne vytvorená. Ďakujeme.");
     }
 
     public function cancelAppointment(AppointmentCancelRequest $request): void
@@ -91,7 +89,7 @@ class Appointments
             exit();
         }
 
-        AppointmentService::cancelAppointment($appointment);
+        AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: true, notifyEmployee: true, isCancelledByEmployee: true);
 
         wp_redirect(home_url(). "?c=1");
         exit();

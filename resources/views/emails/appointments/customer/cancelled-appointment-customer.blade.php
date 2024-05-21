@@ -12,7 +12,7 @@
 
     {{-- START BODY --}}
     @include('parts.emails.email-paragraph.email-paragraph-opening-tag')
-    @if($isCanceledByEmployee)
+    @if($isCancelledByEmployee ?? false)
         Dobrý deň, je nám to ľúto, ale nemôžeme vybaviť Vašu rezerváciu. Vaša rezervácia bola zrušená.
     @else
         Dobrý deň, na základe vášho podnetu bola Vaša registrácia zrušená.

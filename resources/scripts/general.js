@@ -13,10 +13,11 @@ class General extends Commons {
 
 
     _prepareParametersRemoval() {
-        if (window.location.search.includes("c=")) {
+        if (window.location.search.includes("c=1")) {
             const url = new URL(window.location.href);
             const params = new URLSearchParams(url.search);
             params.delete("c");
+            this.notify("Vaša rezervácia bola zrušená.", "success", 6000)
             url.search = params.toString();
             window.location.replace(url.toString());
         }

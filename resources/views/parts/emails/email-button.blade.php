@@ -6,7 +6,7 @@
     <td align="center" valign="top"
         style="border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; padding-left: 6.25%; padding-right: 6.25%; width: 87.5%;padding-top: 25px;padding-bottom: 5px;"
         class="button">
-        <a href="{{$button->href}}" target="_blank" style="text-decoration: none;">
+        <a href="{{$href}}" target="_blank" style="text-decoration: none;">
             <table border="0" cellpadding="0" cellspacing="0" align="center"
                    style="max-width: 240px; min-width: 120px; border-collapse: collapse; border-spacing: 0; padding: 0;">
                 <tr>
@@ -15,8 +15,8 @@
                         bgcolor="{{ $color }}">
                         <a target="_blank" style="text-decoration: none;
 					color: #FFFFFF; font-family: sans-serif; font-size: 17px; font-weight: 400; line-height: 120%;"
-                           href="{{$button->href}}">
-                            {{$button->text}}
+                           href="{{$href}}">
+                            {{$text}}
                         </a>
                     </td>
                 </tr>

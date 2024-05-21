@@ -110,7 +110,7 @@ class AdminAppointments {
 
         $appointment = Appointment::find($data['id']);
 
-        AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: $notify);
+        AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: $notify, isCancelledByEmployee: true);
 
         wp_send_json_success(['message' => 'Termín bol úspešne zrušený.']);
     }

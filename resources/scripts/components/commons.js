@@ -26,7 +26,7 @@ export default class Commons {
         });
     }
 
-    notify(text, type = "success") {
+    notify(text, type = "success", timeout = 3000) {
         type = "n-" + type
         let container = document.getElementById("customNotifications")
         const div = document.createElement('div');
@@ -38,7 +38,7 @@ export default class Commons {
             setTimeout(function () {
                 div.remove();
             }, 500);
-        }, 3000);
+        }, timeout);
     }
 
     getCurrentTimestamp() {

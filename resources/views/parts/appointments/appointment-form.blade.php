@@ -91,7 +91,7 @@
                                     src="{{main()->assets()->static("icons/reservation/icon-loader.json")}}"
                                     trigger="loop"
                                     stroke="60"
-                                    colors="primary:#1f1f1f,secondary:#1f1f1f">
+                                    colors="primary:#D3932A,secondary:#D3932A">
                             </lord-icon>
                         </div>
                     </div>
@@ -215,14 +215,14 @@
                             trigger="loop"
                             stroke="60"
                             class="loader"
-                            colors="primary:#1f1f1f,secondary:#1f1f1f">
+                            colors="primary:#D3932A,secondary:#D3932A">
                     </lord-icon>
                     <lord-icon
                             src="{{main()->assets()->static("icons/reservation/icon-check.json")}}"
                             trigger="click"
                             stroke="100"
                             class="check"
-                            colors="primary:#348165,secondary:#348165">
+                            colors="primary:#D3932A,secondary:#D3932A">
                     </lord-icon>
                 </div>
             </div>

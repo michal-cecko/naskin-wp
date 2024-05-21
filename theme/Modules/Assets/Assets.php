@@ -8,9 +8,13 @@ use Theme\Users\User;
 
 class Assets extends SaurusAssets
 {
+    private User $user;
+
     public function __construct()
     {
         parent::__construct();
+
+        $this->user = User::find(get_current_user_id() ?? -1);
     }
 
     /**
@@ -47,10 +51,14 @@ class Assets extends SaurusAssets
         wp_enqueue_script('vue-js', 'https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js');
         wp_enqueue_script('moment-js', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
         wp_enqueue_script('moment-js-locale', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/sk.min.js');
+        wp_enqueue_script('lordicon-js', 'https://cdn.lordicon.com/libs/mssddfmo/lord-icon-2.1.0.js');
 
         wp_enqueue_script(handle: 'reservation-js', src: $this->dynamic('scripts/components/reservation-form.js'), ver: $this->ver);
         wp_enqueue_script(handle: 'header-js', src: $this->dynamic('scripts/components/header.js'), ver: $this->ver);
 
+        if( in_array($this->user?->role, ['together-employee', 'employee']) ){
+            wp_enqueue_style(handle: 'employee_role_web-scss', src: $this->dynamic('styles/admin/employee_role_web.scss'), ver: $this->ver);
+        }
 
         if(is_tax( ServiceCategory::getTaxonomySlug() )) {
             wp_enqueue_script('swiper-js', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.0.5/swiper-bundle.min.js');
@@ -67,8 +75,6 @@ class Assets extends SaurusAssets
      */
     public function adminAssets(): void
     {
-        $user = User::find(get_current_user_id());
-
         $this->enqueueCommonsScript();
 
         wp_enqueue_style('bootstrap-css', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css', FALSE, time());
@@ -85,8 +91,8 @@ class Assets extends SaurusAssets
 
         wp_enqueue_script('lordicon-js', 'https://cdn.lordicon.com/libs/mssddfmo/lord-icon-2.1.0.js');
 
-        if( in_array($user?->role, ['together-employee', 'employee']) ){
-            wp_enqueue_style(handle: 'employee_role-scss', src: $this->dynamic('styles/admin/employee_role.scss'), ver: $this->ver);
+        if( in_array($this->user?->role, ['together-employee', 'employee']) ){
+            wp_enqueue_style(handle: 'employee_role_dashboard-scss', src: $this->dynamic('styles/admin/employee_role_dashboard.scss'), ver: $this->ver);
         }
     }
 }

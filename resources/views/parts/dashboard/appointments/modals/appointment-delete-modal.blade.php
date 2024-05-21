@@ -22,7 +22,7 @@
             </div>
             <div class="modal-footer" v-if="appointmentToDelete">
                 <div class="field-container me-auto"
-                     v-if="appointmentToDelete.extendedProps.type === 'appointment'">
+                     v-if="appointmentToDelete.extendedProps.type === 'reservation'">
                     <input v-model="notify" type="checkbox" class="form-control" id="notify" name="notify">
                     <label for="notify">Odoslať notifikáciu?</label>
                 </div>

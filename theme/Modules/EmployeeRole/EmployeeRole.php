@@ -2,6 +2,7 @@
 
 namespace Theme\Modules\EmployeeRole;
 
+use Theme\PostTypes\Service;
 use Theme\Users\User;
 
 class EmployeeRole {
@@ -21,9 +22,14 @@ class EmployeeRole {
             remove_menu_page( 'plugins.php' );         //plugins
             remove_menu_page( 'options-general.php' ); // Settings
             remove_menu_page( 'edit.php?post_type=acf-field-group' ); // ACF Fields
+            remove_menu_page( 'edit.php?post_type=page' ); // Pages
             remove_menu_page( 'ai1wm_export' );         // All in one WP Migration
             remove_menu_page( 'tools.php'); // Site Health
             remove_menu_page( 'themes.php' );          // Appearance
+            remove_menu_page( 'admin.php?page=wpseo_dashboard' );          // Appearance
+            remove_menu_page( 'admin.php?page=theme-general-settings' );          // Appearance
+
+            remove_menu_page( 'edit.php?post_type=' . Service::getPostTypeSlug() ); // Services
         }
     }
 

@@ -28,7 +28,7 @@ class AppointmentsDashboardView
         if( in_array($this->currentUser?->role, ['together-employee', 'employee']) ) {
             global $pagenow;
             if ( $pagenow === 'index.php' ) {
-                wp_redirect( admin_url( 'edit.php?post_type=appointment' ) );
+                wp_redirect( admin_url( 'admin.php?page=appointments' ) );
                 exit();
             }
         }
@@ -45,7 +45,7 @@ class AppointmentsDashboardView
         add_menu_page(
             page_title: __('Termíny', THEME_DOMAIN),
             menu_title: __('Termíny', THEME_DOMAIN),
-            capability: 'manage_options',
+            capability: 'read',
             menu_slug: 'appointments',
             callback: [$this, 'render_appointments_table'],
             icon_url: 'dashicons-calendar-alt',

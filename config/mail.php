@@ -6,8 +6,7 @@ return [
     'sender' => [
         'from' => [
             'name' =>  "NASKIN",
-            // TODO > Change address
-            'address' => "ceckomichal@gmail.com"
+            'address' => "info@naskin.sk"
         ],
     ],
 ];

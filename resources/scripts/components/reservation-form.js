@@ -94,7 +94,7 @@ class ReservationForm extends Commons {
                         this.customer.phone = savedCustomerInfo.phone
                         this.customer.email = savedCustomerInfo.email
                     }
-                    this.defaultService()
+                    this.defaultServices()
                 },
                 mounted() {
                     _thisClass._prepareModalToggling();
@@ -311,8 +311,9 @@ class ReservationForm extends Commons {
                         await _thisClass.checkCaptcha().then(function (token) {
                             body.recaptcha = token;
                         }).catch(function (error) {
-                            _thisClass.notify("Myslíme si, že ste robot. Obnovte stránku, prosím.")
-                            console.error(error);
+                            _thisClass.notify("Myslíme si, že ste robot. Obnovte stránku, prosím.", "error")
+                            console.error(error)
+                            return false;
                         });
 
                         this.sending = true;
@@ -321,22 +322,25 @@ class ReservationForm extends Commons {
 
                         await _thisClass.postFetch("/appointment/store", body)
                             .then(response => response.json())
-                            .then(response => async () => {
-                                console.log(response.data)
-
-                                _this.sending = false;
-
-                                if (response.status !== 200) {
+                            .then(async (response) => {
+                                if (!response.success) {
                                     console.error(response)
                                     return false;
                                 }
 
-                                let clickIcon = document.querySelector(".check")
-                                if (clickIcon) clickIcon.click()
-
                                 _this.sent = true;
 
+                                let clickIcon = document.querySelector(".check")
+                                if (clickIcon) {
+                                    clickIcon.click()
+                                    console.log("clicked on ", clickIcon)
+                                } else {
+                                    console.log("click not fo")
+                                }
+
                                 await _thisClass.delay(1500);
+                                _this.sending = false;
+
                                 _thisClass.toggleModal()
                                 await _thisClass.delay(500);
                                 if (_this.saveCustomerToCookies) {
@@ -357,12 +361,9 @@ class ReservationForm extends Commons {
                     hasError(name) {
                         return this.step === 5 && this.errors.indexOf(name) !== -1
                     },
-                    defaultService() {
-                        this.service = {
-                            id: null,
-                            name: null,
-                            price: null,
-                        }
+                    defaultServices() {
+                        this.chosenServices = {}
+                        this.chosenCategory = null
                     },
                     defaultEmployee() {
                         this.employee = {
@@ -399,7 +400,7 @@ class ReservationForm extends Commons {
                         }
                     },
                     resetReservation() {
-                        this.defaultService()
+                        this.defaultServices()
                         this.defaultEmployee()
                         this.defaultCustomer()
                         this.changeStep(1, true)
@@ -481,7 +482,7 @@ class ReservationForm extends Commons {
                 watch: {
                     employee: {
                         handler(newEmployee, oldEmployee) {
-                            this.defaultService();
+                            this.defaultServices();
                         },
                         deep: true
                     },

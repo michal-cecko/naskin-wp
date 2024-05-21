@@ -11,7 +11,7 @@
 
     {{-- START BODY --}}
     @include('parts.emails.email-paragraph.email-paragraph-opening-tag')
-    @if($isCanceledByEmployee)
+    @if($isCancelledByEmployee ?? false)
         Dobrý deň, toto je potvrdenie zrušeného termínu rezerevácie pracovníkom:
     @else
         Dobrý deň. Upozorňujeme, že zákazník zrušil rezerváciu nasledovného termínu

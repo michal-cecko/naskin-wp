@@ -4,7 +4,7 @@
         'content' => 'Pridajte si termín do kalendára'
     ])
 
-    @include("parts.emails.appointments.email-ics-button", [
+    @include("parts.emails.email-button", [
         'href' => $icsUrl,
         'text' => 'Pridať do kalendára'
     ])

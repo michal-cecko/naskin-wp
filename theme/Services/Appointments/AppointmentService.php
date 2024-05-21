@@ -14,6 +14,8 @@ use Theme\Mail\Appointments\Customer\AppointmentCancelledCustomer;
 use Theme\Mail\Appointments\Customer\AppointmentCreatedCustomer;
 use Theme\Mail\Appointments\Customer\AppointmentRemindCustomer;
 use Theme\Mail\Appointments\Customer\AppointmentUpdatedCustomer;
+use Theme\Mail\Appointments\Employee\AppointmentCancelledEmployee;
+use Theme\Mail\Appointments\Employee\AppointmentCreatedEmployee;
 use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Customer;
 use Theme\PostTypes\Service;
@@ -181,14 +183,14 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function notifyCustomer(Appointment $appointment, AppointmentEmailType $type): bool
+    public static function notifyCustomer(Appointment $appointment, AppointmentEmailType $type, array $additionalData = []): bool
     {
         try {
             $mailable = match ($type) {
-                AppointmentEmailType::CREATED => new AppointmentCreatedCustomer($appointment),
-                AppointmentEmailType::UPDATED => new AppointmentUpdatedCustomer($appointment),
-                AppointmentEmailType::CANCELLED => new AppointmentCancelledCustomer($appointment),
-                AppointmentEmailType::REMIND => new AppointmentRemindCustomer($appointment),
+                AppointmentEmailType::CREATED => new AppointmentCreatedCustomer($appointment, $additionalData),
+                AppointmentEmailType::UPDATED => new AppointmentUpdatedCustomer($appointment, $additionalData),
+                AppointmentEmailType::CANCELLED => new AppointmentCancelledCustomer($appointment, $additionalData),
+                AppointmentEmailType::REMIND => new AppointmentRemindCustomer($appointment, $additionalData),
                 default => throw new Exception('Unsupported email type for customer notification: ' . $type->value)
             };
         } catch (Exception $th) {
@@ -208,12 +210,12 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function notifyEmployee(Appointment $appointment, AppointmentEmailType $type): bool
+    public static function notifyEmployee(Appointment $appointment, AppointmentEmailType $type, array $additionalData = []): bool
     {
         try {
             $mailable = match ($type) {
-                AppointmentEmailType::CREATED => new AppointmentCreatedEmployee($appointment),
-                AppointmentEmailType::CANCELLED => new AppointmentCancelledEmployee($appointment),
+                AppointmentEmailType::CREATED => new AppointmentCreatedEmployee($appointment, $additionalData),
+                AppointmentEmailType::CANCELLED => new AppointmentCancelledEmployee($appointment, $additionalData),
                 default => throw new Exception('Unsupported email type for employee notification: ' . $type->value)
             };
         } catch (Exception $th) {
@@ -222,7 +224,6 @@ class AppointmentService
         }
 
         $email = $appointment->employee?->email;
-
         if (empty($email)) {
             return false;
         }
@@ -399,7 +400,7 @@ class AppointmentService
         return $appointment->cancel_token === $token;
     }
 
-    public static function cancelAppointment($appointment, bool $notifyCustomer = false, bool $notifyEmployee = false): void
+    public static function cancelAppointment($appointment, bool $notifyCustomer = false, bool $notifyEmployee = false, $isCancelledByEmployee = false): void
     {
         if($appointment->type === AppointmentType::VACATION) {
             $appointment->delete();
@@ -409,11 +410,11 @@ class AppointmentService
         $appointment->update(['status' => AppointmentStatus::CANCELLED]);
 
         if($notifyEmployee) {
-            self::notifyEmployee($appointment, AppointmentEmailType::CANCELLED);
+            self::notifyEmployee($appointment, AppointmentEmailType::CANCELLED, ['isCancelledByEmployee' => $isCancelledByEmployee]);
         }
 
         if($notifyCustomer) {
-            self::notifyCustomer($appointment, AppointmentEmailType::CANCELLED);
+            self::notifyCustomer($appointment, AppointmentEmailType::CANCELLED, ['isCancelledByEmployee' => $isCancelledByEmployee]);
         }
     }
 
@@ -444,8 +445,8 @@ class AppointmentService
         $name = "NASKIN - Rezervácia";
 
         theme()->ics()->setData(
-            start: $appointment->startAt,
-            end: $appointment->endAt,
+            start: $appointment->start_at,
+            end: $appointment->end_at,
             name: $name,
             location: get_field("address", "options")
         );
