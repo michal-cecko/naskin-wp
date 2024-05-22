@@ -70,7 +70,7 @@ class AppointmentsDashboardView
     }
 
     private function getCurrentUser() : ?User {
-        return User::find(get_current_user_id());
+        return User::where("ID", get_current_user_id())->first();
     }
 
     private function getServices(): array
@@ -113,7 +113,7 @@ class AppointmentsDashboardView
         if( $this->currentUser?->role !== 'employee') {
             $arr = Employee::all();
         } else {
-            $arr = [Employee::find($this->currentUser?->id)];
+            $arr = [Employee::where($this->currentUser?->id)->first()];
         }
 
         $employeesFinal = collect([]);

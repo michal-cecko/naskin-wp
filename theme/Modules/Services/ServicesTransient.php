@@ -52,7 +52,7 @@ class ServicesTransient {
     // User registration function
     function invalidate_cache_on_user_save($user_id): void
     {
-        $user = Employee::find($user_id);
+        $user = Employee::where("ID", $user_id)->first();
         if(!$user) {
             return;
         }

@@ -158,6 +158,12 @@ class AdminAppointments {
                         ]
                     ];
                 } else {
+
+                    if(!$appointment->customer) {
+                        main()->log()->error("Customer for app: {$appointment->id} was not found");
+                        continue;
+                    }
+
                     $return[$appointment->id] = [
                         'type' => $appointment->type->value,
                         'employee' => $appointment->employee->first_name,

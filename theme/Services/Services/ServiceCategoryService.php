@@ -15,11 +15,11 @@ class ServiceCategoryService {
         $categories = get_transient($transient_key);
 
         if ($categories === false) {
-            $categories = ServiceCategory::with(['publishedPosts', 'term'])->get();
+            $categories = ServiceCategoryMapper::collection(ServiceCategory::with(['publishedPosts', 'term'])->get());
             set_transient($transient_key, $categories, $expiration_time);
         }
 
-        return ServiceCategoryMapper::collection($categories);
+        return $categories;
     }
 
     public static function invalidateServiceCategoryCache(): void

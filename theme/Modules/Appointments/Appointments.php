@@ -39,7 +39,7 @@ class Appointments
     public function getAvailableDates(AppointmentListAvailableDates $request) : void {
         $data = $request->validated();
 
-        $employee = $data['employee_id'] === -1 ? "ANY" : Employee::find($data['employee_id']);
+        $employee = $data['employee_id'] === -1 ? "ANY" : Employee::where("ID", $data['employee_id'])->first();
         $services = Service::whereIn("id", $data['services'])->get();
 
         if(!$employee || empty($services)) {

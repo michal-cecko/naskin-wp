@@ -26,7 +26,7 @@ class AppointmentStoreRequest extends Request {
 
             'customer' => ['required', 'array'],
             'customer.name' => ['required', 'string', 'max:255'],
-            'customer.email' => ['required', 'email:rfc,dns', 'max:255'],
+            'customer.email' => ['required', 'max:255'],
             'customer.phone' => ['required', 'string', 'max:255'],
             'customer.note' => ['sometimes', 'nullable', 'string', 'max:255'],
 

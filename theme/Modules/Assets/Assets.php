@@ -14,7 +14,7 @@ class Assets extends SaurusAssets
     {
         parent::__construct();
 
-        $this->user = User::find(get_current_user_id() ?? -1);
+        $this->user = User::where("ID", get_current_user_id() ?? -1)->first();
     }
 
     /**

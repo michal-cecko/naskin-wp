@@ -34,18 +34,21 @@ class AppointmentService
         if (empty($customer['id'])) {
             $customer = CustomerService::createOrFindCustomer($customer['name'], $customer['email'], $customer['phone'] ?? null);
         } else {
-            $customer = Customer::find($customer['id']);
+            $customer = Customer::where("ID", $customer['id'])->first();
         }
 
         if(!$endAt) {
             $duration = $services->sum("duration");
             $endAt = $startAt->copy()->addMinutes($duration);
+        } else {
+            $duration = $startAt->diffInMinutes($endAt);
         }
 
         $appointment = Appointment::create([
             'employee_id' => $employeeID,
             'start_at' => $startAt,
             'end_at' => $endAt,
+            'break' => AppointmentService::getBreakForDuration($duration),
             'customer_id' => $customer->id,
             'note' => $note,
             'status' => AppointmentStatus::OK,
@@ -53,7 +56,9 @@ class AppointmentService
             'cancel_token' => self::generateCancelToken()
         ]);
 
-        $appointment->load(["employee", "services"]);
+        foreach ($services as $service) {
+            self::addServiceToAppointment($appointment, $service);
+        }
 
         $lastAppointment = get_field('cust_last-appointment', $customer->ID);
         $lastAppointmentC = Carbon::parse($lastAppointment);
@@ -61,9 +66,7 @@ class AppointmentService
             CustomerService::updateLastAppointmentDate($customer, $appointment->start_at->format("Y-m-d H:i"));
         }
 
-        foreach ($services as $service) {
-            self::addServiceToAppointment($appointment, $service);
-        }
+        $appointment->load(["employee", "services"]);
 
         if ($notifyCustomer) {
             if (!self::notifyCustomer($appointment, AppointmentEmailType::CREATED)) {
@@ -228,7 +231,9 @@ class AppointmentService
             return false;
         }
 
-        return main()->mail()->send($mailable, $email);
+        $adminEmail = get_field('reservations_email', 'option');
+
+        return main()->mail()->send($mailable, $email, !empty($adminEmail) ? [$adminEmail] : []);
     }
 
     public static function getAvailableDates(Collection $services, string|Employee $employee = "ANY"): Collection
@@ -238,7 +243,6 @@ class AppointmentService
         $weekenedWork = get_field('weekend_work', 'option') ?? ['saturday' => false, 'sunday' => false];
         $daysAvailableToReserve = get_field('days_available_to_reserve', 'option') ?? 60;
         $breaks = self::getBreaks();
-
         $finalDates = [];
         $b = 0;
         while (($employee === "ANY" && $b < count($employees)) || ($employee instanceof Employee && $b < 1)) :
@@ -262,6 +266,7 @@ class AppointmentService
             foreach ($appointments as $appointment) {
                 $startAt = $appointment->start_at;
                 $endAt = $appointment->end_at_with_break;
+
                 $obsadeneArr[$startAt->format("Y-m-d")][] = ['start' => $startAt->format("H:i"), "end" => $endAt->format("H:i")];
             };
 
@@ -291,7 +296,7 @@ class AppointmentService
                 $obsadene = $obsadeneArr[$dateFormat] ?? false;
                 // Work start time is current time minus 30 minutes
 
-                $currentTime = Carbon::createFromFormat('Y-m-d H:i', $dateFormat . " " . $currentEmployee->worktime['start'])->subMinutes(30);
+                $currentTime = Carbon::createFromFormat('Y-m-d H:i', $dateFormat . " " . $currentEmployee->worktime['start']);
                 // Work end time
                 $workEnd = Carbon::createFromFormat('Y-m-d H:i', $dateFormat . " " . $currentEmployee->worktime['end']);
                 // Work end time minus service duration
@@ -307,11 +312,12 @@ class AppointmentService
                 while ($currentTime->format("H:i") < $workEndWhile) :
 
                     $currentStart = $currentTime->format("H:i");
-                    $currentEnd = $currentTime->modify("+" . $serviceDuration . " minutes")->format("H:i");
+                    $currentEnd = $currentTime->modify("+" . $serviceDuration . " minutes")->modify("+" . self::getBreakForDuration($serviceDuration, $breaks) . " minutes")->format("H:i");
 
                     //echo "termin: from" . $currentStart . " to $currentEnd\n";
                     if ($lunchStart && $lunchEnd) {
                         $canEnd = $currentEnd <= $lunchStart || $currentStart >= $lunchEnd;
+                        //echo !$canEnd ? "lunch broke this. \n" : "";
                         if (!$canEnd) {
                             continue;
                         }
@@ -325,6 +331,7 @@ class AppointmentService
 
                             $canEnd = $currentEnd <= $terminStart || $currentStart >= $terminEnd;
                             //echo "$currentEnd <= $terminStart " . " || " . " $currentStart >= $terminEnd \n";
+                            //echo !$canEnd ? "obsadenie broke this. \n" : "";
 
                             if (!$canEnd) {
                                 $ok = false;
@@ -379,20 +386,22 @@ class AppointmentService
             return $a['duration'] <=> $b['duration'];
         });
 
-
         return $breaks;
     }
 
-    private static function getBreakForDuration($duration, $breaks = []) {
+    public static function getBreakForDuration($duration, $breaks = []): int
+    {
         if(empty($breaks)) {
             $breaks = self::getBreaks();
         }
 
         foreach ($breaks as $break) {
             if($duration <= $break['duration']) {
-                return $break;
+                return intval($break['break']);
             }
         }
+
+        return 0;
     }
 
     public static function checkCancelToken(Appointment $appointment, string $token): bool

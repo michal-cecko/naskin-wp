@@ -58,6 +58,14 @@ class Appointment extends Model
         return main()->api()->getApiEndpointUrl(routeName: "appointment.ics", routeParams: ['id' => $this->id, 't' => config("appointments.cron-ics-token")]);
     }
 
+    public function getDurationWithoutBreakAttribute() {
+        return $this->start_at->diffInMinutes($this->end_at);
+    }
+
+    public function getDurationWithBreakAttribute() {
+        return $this->start_at->diffInMinutes($this->end_at_with_break);
+    }
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, "employee_id", "ID");

@@ -43,7 +43,7 @@ class Customers {
         $search = strtolower($data['search']);
 
         $customers = Customer::whereHas('meta', function ($q) use ($search) {
-            $q->where('meta_value', 'LIKE', "%$search%")->whereIn("meta_key", ['cust_name', 'cust_phone', 'cust_email4']);
+            $q->where('meta_value', 'LIKE', "%$search%")->whereIn("meta_key", ['cust_name', 'cust_phone', 'cust_email']);
         })->get();
 
         $finalPosts = [];

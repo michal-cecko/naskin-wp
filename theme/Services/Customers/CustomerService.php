@@ -24,7 +24,7 @@ class CustomerService {
             ], 500);
         }
 
-        $customer = Customer::find($id);
+        $customer = Customer::where("ID", $id)->first();
 
         update_field('cust_name', $name, $id);
         update_field('cust_email', $email, $id);

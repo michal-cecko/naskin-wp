@@ -152,7 +152,7 @@ class ReservationForm extends Commons {
                     },
                     async changeStep(nextStep, returning = false) {
                         if (this.step === 1 && !!this.chosenCategory && returning) {
-                            this.chosenCategory = null;
+                            this.defaultServices();
                             return;
                         }
 

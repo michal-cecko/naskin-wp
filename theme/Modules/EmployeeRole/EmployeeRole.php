@@ -14,7 +14,7 @@ class EmployeeRole {
      */
     public function restrict_employee_role(): void
     {
-        $user = User::find(get_current_user_id());
+        $user = User::where("ID", get_current_user_id())->first();
 
         if( in_array($user?->role, ['together-employee', 'employee']) ) {
             remove_menu_page( 'upload.php' );

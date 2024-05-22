@@ -29,7 +29,7 @@ class AppointmentAdminStoreRequest extends AuthenticatedAdminRequest {
             'customer' => ['required_if:type,' . AppointmentType::RESERVATION->value, 'array'],
             'customer.id' => ['sometimes', 'nullable', 'integer', new PostExists(postModel: Customer::class)],
             'customer.name' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'customer.email' => ['sometimes', 'nullable', 'email:rfc,dns', 'max:255'],
+            'customer.email' => ['sometimes', 'nullable', 'max:255'],
             'customer.phone' => ['sometimes', 'nullable', 'string', 'max:255'],
 
             'note' => 'sometimes|nullable|string|max:1000',

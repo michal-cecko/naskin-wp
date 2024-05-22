@@ -215,15 +215,14 @@ class ReservationCalendar extends Commons {
                             let html = '<div class="event-content-container ' + view + '"><div class="time">' + moment(event.start).format('HH:mm') + ' - ' + moment(event.end).format('HH:mm') + '</div>';
                             html += '<div class="title">' + event.title + '</div>';
 
+                            let empl = _thisVue.employees[props.employeeID]?.name ?? props.employee ?? null
                             if (_thisVue.chosenEmployeeOnView === -1) {
-                                if (_thisVue.employees[props.employeeID])
-                                    html += '<div class="employee">Vybaví: ' + _thisVue.employees[props.employeeID].name + '</div>';
+                                if (empl) html += '<div class="employee">Vybaví: ' + empl + '</div>';
                             }
 
                             if (props.type === "free") {
 
                             } else {
-                                console.log("servicesssss", props.services)
                                 html += '<div class="service">' + props.services.map((item) =>item?.title).join(", ") + '</div>';
                                 if (view === "timeGridWeek") {
                                 }
@@ -349,7 +348,7 @@ class ReservationCalendar extends Commons {
                                 return false;
                             }
 
-                            this.calendar.addEvent({
+                            let ev = {
                                 title: this.appointment.type === "free" ? "Voľno" : this.appointment.customer.name,
                                 start: this.appointment.datetime.start,
                                 end: this.appointment.datetime.end,
@@ -364,7 +363,11 @@ class ReservationCalendar extends Commons {
                                 },
                                 color: this.getActiveColor(),
                                 textColor: '#ffffff'
-                            });
+                            }
+
+                            console.log(ev);
+
+                            this.calendar.addEvent(ev);
 
                             this.createModal.hide();
                             this.resetModals()
@@ -656,8 +659,6 @@ class ReservationCalendar extends Commons {
                         }
                     }
 
-                    console.log(this.chosenEmployeeInForms, this.employees, allowedServices, filteredObj);
-
                     this.employeeServices = filteredObj;
                 }
             },
@@ -667,7 +668,6 @@ class ReservationCalendar extends Commons {
                     this.setServiceList()
                 },
                 'appointment.services'(newServices) {
-                    console.log("NEWSERV", newServices)
                     let start = this.appointment.datetime.start
                     if (start && this.appointment.type === "reservation") {
                         this.appointment.datetime.end = moment(start, 'YYYY-MM-DD HH:mm:ss').add(this.getTotalDuration(newServices), "minutes").format("YYYY-MM-DD HH:mm:ss")

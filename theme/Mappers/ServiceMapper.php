@@ -16,6 +16,7 @@ class ServiceMapper extends Mapper {
         $data['price'] = $model->price;
         $data['duration'] = $model->duration;
         $data['image'] = $model->image;
+        $data['service_category_id'] = $model->service_category_id;
         $data['employees'] = EmployeeMapper::collection($model->employees);
 
         return $data;
