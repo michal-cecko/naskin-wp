@@ -134,13 +134,13 @@
                 <div id="current-reservation"
                      :class="[(isVisibleOrder ? 'visible' : ''), (step === 5 ? 'bigger' : '')]">
                     <div class="header" @click="headerToggler()">
-                        <span class="header-text">Vaša rezervácia</span>
+                        <span class="header-text">Súhrn rezervácie</span>
                         <span class="toggle-button" :class="step !== 5 ? 'active' : ''">
                             {!! main()->assets()->svg("icons/reservation/icon-arrow.svg") !!}
                         </span>
                     </div>
                     <div class="order" v-if="hasChosenServices()">
-                        <div class="img-container">
+                        {{--<div class="img-container">
                             <template v-if="chosenEmployee?.profile_picture">
                                 <img :src="chosenEmployee.profile_picture" :alt="chosenEmployee.first_name">
                             </template>
@@ -150,7 +150,7 @@
                             <template v-else>
                                 {!! main()->assets()->svg("icons/reservation/icon-question_mark.svg", ['class'=> ['unknown_icon']]) !!}
                             </template>
-                        </div>
+                        </div>--}}
                         <div class="info">
                             <div class="name-price-container">
                                 <div class="name">@{{ chosenEmployee?.first_name ?? "Pracovníčka" }}</div>

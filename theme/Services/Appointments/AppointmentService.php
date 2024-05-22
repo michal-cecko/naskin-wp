@@ -171,7 +171,7 @@ class AppointmentService
         return $appointment;
     }
 
-    private static function generateCancelToken(): string
+    public static function generateCancelToken(): string
     {
         do {
             $token = Str::random(12);
@@ -423,6 +423,7 @@ class AppointmentService
             ->where("status", AppointmentStatus::OK)
             ->where("type", AppointmentType::RESERVATION)
             ->whereDate('start_at', '<=', Carbon::now()->addDay()->toDateString())
+            ->whereDate('start_at', '>', Carbon::now()->subDay()->toDateString())
             ->get();
 
         if(!$appointments->count()) {

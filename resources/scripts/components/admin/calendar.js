@@ -492,7 +492,7 @@ class ReservationCalendar extends Commons {
                                         id: ID,
                                         type: appointment.type,
                                         note: appointment.note,
-                                        services: appointment.services.map((appService => this.services[appService.service_id])) ?? {},
+                                        services: appointment.services?.map((appService => this.services[appService.service_id])) ?? {},
                                         employee: appointment.employee,
                                         employeeID: appointment.employeeID,
                                         customer: appointment.customer ?? null,

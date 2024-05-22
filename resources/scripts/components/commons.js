@@ -66,10 +66,10 @@ export default class Commons {
 
         let formattedTime = '';
         if (hours > 0) {
-            formattedTime += hours + 'h ';
+            formattedTime += hours + 'h';
         }
         if (mins > 0 || (hours === 0 && mins === 0)) {
-            formattedTime += mins + 'm';
+            formattedTime += (formattedTime.length ? " " : "") + mins + 'min';
         }
 
         return formattedTime.trim();
