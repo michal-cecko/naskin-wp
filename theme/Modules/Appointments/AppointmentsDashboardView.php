@@ -113,7 +113,7 @@ class AppointmentsDashboardView
         if( $this->currentUser?->role !== 'employee') {
             $arr = Employee::all();
         } else {
-            $arr = [Employee::where($this->currentUser?->id)->first()];
+            $arr = [Employee::where("ID", $this->currentUser?->id)->first()];
         }
 
         $employeesFinal = collect([]);

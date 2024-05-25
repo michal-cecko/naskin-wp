@@ -34,8 +34,8 @@ class Ics
             $endDateTime->modify('-2 hours');
         } else {
             // If it's not summer time, adjust for -1 hour
-            $startDateTime->modify('-1 hour');
-            $endDateTime->modify('-1 hour');
+            $startDateTime->modify('-2 hour');
+            $endDateTime->modify('-2 hour');
         }
 
         $start = $startDateTime->format('Ymd\THis\Z');

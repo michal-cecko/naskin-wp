@@ -47,11 +47,11 @@ class AdminAppointments {
             $appointment = AppointmentService::createReservation(
                 employeeID: $data['employeeID'],
                 startAt: Carbon::parse($data['date']['start']),
-                endAt: Carbon::parse($data['date']['end']),
                 customer: $data['customer'],
+                endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
                 services: $services,
-                notifyCustomer: $data['notify'] === 1,
+                notifyCustomer: $data['notify'],
                 notifyEmployee: false,
             );
 
@@ -84,7 +84,7 @@ class AdminAppointments {
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
                 services: $services,
-                notifyCustomer: $data['notify'] === 1,
+                notifyCustomer: $data['notify'],
             );
 
         } else {
@@ -98,7 +98,7 @@ class AdminAppointments {
 
         }
 
-        wp_send_json_success(['message' => 'Termín bol úspešne upravený.', 'appointment' => $appointment, 'type' => $data['type']]);
+        wp_send_json_success(['message' => 'Termín bol úspešne upravený.', 'id' => $appointment->id]);
     }
 
 

@@ -209,9 +209,6 @@ class ReservationCalendar extends Commons {
                             let view = info.view.type;
                             let props = event.extendedProps;
 
-                            console.log(props)
-                            console.log("aaa")
-
                             let html = '<div class="event-content-container ' + view + '"><div class="time">' + moment(event.start).format('HH:mm') + ' - ' + moment(event.end).format('HH:mm') + '</div>';
                             html += '<div class="title">' + event.title + '</div>';
 
@@ -243,8 +240,6 @@ class ReservationCalendar extends Commons {
                                 html += '<div class="note">' + note + '</div>';
                             }
                             html += '</div>';
-
-                            console.log(html)
 
                             return {
                                 html: html,
@@ -299,28 +294,10 @@ class ReservationCalendar extends Commons {
 
                 async createAppointment() {
 
-                    if(!this.appointment.datetime.end) {
-                        _thisClass.notify("Zadajte koniec služby.", "error")
-                        return;
-                    }
-
-                    if(!this.appointment.datetime.start) {
-                        _thisClass.notify("Zadajte začiatok služby.", "error")
-                        return;
-                    }
-
-                    if(this.appointment.type !== "free" && this.appointment.services.length === 0) {
-                        _thisClass.notify("Vyberte aspoň jednu službu.", "error")
-                        return;
-                    }
-
-                    if( this.appointment.type !== "free" && !this.appointment.customer?.id && (!this.appointment.customer?.email || !this.appointment.customer?.name) ) {
-                        _thisClass.notify("Vyberte zákazníka alebo zadajte údaje nového.", "error")
-                        return;
-                    }
+                    if(!this.checkErrors()) return;
 
                     let body = {
-                        notify: this.notify ? 1 : 0,
+                        notify: !!this.notify,
                         employeeID: parseInt(this.chosenEmployeeInForms),
                         date: {
                             start: this.appointment.datetime.start,
@@ -355,10 +332,10 @@ class ReservationCalendar extends Commons {
                                 extendedProps: {
                                     id: response.data.id,
                                     type: this.appointment.type,
-                                    note: this.appointment.note,
+                                    note: this.appointment.note ?? null,
                                     services: this.appointment.services,
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
-                                    employeeID: this.employeeID,
+                                    employeeID: this.appointment.employeeID,
                                     customer: this.appointment.customer,
                                 },
                                 color: this.getActiveColor(),
@@ -377,12 +354,43 @@ class ReservationCalendar extends Commons {
                     return true;
                 },
 
+                checkErrors() {
+                    if(!this.appointment.datetime.end) {
+                        _thisClass.notify("Zadajte koniec služby.", "error")
+                        return false;
+                    }
+
+                    if(!moment(this.appointment.datetime.end).isAfter(this.appointment.datetime.start)) {
+                        _thisClass.notify("Koniec služby musí byť neskôr ako začiatok!", "error")
+                        return false;
+                    }
+
+                    if(!this.appointment.datetime.start) {
+                        _thisClass.notify("Zadajte začiatok služby.", "error")
+                        return false;
+                    }
+
+                    if(this.appointment.type !== "free" && this.appointment.services.length === 0) {
+                        _thisClass.notify("Vyberte aspoň jednu službu.", "error")
+                        return false;
+                    }
+
+                    if( this.appointment.type !== "free" && !this.appointment.customer?.id && (!this.appointment.customer?.email || !this.appointment.customer?.name) ) {
+                        _thisClass.notify("Vyberte zákazníka alebo zadajte údaje nového.", "error")
+                        return false;
+                    }
+
+                    return true;
+                },
+
                 async editAppointment() {
                     if (!this.editingAppointment) return;
 
+                    if(!this.checkErrors()) return;
+
                     let data = {
                         id: this.editingAppointment.extendedProps.id,
-                        notify: this.notify,
+                        notify: !!this.notify,
                         type: this.appointment.type,
                         date: {
                             start: this.appointment.datetime.start,
@@ -406,8 +414,6 @@ class ReservationCalendar extends Commons {
                                 return false;
                             }
 
-                            let responseData = response.data
-
                             this.editingAppointment.remove();
                             this.editingAppointment = null;
 
@@ -416,20 +422,19 @@ class ReservationCalendar extends Commons {
                                 start: this.appointment.datetime.start,
                                 end: this.appointment.datetime.end,
                                 extendedProps: {
-                                     id: responseData.appointment.id,
+                                    id: response.data.id,
                                     type: this.appointment.type,
-                                    note: this.appointment.note,
-                                    services: responseData.services?.length ? responseData.services.map((item) => {
-                                        item.id, item.title, item.price, item.duration, item.category_id}) : {},
+                                    note: this.appointment.note ?? null,
+                                    services: this.appointment.services?.map((appService => this.services[appService])),
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
-                                    employeeID: responseData.employee_id ?? this.chosenEmployeeInForms,
-                                    customer: this.appointment.customer ?? {},
+                                    employeeID: this.appointment.employeeID,
+                                    customer: this.appointment.customer,
                                 },
                                 color: this.getActiveColor(),
                                 textColor: '#ffffff'
                             }
 
-                            console.log(responseData, event)
+                            console.log("edited : ", event, this.appointment)
 
                             this.calendar.addEvent(event);
 
@@ -444,7 +449,7 @@ class ReservationCalendar extends Commons {
                 async removeAppointment() {
                     let data = {
                         id: this.appointmentToDelete.extendedProps.id,
-                        notify: this.notify,
+                        notify: !!this.notify,
                     }
 
                     this.buttonLoader = true;
@@ -649,6 +654,8 @@ class ReservationCalendar extends Commons {
                 setServiceList() {
                     const filteredObj = {};
 
+                    console.log("CHOSEN EMP: " + this.chosenEmployeeInForms, this.employees?.[this.chosenEmployeeInForms], this.employees)
+
                     let allowedServices = this.employees?.[this.chosenEmployeeInForms]?.allowed_services ?? null;
 
                     if (allowedServices) {
@@ -664,7 +671,8 @@ class ReservationCalendar extends Commons {
             },
             watch: {
                 chosenEmployeeInForms(newID) {
-                    console.log("NEW EMP: " + newID)
+                    if(!newID) return;
+
                     this.setServiceList()
                 },
                 'appointment.services'(newServices) {

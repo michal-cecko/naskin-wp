@@ -17,6 +17,8 @@ abstract class AppointmentEmail extends Mailable
 
         $address = config("appointments.address");
         $this->address = "{$address['street']}, {$address['zip']} {$address['city']}";
+
+        $this->setup();
     }
 
     public function data(): array

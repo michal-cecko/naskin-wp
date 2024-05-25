@@ -43,7 +43,9 @@
         @show
     </div>
 
-    @include("parts.appointments.appointment-form")
+    @if(!get_field("hide_reservations", "option"))
+        @include("parts.appointments.appointment-form")
+    @endif
 
     @section('content')
         @yield('content')
