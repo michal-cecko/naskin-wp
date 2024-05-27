@@ -80,6 +80,7 @@ class AdminAppointments {
 
             $appointment = AppointmentService::updateReservation(
                 appointment: (int)$data['id'],
+                employee: (int)$data['employeeID'],
                 startAt: Carbon::parse($data['date']['start']),
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
@@ -136,7 +137,7 @@ class AdminAppointments {
         $appointments = Appointment::where(function ($query) use ($dateToFetchFrom, $dateToFetchTo) {
             $query->whereBetween("start_at", [$dateToFetchFrom, $dateToFetchTo])
                 ->orWhereBetween("end_at", [$dateToFetchFrom, $dateToFetchTo]);
-        })->where("status", AppointmentStatus::OK)->when($data['employeeID'] > 0, function ($query) use ($data) {
+        })->where("status", AppointmentStatus::OK)->when(intval($data['employeeID']) > 0, function ($query) use ($data) {
             $query->where("employee_id", $data['employeeID']);
         })->with(["employee", 'services.service', 'customer'])->get();
 

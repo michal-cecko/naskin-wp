@@ -18,7 +18,7 @@
                          :class="appointment.type === 'reservation' ? 'col-md-6' : ''">
                         <div class="field-container mb-3">
                             <label for="type">Pracovník</label>
-                            <select v-model="chosenEmployeeInForms" class="form-control" id="type" disabled>
+                            <select v-model="chosenEmployeeInForms" class="form-control" id="type">
                                 <option v-for="employee in employees" :value="employee.id"
                                         v-html="employee.name"></option>
                             </select>

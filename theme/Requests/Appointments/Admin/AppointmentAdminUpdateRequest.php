@@ -17,6 +17,8 @@ class AppointmentAdminUpdateRequest extends AuthenticatedAdminRequest {
         return [
             'id' => ['required', 'integer', new Exists("appointments", "id")],
 
+            'employeeID' => ['required', 'integer', new Exists("users", "ID")],
+
             'date' => 'required|array',
             'date.start' => 'required|date',
             'date.end' => 'required|date',

@@ -87,9 +87,10 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function updateReservation(Appointment|int $appointment, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], bool $notifyCustomer = false): ?Appointment
+    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], bool $notifyCustomer = false): ?Appointment
     {
         $eager = ["services", "customer"];
+
         if(is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->with($eager)->first();
             if(!$appointment) return null;
@@ -97,8 +98,13 @@ class AppointmentService
             $appointment->load($eager);
         }
 
+        if(is_int($employee)) {
+            $employee = Employee::where("id", $employee)->first();
+            if(!$employee) return null;
+        }
 
         $appointment->update([
+            'employee_id' => $employee->ID,
             'start_at' => $startAt,
             'end_at' => $endAt,
             'note' => $note,
@@ -233,7 +239,10 @@ class AppointmentService
 
         $adminEmail = get_field('reservations_email', 'option');
 
-        return main()->mail()->send($mailable, $email, !empty($adminEmail) ? [$adminEmail] : []);
+        $adminSent = empty($adminEmail) || main()->mail()->send($mailable, $adminEmail);
+        $employeeSent = main()->mail()->send($mailable, $email);
+
+        return $adminSent && $employeeSent;
     }
 
     public static function getAvailableDates(Collection $services, string|Employee $employee = "ANY"): Collection

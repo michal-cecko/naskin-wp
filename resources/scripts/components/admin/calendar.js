@@ -389,6 +389,7 @@ class ReservationCalendar extends Commons {
                     if(!this.checkErrors()) return;
 
                     let data = {
+                        employeeID: parseInt(this.chosenEmployeeInForms),
                         id: this.editingAppointment.extendedProps.id,
                         notify: !!this.notify,
                         type: this.appointment.type,
