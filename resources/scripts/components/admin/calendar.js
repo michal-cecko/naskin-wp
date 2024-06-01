@@ -21,57 +21,59 @@ class ReservationCalendar extends Commons {
         let _Vue = Vue
         let _thisClass = this
 
-        Vue.directive('click-outside', {
-            bind: function (el, binding, vnode) {
+        const clickOutsideDirective = {
+            beforeMount(el, binding, vnode) {
                 el.clickOutsideEvent = function (event) {
-                    if (!(el == event.target || el.contains(event.target))) {
-                        console.log("clicked out")
-                        vnode.context[binding.expression](event);
+                    if (!(el === event.target || el.contains(event.target))) {
+                        binding.value(event);
                     }
                 };
                 document.body.addEventListener('click', el.clickOutsideEvent);
             },
-            unbind: function (el) {
+            unmounted(el) {
                 document.body.removeEventListener('click', el.clickOutsideEvent);
             }
-        });
+        };
 
-        new _Vue({
-            el: '#calendarContainer',
-            data: {
-                calendar: null,
+        const {createApp} = Vue;
+        const app = createApp({
+            data() {
+                return {
+                    calendar: null,
 
-                //Data needed to create appointment
-                appointment: {},
-                freeAppColor: "#0b99a6",
-                serviceColors: {},
-                serviceDurations: {},
-                services: {},
+                    // Data needed to create appointment
+                    appointment: {},
+                    freeAppColor: "#0b99a6",
+                    serviceColors: {},
+                    serviceDurations: {},
+                    services: {},
 
-                createModal: null,
-                editModal: null,
-                editingAppointment: null,
+                    visibleCreateModal: false,
+                    visibleEditModal: false,
+                    visibleDeleteModal: false,
 
-                deleteModal: null,
-                appointmentToDelete: null,
+                    editingAppointment: null,
 
-                loggedInEmployee: {},
-                chosenEmployeeOnView: null,
-                chosenEmployeeInForms: null,
-                employees: null,
-                employeeServices: {},
+                    appointmentToDelete: null,
 
-                buttonLoader: false,
+                    loggedInEmployee: {},
+                    chosenEmployeeOnView: null,
+                    chosenEmployeeInForms: null,
+                    employees: null,
+                    employeeServices: [],
 
-                dateRange: {start: null, end: null},
-                customers: {},
-                customerSearchQuery: "",
-                shownOptions: false,
-                debounceTimer: null,
+                    buttonLoader: false,
 
-                notify: false,
+                    dateRange: { start: null, end: null },
+                    customers: {},
+                    customerSearchQuery: "",
+                    shownOptions: false,
+                    debounceTimer: null,
 
-                hasInit: false,
+                    notify: false,
+
+                    hasInit: false,
+                };
             },
             created() {
                 console.log(`Calendar Vue component has been created.`)
@@ -81,10 +83,6 @@ class ReservationCalendar extends Commons {
             mounted() {
                 let pageData = document.getElementById('page-data')?.dataset ?? {}
                 this.loggedInEmployee = document.getElementById('logged-user')?.dataset ?? {}
-
-                this.createModal = new bootstrap.Modal(document.getElementById('createAppointmentModal'))
-                this.editModal = new bootstrap.Modal(document.getElementById('editAppointmentModal'))
-                this.deleteModal = new bootstrap.Modal(document.getElementById('deleteAppointmentModal'))
 
                 let employees = JSON.parse(pageData?.employees)
                 this.employees = Object.assign({}, employees);
@@ -138,13 +136,11 @@ class ReservationCalendar extends Commons {
                         locale: skLocale,
                         nowIndicator: true,
                         select: function (info) {
-                            // Show the modal
-                            //_thisVue.resetModals()
                             _thisVue.$set(_thisVue.appointment, 'datetime', {
                                 start: moment(info.start).format("YYYY-MM-DD HH:mm:ss"),
                                 end: moment(info.end).format("YYYY-MM-DD HH:mm:ss"),
                             });
-                            _thisVue.createModal.show();
+                            _thisVue.visibleCreateModal = true;
                         },
                         longPressDelay: longPressDelay,
                         editable: false,
@@ -199,7 +195,7 @@ class ReservationCalendar extends Commons {
                                     _thisVue.resetAppointmentToDeleteVariable()
                                     _thisVue.appointmentToDelete = info.event
                                     console.log(_thisVue.appointmentToDelete)
-                                    _thisVue.deleteModal.show();
+                                    _thisVue.visibleDeleteModal = true;
                                 });
                             }
                         },
@@ -251,7 +247,7 @@ class ReservationCalendar extends Commons {
                             }
                             _thisVue.editingAppointment = info.event;
                             _thisVue.loadEditModal(info.event);
-                            _thisVue.editModal.show();
+                            _thisVue.visibleEditModal = true;
                         },
                         eventDrop: false,
                         eventResize: false,
@@ -307,6 +303,7 @@ class ReservationCalendar extends Commons {
                     }
 
                     if (this.appointment.type !== "free") {
+                        body.source = this.appointment.source
                         body.services = this.appointment.services
                         body.customer = this.appointment.customer
                         body.note = this.appointment.note
@@ -331,6 +328,7 @@ class ReservationCalendar extends Commons {
                                 end: this.appointment.datetime.end,
                                 extendedProps: {
                                     id: response.data.id,
+                                    source: this.appointment.source,
                                     type: this.appointment.type,
                                     note: this.appointment.note ?? null,
                                     services: this.appointment.services,
@@ -342,11 +340,9 @@ class ReservationCalendar extends Commons {
                                 textColor: '#ffffff'
                             }
 
-                            console.log(ev);
-
                             this.calendar.addEvent(ev);
 
-                            this.createModal.hide();
+                            this.visibleCreateModal = false;
                             this.resetModals()
                         });
 
@@ -400,6 +396,7 @@ class ReservationCalendar extends Commons {
                     }
 
                     if (this.appointment.type !== "free") {
+                        data.source = this.appointment.source
                         data.services = this.appointment.services
                         data.note = this.appointment.note
                     }
@@ -424,6 +421,7 @@ class ReservationCalendar extends Commons {
                                 end: this.appointment.datetime.end,
                                 extendedProps: {
                                     id: response.data.id,
+                                    source: this.appointment.source,
                                     type: this.appointment.type,
                                     note: this.appointment.note ?? null,
                                     services: this.appointment.services?.map((appService => this.services[appService])),
@@ -440,7 +438,7 @@ class ReservationCalendar extends Commons {
                             this.calendar.addEvent(event);
 
                             this.buttonLoader = false;
-                            this.editModal.hide();
+                            this.visibleEditModal = false;
                             this.resetModals()
 
                             return true;
@@ -466,7 +464,7 @@ class ReservationCalendar extends Commons {
                             }
 
                             this.appointmentToDelete.remove()
-                            this.deleteModal.hide();
+                            this.visibleDeleteModal = false;
                             this.notify = false;
                         });
                 },
@@ -499,6 +497,7 @@ class ReservationCalendar extends Commons {
                                     end: moment(appointment.datetime.to, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DDTHH:mm:ss"),
                                     extendedProps: {
                                         id: ID,
+                                        source: appointment.source,
                                         type: appointment.type,
                                         note: appointment.note,
                                         services: appointment.services?.map((appService => this.services[appService.service_id])) ?? {},
@@ -614,6 +613,7 @@ class ReservationCalendar extends Commons {
                         customer: {},
                         datetime: {},
                         type: "reservation",
+                        source: "phone",
                         services: [],
                     }
                 },
@@ -653,22 +653,25 @@ class ReservationCalendar extends Commons {
                     return duration
                 },
 
-                setServiceList() {
-                    const filteredObj = {};
+                serviceOptionLabel(service) {
+                    return `${service.title} / ${service.duration}min / ${service.price}€`;
+                },
 
-                    console.log("CHOSEN EMP: " + this.chosenEmployeeInForms, this.employees?.[this.chosenEmployeeInForms], this.employees)
+                setServiceList() {
+                    const filteredArr = [];
 
                     let allowedServices = this.employees?.[this.chosenEmployeeInForms]?.allowed_services ?? null;
 
                     if (allowedServices) {
                         for (const key in this.services) {
                             if ((allowedServices).includes(parseInt(key))) {
-                                filteredObj[key] = this.services[key];
+                                filteredArr.push(this.services[key]);
+                                console.log("added", this.services[key])
                             }
                         }
                     }
 
-                    this.employeeServices = filteredObj;
+                    this.employeeServices = filteredArr;
                 }
             },
             watch: {
@@ -695,6 +698,16 @@ class ReservationCalendar extends Commons {
                 }
             }
         });
+        app.use(primevue.config.default);
+        app.directive("click-outside", clickOutsideDirective);
+
+        app.component('p-datepicker', primevue.calendar);
+        app.component('p-multiselect', primevue.multiselect);
+        app.component('p-input-text', primevue.inputtext);
+        app.component('p-dialog', primevue.dialog);
+        app.component('p-confirmdialog', primevue.confirmdialog);
+
+        app.mount("#calendarContainer");
     }
 
     _prepareAutoRefresh() {

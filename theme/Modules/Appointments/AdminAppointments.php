@@ -51,6 +51,7 @@ class AdminAppointments {
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
                 services: $services,
+                source: $data['source'],
                 notifyCustomer: $data['notify'],
                 notifyEmployee: false,
             );

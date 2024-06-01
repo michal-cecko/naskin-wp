@@ -6,7 +6,6 @@ use Saurus\App\Modules\Wordpress\Posts\PostType;
 
 class Customer extends PostType
 {
-
     public function getNameAttribute() : string {
         return $this->title;
     }

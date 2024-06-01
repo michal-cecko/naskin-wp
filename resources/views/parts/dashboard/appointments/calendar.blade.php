@@ -35,8 +35,8 @@
             <div></div>
         @endif
 
-        <div class="buttons-wrapper ml-auto d-flex align-items-center flex-wrap">
-            <button type="button" class="btn btn-primary" @click="createModal.show()">Pridať termín</button>
+        <div class="buttons-wrapper">
+            <button type="button" class="button button-primary button-large" @click="visibleCreateModal = true">Pridať termín</button>
         </div>
 
     </div>
@@ -45,9 +45,9 @@
 
     @include("parts.dashboard.appointments.modals.appointment-create-modal", ['services' => $services['service_categories']])
 
-    @include("parts.dashboard.appointments.modals.appointment-edit-modal", ['services' => $services['service_categories']])
+    {{--@include("parts.dashboard.appointments.modals.appointment-edit-modal", ['services' => $services['service_categories']])--}}
 
-    @include("parts.dashboard.appointments.modals.appointment-delete-modal")
+    {{--@include("parts.dashboard.appointments.modals.appointment-delete-modal")--}}
 </div>
 
 

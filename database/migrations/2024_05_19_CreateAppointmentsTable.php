@@ -1,6 +1,8 @@
 <?php
 
 use DeliciousBrains\WPMigrations\Database\AbstractMigration;
+use Theme\Enum\AppointmentSource;
+use Theme\Enum\AppointmentStatus;
 
 class CreateAppointmentsTable extends AbstractMigration {
 
@@ -22,6 +24,7 @@ class CreateAppointmentsTable extends AbstractMigration {
             $table->string('cancel_token')->nullable()->default(null);
             $table->boolean('has_been_reminded')->default(false);
             $table->string('status');
+            $table->string('source')->nullable()->default(null);
             $table->timestamps();
         });
 	}

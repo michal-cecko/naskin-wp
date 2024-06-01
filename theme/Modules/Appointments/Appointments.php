@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Exception;
 use Saurus\App\Enums\ApiMethod;
 use Saurus\App\Traits\Validation;
+use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentType;
 use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Service;
@@ -67,6 +68,7 @@ class Appointments
             customer: $data['customer'],
             note: $data['note'] ?? null,
             services: $services,
+            source: AppointmentSource::WEB,
             notifyCustomer: true,
             notifyEmployee: true
         );

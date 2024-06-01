@@ -5,6 +5,7 @@ namespace Theme\Models\Appointment;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Saurus\App\Modules\Wordpress\Models\Model;
+use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
 use Theme\PostTypes\Customer;
@@ -25,11 +26,13 @@ class Appointment extends Model
         'cancel_token',
         'has_been_reminded',
         'status',
+        'source',
     ];
 
     protected $casts = [
         'type' => AppointmentType::class,
         'status' => AppointmentStatus::class,
+        'source' => AppointmentSource::class,
         'start_at' => "datetime",
         'end_at' => "datetime",
     ];

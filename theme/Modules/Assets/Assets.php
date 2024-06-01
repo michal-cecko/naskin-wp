@@ -48,10 +48,9 @@ class Assets extends SaurusAssets
 
         wp_enqueue_script(handle: 'general-js', src: $this->dynamic('scripts/general.js'), ver: $this->ver);
 
-        wp_enqueue_script('vue-js', 'https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js');
-        wp_enqueue_script('moment-js', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
-        wp_enqueue_script('moment-js-locale', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/sk.min.js');
-        wp_enqueue_script('lordicon-js', 'https://cdn.lordicon.com/libs/mssddfmo/lord-icon-2.1.0.js');
+        $this->enqueueVue();
+        $this->enqueueMomentJS();
+        $this->enqueueLordicon();
 
         wp_enqueue_script(handle: 'reservation-js', src: $this->dynamic('scripts/components/reservation-form.js'), ver: $this->ver);
         wp_enqueue_script(handle: 'header-js', src: $this->dynamic('scripts/components/header.js'), ver: $this->ver);
@@ -77,23 +76,50 @@ class Assets extends SaurusAssets
     {
         $this->enqueueCommonsScript();
 
-        wp_enqueue_style('bootstrap-css', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css', FALSE, time());
-        wp_enqueue_script('bootstrap-js', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js');
-
-        wp_enqueue_script('vue-js', 'https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js');
-        wp_enqueue_script('moment-js', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
-        wp_enqueue_script('moment-js-locale', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/sk.min.js');
+        $this->enqueueVue();
+        $this->enqueueMomentJS();
+        $this->enqueueLordicon();
+        $this->enqueuePrimevue();
 
         wp_enqueue_script(handle: 'admin-js', src: $this->dynamic('scripts/admin.js'), ver: $this->ver);
         wp_enqueue_script(handle: 'calendar-js', src: $this->dynamic('scripts/components/admin/calendar.js'), ver: $this->ver);
         wp_enqueue_style(handle: 'admin-scss', src: $this->dynamic('styles/admin/admin.scss'), ver: $this->ver);
         wp_enqueue_style(handle: 'calendar-scss', src: $this->dynamic('styles/admin/calendar.scss'), ver: $this->ver);
 
-        wp_enqueue_script('lordicon-js', 'https://cdn.lordicon.com/libs/mssddfmo/lord-icon-2.1.0.js');
 
         if( in_array($this->user?->role, ['together-employee', 'employee']) ){
             wp_enqueue_style(handle: 'employee_role_dashboard-scss', src: $this->dynamic('styles/admin/employee_role_dashboard.scss'), ver: $this->ver);
         }
+    }
+
+
+
+
+
+    // Helpers
+
+    private function enqueueVue() : void {
+        wp_enqueue_script('vue-js', 'https://unpkg.com/vue@3/dist/vue.global.js');
+    }
+
+    private function enqueueMomentJS() : void {
+        wp_enqueue_script('moment-js', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
+        wp_enqueue_script('moment-js-locale', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/sk.min.js');
+    }
+
+    private function enqueueLordicon() : void {
+        wp_enqueue_script('lordicon-js', 'https://cdn.lordicon.com/libs/mssddfmo/lord-icon-2.1.0.js');
+    }
+
+    private function enqueuePrimevue() : void {
+        wp_enqueue_script('primevue-js', 'https://unpkg.com/primevue/core/core.min.js');
+        wp_enqueue_style('primevue-theme-css', 'https://unpkg.com/primevue/resources/themes/lara-light-blue/theme.css');
+
+        wp_enqueue_script('pvc-confirm-dialog', 'https://unpkg.com/primevue/confirmdialog/confirmdialog.min.js');
+        wp_enqueue_script('pvc-dialog', 'https://unpkg.com/primevue/dialog/dialog.min.js');
+        wp_enqueue_script('pvc-input-text', 'https://unpkg.com/primevue/inputtext/inputtext.min.js');
+        wp_enqueue_script('pvc-multiselect', 'https://unpkg.com/primevue/multiselect/multiselect.min.js');
+        wp_enqueue_script('pvc-datepicker', 'https://unpkg.com/primevue/calendar/calendar.min.js');
     }
 }
 

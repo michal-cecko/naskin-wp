@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Theme\Enum\AppointmentEmailType;
+use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
 
@@ -28,7 +29,7 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
+    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
     {
 
         if (empty($customer['id'])) {
@@ -51,6 +52,7 @@ class AppointmentService
             'break' => AppointmentService::getBreakForDuration($duration),
             'customer_id' => $customer->id,
             'note' => $note,
+            'source' => $source,
             'status' => AppointmentStatus::OK,
             'type' => AppointmentType::RESERVATION,
             'cancel_token' => self::generateCancelToken()
