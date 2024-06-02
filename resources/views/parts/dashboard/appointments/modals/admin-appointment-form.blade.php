@@ -58,7 +58,7 @@
         <div class="field-container">
             <label for="start">Začiatok</label>
             <p-datepicker v-model="appointment.datetime.start" show-time hour-format="24"
-                          date-format="dd/mm/yyyy"
+                          date-format="dd/mm/yy"
                           placeholder="Vyberte začiatok"></p-datepicker>
         </div>
     </div>
@@ -66,7 +66,7 @@
         <div class="field-container">
             <label for="end">Koniec</label>
             <p-datepicker v-model="appointment.datetime.end" show-time hour-format="24"
-                          date-format="dd/mm/yyyy"
+                          date-format="dd/mm/yy"
                           placeholder="Vyberte koniec"></p-datepicker>
         </div>
     </div>

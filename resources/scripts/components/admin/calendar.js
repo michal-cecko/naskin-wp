@@ -219,12 +219,16 @@ class ReservationCalendar extends Commons {
 
                             let empl = _thisVue.employees[props.employeeID]?.name ?? props.employee ?? null
                             if (_thisVue.chosenEmployeeOnView === -1) {
-                                if (empl) html += '<div class="employee">Vybaví: ' + empl + '</div>';
+                                if (empl) {
+                                    if(props.type === "free") {
+                                        html += '<div class="employee">Vybaví: ' + empl + '</div>';
+                                    } else {
+                                        html += '<div class="employee">' + empl + '</div>';
+                                    }
+                                }
                             }
 
-                            if (props.type === "free") {
-
-                            } else {
+                            if (props.type === "reservation") {
                                 html += '<div class="service">' + props.services.map((item) =>item?.title).join(", ") + '</div>';
                                 if (view === "timeGridWeek") {
                                 }
@@ -237,6 +241,7 @@ class ReservationCalendar extends Commons {
                                     html += '</div>';
                                 }
                             }
+
                             if (props.note) {
                                 let note = props.note
                                 if (note.length > 30 && view === "timeGridWeek") {
@@ -345,7 +350,7 @@ class ReservationCalendar extends Commons {
                                     employeeID: this.appointment.employeeID,
                                     customer: this.appointment.customer,
                                 },
-                                color: this.getActiveColor(),
+                                color: this.getActiveColor(this.employees?.[this.chosenEmployeeInForms]),
                                 textColor: '#ffffff'
                             }
 
@@ -442,7 +447,7 @@ class ReservationCalendar extends Commons {
                                     employeeID: this.appointment.employeeID,
                                     customer: this.appointment.customer,
                                 },
-                                color: this.getActiveColor(),
+                                color: this.getActiveColor(this.employees?.[this.chosenEmployeeInForms]),
                                 textColor: '#ffffff'
                             }
 
@@ -502,7 +507,7 @@ class ReservationCalendar extends Commons {
                                     title = appointment.customer.name
                                 }
 
-                                console.log(appointment)
+                                console.log(this.employees?.[appointment.employeeID], appointment.employeeID, appointment)
 
                                 appointments.push({
                                     title: title,
@@ -518,7 +523,7 @@ class ReservationCalendar extends Commons {
                                         employeeID: appointment.employeeID,
                                         customer: appointment.customer ?? null,
                                     },
-                                    color: this.getActiveColor(appointment.type, Object.values(appointment.services ?? {})[0]),
+                                    color: this.getActiveColor(this.employees?.[appointment.employeeID], appointment.type, Object.values(appointment.services ?? {})[0]),
                                     textColor: '#ffffff'
                                 })
                             }
@@ -645,7 +650,11 @@ class ReservationCalendar extends Commons {
                     this.appointmentToDelete = null
                 },
 
-                getActiveColor(appointmentType = null, service = null) {
+                getActiveColor(appointmentEmployee = null, appointmentType = null, service = null) {
+                    if (!appointmentEmployee) {
+                        appointmentEmployee = this.appointment.employee
+                    }
+
                     if (!appointmentType) {
                         appointmentType = this.appointment.type
                     }
@@ -654,9 +663,13 @@ class ReservationCalendar extends Commons {
                         service = Object.values(this.appointment.services)[0]
                     }
 
-                    console.log(service)
+                    if(appointmentType === "free") {
+                        console.log(service, appointmentType, appointmentEmployee)
 
-                    return appointmentType === "free" ? this.freeAppColor : this.serviceColors[service?.service_category_id]
+                        return appointmentEmployee?.vacation_color ?? this.freeAppColor
+                    }
+
+                    return this.serviceColors[service?.service_category_id];
                 },
 
                 getTotalDuration(serviceIDs, humanTime = false) {

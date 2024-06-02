@@ -123,9 +123,11 @@ class AppointmentsDashboardView
                 'id' => $employee->ID,
                 'name' => $employee->first_name,
                 'profileImage' => $employee->profile_picture,
-                'allowed_services' => $employee->allowed_service_ids
+                'allowed_services' => $employee->allowed_service_ids,
+                'vacation_color' => $employee->vacation_color
             ]);
         }
+
 
         return $employeesFinal;
     }

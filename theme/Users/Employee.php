@@ -8,7 +8,7 @@ class Employee extends User
 {
     public function getAllowedServiceIdsAttribute(): iterable
     {
-        $serviceIDs = get_field("services", "user_{$this->id}");
+        $serviceIDs = get_field("services", $this->acf_id);
 
         if(empty($serviceIDs)) {
             return [];
@@ -19,7 +19,7 @@ class Employee extends User
 
     public function getAllowedServicesAttribute(): iterable
     {
-        $serviceIDs = get_field("services", "user_{$this->id}");
+        $serviceIDs = get_field("services", $this->acf_id);
 
         if(empty($serviceIDs)) {
             return collect([]);
@@ -28,16 +28,20 @@ class Employee extends User
         return Service::whereIn("id", $serviceIDs)->get()->append(['price', 'duration']);
     }
 
+    public function getVacationColorAttribute() {
+        return get_field("vacation_color", $this->acf_id);
+    }
+
     public function getProfilePictureAttribute() : ?string {
-        return get_field("profile_image", "user_{$this->id}");
+        return get_field("profile_image", $this->acf_id);
     }
 
     public function getWorktimeAttribute() : array {
-        return get_field("worktime", "user_{$this->id}");
+        return get_field("worktime", $this->acf_id);
     }
 
     public function getLunchtimeAttribute() : array {
-        return get_field("lunchtime", "user_{$this->id}");
+        return get_field("lunchtime", $this->acf_id);
     }
 
     public static function getRole(): ?string
