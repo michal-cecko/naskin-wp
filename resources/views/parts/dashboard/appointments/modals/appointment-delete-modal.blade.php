@@ -16,7 +16,7 @@
                     <div class="appointmentToDelete" v-if="appointmentToDelete">
                         <div class="time">@{{ appointmentToDeleteDateFromToFormatted }}</div>
                         <div class="title" v-html="appointmentToDelete.title"></div>
-                        <div class="service">
+                        <div class="service" v-if="appointmentToDelete?.extendedProps?.type === 'reservation'">
                             @{{ appointmentToDeleteChosenServicesInlineText }}
                         </div>
                     </div>
@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="custom-dialog--footer">
-            <div class="field-container field-row" v-if="appointment.type === 'reservation'">
+            <div class="field-container field-row" v-if="appointmentToDelete?.type === 'reservation'">
                 <input v-model="notify" type="checkbox" class="form-control" id="notify" name="notify">
                 <label for="notify">Odoslať notifikáciu o zmazaní?</label>
             </div>

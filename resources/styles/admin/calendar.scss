@@ -52,6 +52,7 @@ $activeColor: #b1bb5b;
     }
 
     .fc-event {
+      overflow: hidden;
       .event-content-container {
         .title {
           font-weight: bold;

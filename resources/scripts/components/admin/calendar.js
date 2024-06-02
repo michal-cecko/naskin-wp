@@ -143,10 +143,13 @@ class ReservationCalendar extends Commons {
                         locale: skLocale,
                         nowIndicator: true,
                         select: function (info) {
+                            _thisVue.resetAppointmentVariable();
+
                             _thisVue.appointment.datetime = {
                                 start: moment(info.start, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.input),
                                 end: moment(info.end, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.input),
                             };
+
                             _thisVue.visibleCreateModal = true;
                         },
                         longPressDelay: longPressDelay,
@@ -693,7 +696,7 @@ class ReservationCalendar extends Commons {
                         }
                     }
 
-                    this.appointment.services = [];
+                    //this.appointment.services = [];
                     this.employeeServices = filteredArr;
                 },
             },
