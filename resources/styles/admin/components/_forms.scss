@@ -1,0 +1,52 @@
+@mixin inputStyles() {
+  border-color: #d1d5db !important;
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  color: #6b7280 !important;
+  max-width: unset !important;
+}
+
+.custom-select,
+.searchable-select > input,
+.custom-text-input {
+  @include inputStyles();
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+
+  &.field-row {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #414141;
+    margin-bottom: 0.3rem;
+  }
+}
+
+@layer primevue {
+  .p-component {
+    font-size: 0.9rem !important;
+  }
+  .p-multiselect .p-multiselect-label {
+   padding: 0.5rem 0.75rem !important;
+  }
+  .p-multiselect-filter-container {
+    > input {
+      @include inputStyles();
+    }
+  }
+  .p-multiselect-panel .p-multiselect-items .p-multiselect-item {
+    padding: 0.5rem 1.25rem !important;
+  }
+  .p-calendar {
+    > input {
+      @include inputStyles();
+    }
+  }
+}

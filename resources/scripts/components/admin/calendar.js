@@ -73,6 +73,13 @@ class ReservationCalendar extends Commons {
                     notify: false,
 
                     hasInit: false,
+
+                    dateFormat: {
+                        'input': 'DD/MM/YYYY HH:mm',
+                        'payload': 'YYYY-MM-DD HH:mm:ss',
+                        'table': 'YYYY-MM-DDTHH:mm:ss',
+                        'table_select': 'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ (z)',
+                    }
                 };
             },
             created() {
@@ -136,10 +143,10 @@ class ReservationCalendar extends Commons {
                         locale: skLocale,
                         nowIndicator: true,
                         select: function (info) {
-                            _thisVue.$set(_thisVue.appointment, 'datetime', {
-                                start: moment(info.start).format("YYYY-MM-DD HH:mm:ss"),
-                                end: moment(info.end).format("YYYY-MM-DD HH:mm:ss"),
-                            });
+                            _thisVue.appointment.datetime = {
+                                start: moment(info.start, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.input),
+                                end: moment(info.end, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.input),
+                            };
                             _thisVue.visibleCreateModal = true;
                         },
                         longPressDelay: longPressDelay,
@@ -194,7 +201,6 @@ class ReservationCalendar extends Commons {
                                 deleteButtonEl.addEventListener('click', function () {
                                     _thisVue.resetAppointmentToDeleteVariable()
                                     _thisVue.appointmentToDelete = info.event
-                                    console.log(_thisVue.appointmentToDelete)
                                     _thisVue.visibleDeleteModal = true;
                                 });
                             }
@@ -296,8 +302,8 @@ class ReservationCalendar extends Commons {
                         notify: !!this.notify,
                         employeeID: parseInt(this.chosenEmployeeInForms),
                         date: {
-                            start: this.appointment.datetime.start,
-                            end: this.appointment.datetime.end,
+                            start: moment(this.appointment.datetime.start, this.dateFormat.input).format(this.dateFormat.payload),
+                            end: moment(this.appointment.datetime.end, this.dateFormat.input).format(this.dateFormat.payload),
                         },
                         type: this.appointment.type === "free" ? "free" : "reservation",
                     }
@@ -324,8 +330,8 @@ class ReservationCalendar extends Commons {
 
                             let ev = {
                                 title: this.appointment.type === "free" ? "Voľno" : this.appointment.customer.name,
-                                start: this.appointment.datetime.start,
-                                end: this.appointment.datetime.end,
+                                start: moment(this.appointment.datetime.start, this.dateFormat.input).format(this.dateFormat.table),
+                                end: moment(this.appointment.datetime.end, this.dateFormat.input).format(this.dateFormat.table),
                                 extendedProps: {
                                     id: response.data.id,
                                     source: this.appointment.source,
@@ -356,7 +362,11 @@ class ReservationCalendar extends Commons {
                         return false;
                     }
 
-                    if (!moment(this.appointment.datetime.end).isAfter(this.appointment.datetime.start)) {
+                    const startTime = moment(this.appointment.datetime.start, this.dateFormat.input);
+                    const endTime = moment(this.appointment.datetime.end, this.dateFormat.input);
+
+                    console.log("comparing", startTime, endTime)
+                    if (!endTime.isAfter(startTime)) {
                         _thisClass.notify("Koniec služby musí byť neskôr ako začiatok!", "error")
                         return false;
                     }
@@ -390,8 +400,8 @@ class ReservationCalendar extends Commons {
                         notify: !!this.notify,
                         type: this.appointment.type,
                         date: {
-                            start: this.appointment.datetime.start,
-                            end: this.appointment.datetime.end,
+                            start: moment(this.appointment.datetime.start, this.dateFormat.input).format(this.dateFormat.payload),
+                            end: moment(this.appointment.datetime.end, this.dateFormat.input).format(this.dateFormat.payload),
                         },
                     }
 
@@ -417,8 +427,8 @@ class ReservationCalendar extends Commons {
 
                             let event = {
                                 title: this.appointment.type === "free" ? "Voľno" : this.appointment.customer.name,
-                                start: this.appointment.datetime.start,
-                                end: this.appointment.datetime.end,
+                                start: moment(this.appointment.datetime.start, this.dateFormat.input).format(this.dateFormat.table),
+                                end: moment(this.appointment.datetime.end, this.dateFormat.input).format(this.dateFormat.table),
                                 extendedProps: {
                                     id: response.data.id,
                                     source: this.appointment.source,
@@ -493,8 +503,8 @@ class ReservationCalendar extends Commons {
 
                                 appointments.push({
                                     title: title,
-                                    start: moment(appointment.datetime.from, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DDTHH:mm:ss"),
-                                    end: moment(appointment.datetime.to, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DDTHH:mm:ss"),
+                                    start: moment(appointment.datetime.from, this.dateFormat.payload).format(this.dateFormat.table),
+                                    end: moment(appointment.datetime.to, this.dateFormat.payload).format(this.dateFormat.table),
                                     extendedProps: {
                                         id: ID,
                                         source: appointment.source,
@@ -540,6 +550,7 @@ class ReservationCalendar extends Commons {
                         .then(response => response.json())
                         .then(response => {
                             this.customers = response.data;
+                            this.shownOptions = true
                         })
                 },
 
@@ -601,11 +612,11 @@ class ReservationCalendar extends Commons {
                     this.appointment.type = type
                     this.appointment.note = appToEdit.extendedProps.note
                     this.appointment.datetime = {
-                        start: moment(appToEdit.start).format("YYYY-MM-DD HH:mm:ss"),
-                        end: moment(appToEdit.end).format("YYYY-MM-DD HH:mm:ss"),
+                        start: moment(appToEdit.start).format(this.dateFormat.input),
+                        end: moment(appToEdit.end).format(this.dateFormat.input),
                     }
 
-                    console.log(appToEdit, this.appointment)
+                    console.log(appToEdit.end, moment(appToEdit.end).format(this.dateFormat.input))
                 },
 
                 resetAppointmentVariable() {
@@ -645,12 +656,23 @@ class ReservationCalendar extends Commons {
                     return appointmentType === "free" ? this.freeAppColor : this.serviceColors[service?.service_category_id]
                 },
 
-                getTotalDuration(serviceIDs) {
+                getTotalDuration(serviceIDs, humanTime = false) {
                     let duration = 0;
                     serviceIDs.forEach(id => {
                         duration += this.serviceDurations[id]
                     });
+                    if (humanTime) {
+                        duration = _thisClass.humanDurationFromMinutes(duration)
+                    }
                     return duration
+                },
+
+                getTotalPrice(serviceIDs) {
+                    let price = 0;
+                    serviceIDs.forEach(id => {
+                        price += this.services[id]?.price
+                    });
+                    return price
                 },
 
                 serviceOptionLabel(service) {
@@ -671,7 +693,42 @@ class ReservationCalendar extends Commons {
                         }
                     }
 
+                    this.appointment.services = [];
                     this.employeeServices = filteredArr;
+                },
+            },
+            computed: {
+                canChangeEmployeeOnView() {
+                    return this.chosenEmployeeOnView === -1 || this.loggedInEmployee.role === 'administrator'
+                },
+                appointmentToDeleteChosenServicesInlineText() {
+                    let services = this.appointmentToDelete.extendedProps.services ?? [];
+                    let toReturn = "";
+                    services.forEach((service) => {
+                        if(Number.isInteger(service)) {
+                            toReturn += this.services[service].title + ", ";
+                        } else {
+                            toReturn += service.title + ", ";
+                        }
+                    });
+                    return toReturn.slice(0, -2);
+                },
+                appointmentToDeleteDateFromToFormatted() {
+                    if (!this.appointmentToDelete) return "Niečo sa pokazilo.";
+
+                    const start = moment(this.appointmentToDelete.start, this.dateFormat.table);
+                    const end = moment(this.appointmentToDelete.end, this.dateFormat.table);
+
+                    const startDate = start.format(this.dateFormat.input);
+                    const endDate = end.format(this.dateFormat.input);
+
+                    if (start.isSame(end, 'day')) {
+                        // If the start and end dates are the same, return the start date and end time only
+                        return startDate + " - " + end.format('HH:mm');
+                    } else {
+                        // If the start and end dates are different, return both dates and times
+                        return startDate + " - " + endDate;
+                    }
                 }
             },
             watch: {
@@ -683,19 +740,16 @@ class ReservationCalendar extends Commons {
                 'appointment.services'(newServices) {
                     let start = this.appointment.datetime.start
                     if (start && this.appointment.type === "reservation") {
-                        this.appointment.datetime.end = moment(start, 'YYYY-MM-DD HH:mm:ss').add(this.getTotalDuration(newServices), "minutes").format("YYYY-MM-DD HH:mm:ss")
+                        this.appointment.datetime.end = moment(start, this.dateFormat.input).add(this.getTotalDuration(newServices), "minutes").format(this.dateFormat.input)
                     }
                 },
                 'appointment.datetime.start'(newStart) {
                     let start = newStart
                     let services = this.appointment?.services ?? [];
                     if (services.length && start && this.appointment.type === "reservation") {
-                        this.appointment.datetime.end = moment(start, 'YYYY-MM-DD HH:mm:ss').add(this.getTotalDuration(services), "minutes").format("YYYY-MM-DD HH:mm:ss")
+                        this.appointment.datetime.end = moment(start, this.dateFormat.input).add(this.getTotalDuration(services), "minutes").format(this.dateFormat.input)
                     }
                 },
-                'appointment.datetime'(newdaco) {
-                    console.log("NEW", newdaco)
-                }
             }
         });
         app.use(primevue.config.default);

@@ -7,7 +7,7 @@
     <input type="hidden" id="logged-user" data-id="{{$currentUser->id}}"
          data-name="{{$currentUser->first_name}}" data-role="{{$currentUser->role}}">
 
-    <div class="header-wrapper mb-3 d-flex align-items-center justify-content-between flex-wrap">
+    <div class="header-wrapper">
         @if($currentUser->role !== "employee")
             <div class="employees-toggler">
                 <div class="employee" @click="changeCurrentEmployeeView(-1)"
@@ -45,9 +45,9 @@
 
     @include("parts.dashboard.appointments.modals.appointment-create-modal", ['services' => $services['service_categories']])
 
-    {{--@include("parts.dashboard.appointments.modals.appointment-edit-modal", ['services' => $services['service_categories']])--}}
+    @include("parts.dashboard.appointments.modals.appointment-edit-modal", ['services' => $services['service_categories']])
 
-    {{--@include("parts.dashboard.appointments.modals.appointment-delete-modal")--}}
+    @include("parts.dashboard.appointments.modals.appointment-delete-modal")
 </div>
 
 

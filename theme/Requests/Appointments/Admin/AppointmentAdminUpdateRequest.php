@@ -5,6 +5,7 @@ namespace Theme\Requests\Appointments\Admin;
 use Illuminate\Validation\Rule;
 use Saurus\App\Rules\Exists;
 use Saurus\App\Rules\PostExists;
+use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentType;
 use Theme\PostTypes\Customer;
 use Theme\PostTypes\Service;
@@ -24,6 +25,8 @@ class AppointmentAdminUpdateRequest extends AuthenticatedAdminRequest {
             'date.end' => 'required|date',
 
             'type' => ['required', 'in:' . implode(",", AppointmentType::stringCases())],
+
+            'source' => ['nullable', 'sometimes', 'in:' . implode(",", AppointmentSource::stringCases())],
 
             'services' => ['sometimes', 'array'],
             'services.*' => ['required_if:services,array', 'integer', new PostExists(postModel: Service::class)],

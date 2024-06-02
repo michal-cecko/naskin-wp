@@ -1,0 +1,17 @@
+$red: #d23f40;
+.button{
+  transition: all 0.3s ease;
+  &.button-danger {
+    background: $red;
+    border-color: $red;
+    color: white;
+    @include hover() {
+      background: darken($red, 10%);
+      border-color: darken($red, 10%);
+      color: white;
+    }
+    &:focus {
+      box-shadow: 0 0 0 1px $red;
+    }
+  }
+}

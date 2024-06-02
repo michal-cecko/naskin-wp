@@ -7,6 +7,7 @@ use Carbon\CarbonInterface;
 use Exception;
 use Saurus\App\Enums\ApiMethod;
 use Saurus\App\Traits\Validation;
+use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
 use Theme\Models\Appointment\Appointment;
@@ -51,7 +52,7 @@ class AdminAppointments {
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
                 services: $services,
-                source: $data['source'],
+                source: AppointmentSource::getCaseFromValue($data['source']),
                 notifyCustomer: $data['notify'],
                 notifyEmployee: false,
             );

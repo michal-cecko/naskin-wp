@@ -109,7 +109,9 @@ xxl: 1600px
 }
 
 @mixin hover() {
-    &:hover{
-        @content
+    @media (hover: hover) {
+        &:hover{
+            @content
+        }
     }
 }

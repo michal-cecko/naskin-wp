@@ -5,17 +5,20 @@
     width: 100%;
   }
   .options{
+    z-index: 200;
     position: absolute;
     left: 0;
     top: 100%;
     width: 100%;
-    border-radius: 3px;
-    border: 1px solid #8c8f94;
     display: none;
     max-height: 10rem;
     overflow-y: auto;
     overflow-x: hidden;
     background: white;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    padding: 5px 10px !important;
+    color: #6b7280 !important;
     .option,
     .nothing{
       font-size: 0.9rem;
@@ -23,13 +26,14 @@
       min-height: 30px;
       line-height: 2;
       background: white;
-      border-bottom: 1px solid #8c8f94;
+      border-bottom: 1px solid #d1d5db;
       transition: all 0.15s ease;
       &:last-child{
         border-bottom: 0;
       }
     }
     .option{
+      cursor: pointer;
       @media(hover: hover) {
         &:hover{
           background: #f1f1f1;
