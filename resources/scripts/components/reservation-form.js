@@ -49,9 +49,10 @@ class ReservationForm extends Commons {
             return;
         }
 
-        new _Vue({
-                el: '#reservation',
-                data: {
+        const {createApp} = Vue;
+        let app = createApp({
+            data() {
+                return {
                     step: 1,
 
                     chosenCategory: null,
@@ -83,7 +84,8 @@ class ReservationForm extends Commons {
                     container: null,
                     contentContainer: null,
                     cards: {},
-                },
+                }
+            },
                 created() {
                     this.categories = JSON.parse(reservationNode.dataset.categories);
                     console.log(`Reservation Vue component has been created.`)
@@ -128,11 +130,11 @@ class ReservationForm extends Commons {
                         this.chosenEmployee = this.availableEmployees.find(employee => employee?.id === employeeID)
                     },
                     toggleService(service) {
-                        this.isVisibleOrder = true
+                        this.isVisibleOrder = true;
                         if (this.chosenServices[service.id]) {
-                            this.$delete(this.chosenServices, service.id);
+                            delete this.chosenServices[service.id];
                         } else {
-                            this.$set(this.chosenServices, service.id, service);
+                            this.chosenServices[service.id] = service;
                         }
                     },
                     hasChosenServices() {
@@ -294,6 +296,9 @@ class ReservationForm extends Commons {
                     headerToggler() {
                         if (this.step !== 5) this.isVisibleOrder = !this.isVisibleOrder
                     },
+                    getMomentDate(date, format) {
+                        return moment(date).format(format)
+                    },
 
                     async makeReservation() {
                         if (!this.sanitizeInputs()) {
@@ -364,12 +369,12 @@ class ReservationForm extends Commons {
                     defaultServices() {
                         this.chosenServices = {}
                         this.chosenCategory = null
+                        this.defaultEmployee()
                     },
                     defaultEmployee() {
-                        this.employee = {
+                        this.chosenEmployee = {
                             id: null,
-                            name: null,
-                            photo: null,
+                            first_name: null,
                         }
                     },
                     defaultCustomer() {
@@ -401,7 +406,6 @@ class ReservationForm extends Commons {
                     },
                     resetReservation() {
                         this.defaultServices()
-                        this.defaultEmployee()
                         this.defaultCustomer()
                         this.changeStep(1, true)
                         this.isVisibleOrder = false;
@@ -505,6 +509,7 @@ class ReservationForm extends Commons {
                 },
             }
         );
+        app.mount("#reservation");
     }
 }
 

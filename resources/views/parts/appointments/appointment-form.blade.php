@@ -78,9 +78,8 @@
                                         <div class="date"
                                              :class="[availableDate === date ? 'chosen' : '', isWeekend(availableDate) || appointments['isAvailable'] === 0 ? 'notAvailable' : '']"
                                              @click="chooseDate(availableDate)">
-                                            <div class="number" v-html="moment(availableDate).format('D')"></div>
-                                            <div class="name"
-                                                 v-html="getDayName(moment(availableDate).format('d'))"></div>
+                                            <div class="number" v-html="getMomentDate(availableDate, 'D')"></div>
+                                            <div class="name" v-html="getDayName(getMomentDate(availableDate, 'd'))"></div>
                                         </div>
                                     </template>
                                 </div>
@@ -101,7 +100,7 @@
                                  :class="[!empty(chosenTime.time) && availableTime === chosenTime.time ? 'chosen' : '', (timeArray.isAvailable === 0 ? 'unavailable' : '')]"
                                  @click="chooseTime(availableTime)">
                                 <div class="time" :class="getTimeClass(availableTime)"
-                                     v-html="moment('2022-03-21T' + availableTime + ':00').format('H:mm')"></div>
+                                     v-html="getMomentDate('2022-03-21T' + availableTime + ':00', 'H:mm')"></div>
                             </div>
                         </div>
                     </div>
