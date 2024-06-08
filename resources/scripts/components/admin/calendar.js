@@ -61,6 +61,8 @@ class ReservationCalendar extends Commons {
                     chosenEmployeeInForms: null,
                     employees: null,
                     employeeServices: [],
+                    urlEmployeeKey: "employee",
+                    urlDateKey: "date",
 
                     buttonLoader: false,
 
@@ -79,6 +81,7 @@ class ReservationCalendar extends Commons {
                         'payload': 'YYYY-MM-DD HH:mm:ss',
                         'table': 'YYYY-MM-DDTHH:mm:ss',
                         'table_select': 'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ (z)',
+                        'url_date': 'YYYY-MM-DD',
                     }
                 };
             },
@@ -97,19 +100,40 @@ class ReservationCalendar extends Commons {
                 let services = JSON.parse(pageData?.services)
                 this.services = Object.assign({}, services);
 
+                let urlParams = _thisClass.getUrlParams()
+                let urlEmployee = urlParams[this.urlEmployeeKey] ? this.employees[urlParams.employee] : null
+                let urlDate = urlParams[this.urlDateKey] ?? null
+
                 let loggedInId = parseInt(this.loggedInEmployee.id);
                 if (this.loggedInEmployee.role === "administrator" || !this.employees[loggedInId]) {
-                    this.chosenEmployeeOnView = -1;
-                    const firstKey = Object.keys(this.employees)[0];
-                    if (this.employees[firstKey]) {
+                    this.chosenEmployeeOnView = urlEmployee ? urlEmployee.id : -1;
+                    if (this.chosenEmployeeOnView === -1) {
+                        const firstKey = Object.keys(this.employees)[0];
                         this.chosenEmployeeInForms = this.employees[firstKey].id;
+                    } else {
+                        this.chosenEmployeeInForms = this.chosenEmployeeOnView;
                     }
                 } else {
                     this.chosenEmployeeOnView = this.chosenEmployeeInForms = loggedInId;
                 }
 
+                let params = {}
+
+                if(!urlEmployee) {
+                    params[this.urlEmployeeKey] = this.chosenEmployeeOnView
+                }
+
+                if(!urlDate) {
+                    params[this.urlDateKey] = moment().format(this.dateFormat.url_date)
+                }
+
+                _thisClass.addParamsToUrl(params, null,true)
+
                 this.serviceColors = JSON.parse(pageData?.colors)
                 this.serviceDurations = JSON.parse(pageData?.durations)
+
+
+
                 this.initCalendar();
                 this.setServiceList();
             },
@@ -129,8 +153,10 @@ class ReservationCalendar extends Commons {
                 async initCalendar() {
                     let _thisVue = this
 
-                    let now = _thisClass.getCurrentTimestamp()
-                    let appointments = await this.fetchAppointments(now, this.chosenEmployeeOnView, "timeGridWeek");
+                    let urlParams = _thisClass.getUrlParams()
+
+                    let initialDate = urlParams[_thisVue.urlDateKey] ?? moment().format(_thisVue.dateFormat.url_date);
+                    let appointments = await this.fetchAppointments(initialDate, this.chosenEmployeeOnView, "timeGridWeek");
 
                     const calendarEl = document.getElementById('calendar')
 
@@ -158,6 +184,7 @@ class ReservationCalendar extends Commons {
                         selectOverlap: true,
                         eventResizableFromStart: false,
                         initialView: 'timeGridWeek',
+                        initialDate: initialDate,
                         rerenderDelay: 500,
                         headerToolbar: {
                             left: 'prev,next today',
@@ -273,11 +300,6 @@ class ReservationCalendar extends Commons {
 
                             _thisVue.dateRange.start = start
                             _thisVue.dateRange.end = end
-
-                            let fetchStart = _thisClass.utc(moment(start).add(1, "hour"))
-                            console.log("SHOULD REFETCH")
-                            //let appointments = await _thisVue.fetchAppointments(fetchStart, _thisVue.chosenEmployeeOnView, view.type)
-                            //_thisVue.exchangeAppointmentsOnView(appointments)
                         }
                     })
                     calendar.on('datesSet', async function (info) {
@@ -289,8 +311,9 @@ class ReservationCalendar extends Commons {
                         _thisVue.dateRange.start = start
                         _thisVue.dateRange.end = end
 
-                        let fetchStart = _thisClass.utc(moment(start).add(1, "hour"))
-                        let appointments = await _thisVue.fetchAppointments(fetchStart, _thisVue.chosenEmployeeOnView, calendar.view.type)
+                        _thisClass.addParamsToUrl({[_thisVue.urlDateKey]: moment(start, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.url_date)}, null, true)
+
+                        let appointments = await _thisVue.fetchAppointments(moment(start).add(1, "hour").format(_thisVue.dateFormat.url_date), _thisVue.chosenEmployeeOnView, calendar.view.type)
                         _thisVue.exchangeAppointmentsOnView(appointments)
                     });
                     this.calendar = calendar;
@@ -487,10 +510,10 @@ class ReservationCalendar extends Commons {
                         });
                 },
 
-                fetchAppointments(timestamp, employeeID, dateRange = "timeGridWeek") {
+                fetchAppointments(date, employeeID, dateRange = "timeGridWeek") {
                     let params = {
                         employeeID: employeeID,
-                        timestamp: timestamp,
+                        date: date,
                         dateRange: dateRange,
                     };
 
@@ -585,7 +608,10 @@ class ReservationCalendar extends Commons {
                 async changeCurrentEmployeeView(id) {
                     this.chosenEmployeeOnView = this.chosenEmployeeInForms = id
 
-                    let now = moment(this.dateRange.start).add(1, "hour").valueOf()
+                    let now = moment(this.dateRange.start).add(1, "hour").format(this.dateFormat.url_date)
+                    let params = {[this.urlEmployeeKey]: this.chosenEmployeeOnView}
+                    _thisClass.addParamsToUrl(params, null,true)
+
                     let appointments = await this.fetchAppointments(now, id, this.calendar.view.type);
                     this.exchangeAppointmentsOnView(appointments)
                 },

@@ -1,4 +1,3 @@
-
 $contentWidth: 18.6rem;
 $contentWidthDualGap: 2rem;
 
@@ -9,16 +8,16 @@ $contentWidthDualGap: 2rem;
   bottom: 0;
   height: 100vh;
   transition: all 0.3s ease;
-  background: rgba(0,0,0,0);
+  background: rgba(0, 0, 0, 0);
   z-index: 500;
   pointer-events: none;
 
-  &.active{
+  &.active {
     pointer-events: all;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
   }
 
-  .reservation-wrapper{
+  .reservation-wrapper {
     pointer-events: none;
     width: 100%;
     position: relative;
@@ -33,7 +32,8 @@ $contentWidthDualGap: 2rem;
     transition: all 0.5s ease;
     opacity: 0;
     pointer-events: none;
-    &.active{
+
+    &.active {
       opacity: 1;
       pointer-events: all;
       transform: translateX(0);
@@ -295,12 +295,14 @@ $contentWidthDualGap: 2rem;
             z-index: 1;
             background: $light_beige;
             position: relative;
+
             img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
             }
-            &::after{
+
+            &::after {
               content: "";
               position: absolute;
               top: 0;
@@ -314,6 +316,7 @@ $contentWidthDualGap: 2rem;
 
         .services-list {
           flex: 1;
+
           .services-grid {
             display: grid;
             grid-template-columns: repeat(2, 50%);
@@ -436,7 +439,7 @@ $contentWidthDualGap: 2rem;
           }
         }
 
-        .date-grid{
+        .date-grid {
           display: grid;
           grid-template-columns: repeat(7, 1fr);
           grid-row-gap: 0.5rem;
@@ -503,6 +506,7 @@ $contentWidthDualGap: 2rem;
 
       &.choose-time {
         min-height: 20rem;
+
         .time-picker {
           display: flex;
           width: 100%;
@@ -517,6 +521,7 @@ $contentWidthDualGap: 2rem;
             width: 0; /* Remove scrollbar space */
             background: transparent; /* Optional: just make scrollbar invisible */
           }
+
           grid-column-gap: 1rem;
           grid-row-gap: 0.5rem;
 
@@ -541,7 +546,8 @@ $contentWidthDualGap: 2rem;
               display: flex;
               justify-content: center;
               align-items: center;
-              &::before{
+
+              &::before {
 
                 //Turned off
                 display: none !important;
@@ -553,21 +559,24 @@ $contentWidthDualGap: 2rem;
                 height: 1.3rem;
                 background-repeat: no-repeat;
               }
-              &.morning{
+
+              &.morning {
                 &::before {
                   background-size: 1.25rem auto;
                   background-position: 2px 3px;
                   background-image: url('@/icons/reservation/icon-sunrise.svg');
                 }
               }
-              &.afternoon{
+
+              &.afternoon {
                 &::before {
                   background-size: 1.1rem auto;
                   background-position: 4px 1px;
                   background-image: url('@/icons/reservation/icon-sun.svg');
                 }
               }
-              &.evening{
+
+              &.evening {
                 &::before {
                   background-size: 0.9rem auto;
                   background-position: 6.5px 3px;
@@ -582,12 +591,14 @@ $contentWidthDualGap: 2rem;
 
               .time {
                 color: $white;
-                &::before{
+
+                &::before {
                   filter: brightness(0) invert(1);
                 }
               }
             }
-            &.unavailable{
+
+            &.unavailable {
               pointer-events: none;
               background: $dirty_beige !important;
               opacity: 0.5;
@@ -599,6 +610,7 @@ $contentWidthDualGap: 2rem;
       &.choose-contact {
         height: 30.5rem;
         padding-bottom: 13rem;
+
         .input--text {
           margin-bottom: 0.5rem;
         }
@@ -607,7 +619,7 @@ $contentWidthDualGap: 2rem;
   }
 
   &.active {
-    .reservation-container{
+    .reservation-container {
       opacity: 1;
       pointer-events: all;
       transform: translateX(0);
@@ -626,6 +638,7 @@ $contentWidthDualGap: 2rem;
     box-shadow: 0 0.3125rem 1.875rem rgba(0, 0, 0, 0.15);
     border-radius: 0.625rem 0.625rem 0 0;
     z-index: 5;
+
     .header {
       display: flex;
       justify-content: space-between;
@@ -657,7 +670,7 @@ $contentWidthDualGap: 2rem;
           }
         }
 
-        &.active{
+        &.active {
           transform: translateX(0);
           opacity: 1;
           pointer-events: none;
@@ -676,9 +689,9 @@ $contentWidthDualGap: 2rem;
       padding: 0 1.7rem;
 
       .unknown_icon {
-          path {
-            fill: $dark;
-          }
+        path {
+          fill: $dark;
+        }
       }
 
       .img-container {
@@ -717,19 +730,22 @@ $contentWidthDualGap: 2rem;
         .name-price-container {
           display: flex;
           justify-content: space-between;
+
           .name {
             font-size: 0.9rem;
             font-weight: 700;
             line-height: 1.0625rem;
           }
+
           .summed-duration-price {
-              display: flex;
+            display: flex;
             justify-content: flex-end;
             align-items: center;
             font-size: 0.9rem;
             column-gap: 0.4rem;
             font-weight: 700;
             color: $dark;
+
             .duration {
               font-weight: 600;
               color: $secondary_dark;
@@ -750,6 +766,7 @@ $contentWidthDualGap: 2rem;
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: 0.3rem;
+
           .service-duration-price {
             display: flex;
             min-width: 5.5rem;
@@ -758,11 +775,13 @@ $contentWidthDualGap: 2rem;
             column-gap: 0.4rem;
             text-align: right;
             font-weight: 600;
+
             .duration {
               color: $secondary_dark;
               font-weight: 600;
             }
           }
+
           span {
             font-weight: 600;
           }
@@ -774,7 +793,7 @@ $contentWidthDualGap: 2rem;
       }
     }
 
-    .contact-data{
+    .contact-data {
       display: grid;
       grid-template-columns: auto auto;
       grid-gap: 0.625rem;
@@ -782,13 +801,15 @@ $contentWidthDualGap: 2rem;
       margin-inline: 1.7rem;
       margin-top: 1rem;
       border-top: 1px solid $white;
-      .label{
+
+      .label {
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         color: $secondary_dark;
       }
-      .value{
+
+      .value {
         font-size: 0.85rem;
         font-weight: 600;
         color: $dark;
@@ -807,7 +828,8 @@ $contentWidthDualGap: 2rem;
 
     &.visible {
       max-height: 27rem;
-      &.bigger{
+
+      &.bigger {
         max-height: 37rem;
       }
 
@@ -821,7 +843,7 @@ $contentWidthDualGap: 2rem;
     }
   }
 
-  .sending-overlay{
+  .sending-overlay {
     position: absolute;
     left: 0;
     width: 100%;
@@ -832,41 +854,58 @@ $contentWidthDualGap: 2rem;
     transition: all 0.3s ease;
     opacity: 0;
     pointer-events: none;
-    lord-icon{
+
+    lord-icon {
       position: absolute;
       left: 50%;
       top: 50%;
     }
+
     .loader,
-    .check{
+    .check {
       transform: translate(-50%, -50%) scale(0);
       transition: all 0.4s ease;
       width: 4rem;
       height: 4rem;
     }
-    &.sending{
+
+    .success-message {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s ease;
+      color: $brownish_yellow;
+    }
+
+    &.sending {
       opacity: 1;
       pointer-events: all;
-      .loader{
+
+      .loader {
         transform: translate(-50%, -50%) scale(1);
       }
-      &.sent{
-        .loader{
+
+      &.sent {
+        .loader {
           transform: translate(-50%, -50%) scale(0);
         }
-        .check{
-          transform: translate(-50%, -50%) scale(1);
+
+        .check {
+          transform: translate(-50%, calc(-50% - 3rem)) scale(1);
+        }
+
+        .success-message {
+          opacity: 1;
+          transform: translate(-50%, calc(-50% + 3rem)) scale(1);
         }
       }
     }
   }
-
-
-
-
-
-
-
 
 
   @include respond-below(sm) {

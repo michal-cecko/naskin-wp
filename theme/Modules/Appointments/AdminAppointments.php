@@ -124,7 +124,7 @@ class AdminAppointments {
     {
         $data = $request->validated();
 
-        $datetime = Carbon::createFromTimestamp(floor($data['timestamp'] / 1000))->modify("+1 hour");
+        $datetime = Carbon::parse($data['date'])->modify("+1 hour");
 
         //Week
         if ($data['dateRange'] === "timeGridWeek") {

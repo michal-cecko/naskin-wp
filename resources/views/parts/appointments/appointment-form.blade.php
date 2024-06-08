@@ -223,6 +223,9 @@
                             class="check"
                             colors="primary:#D3932A,secondary:#D3932A">
                     </lord-icon>
+                    <span class="success-message">
+                        Vaša rezervácia je potvrdená. Ďakujeme.
+                    </span>
                 </div>
             </div>
         </div>

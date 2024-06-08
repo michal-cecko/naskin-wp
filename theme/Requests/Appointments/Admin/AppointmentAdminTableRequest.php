@@ -10,7 +10,7 @@ class AppointmentAdminTableRequest extends AuthenticatedAdminRequest {
 
         return [
             'employeeID' => ['sometimes', 'nullable', 'integer'],
-            'timestamp' => ['required', 'integer'],
+            'date' => ['required', 'date'],
             'dateRange' => ['required', 'string']
         ];
 

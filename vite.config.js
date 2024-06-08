@@ -28,6 +28,7 @@ export default defineConfig({
 
                 // Frontend styles + scripts
                 'resources/scripts/general.js',
+                'resources/scripts/components/dialogs.js',
                 'resources/scripts/components/service-taxonomy-single.js',
                 'resources/scripts/components/header.js',
                 'resources/scripts/components/reservation-form.js',
@@ -63,35 +64,5 @@ export default defineConfig({
                 };
             },
         },
-        /*copy({
-            targets: [
-                {
-                    src: `resources/images/!**!/!*.{png,jpg,svg,json,webp,ico,gif}`,
-                    dest: 'dist/images',
-                    manifest: true,
-                },
-                {
-                    src: `resources/videos/!**!/!*.{mp4,webm,mov,avi,flv,wmv,3gp,3g2,ogg}`,
-                    dest: 'dist/videos',
-                    manifest: true,
-                },
-                {
-                    src: `resources/fonts/!**!/!*`,
-                    dest: 'dist/fonts',
-                    manifest: true,
-                },
-                {
-                    src: `resources/favicon/!**!/!*`,
-                    dest: 'dist/favicon',
-                    manifest: true,
-                },
-                {
-                    src: `resources/css/!**!/!*`,
-                    dest: 'dist/css',
-                    rename: '[hash].[ext]',
-                    manifest: true,
-                },
-            ],
-        }),*/
     ],
 });

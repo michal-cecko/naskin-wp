@@ -76,9 +76,11 @@ export default class Commons {
     }
 
 
-    utc(datetime) {
+    utc(datetime, format = null) {
         const utcOffset = 60; // UTC+1
-        let x = moment(datetime).utc().utcOffset(utcOffset);
+        let x = format ? moment(datetime, format) : moment(datetime)
+        x = x.utc().utcOffset(utcOffset);
+        console.log("new UTC from datetime: " + datetime + " = " + x.format("YYYY-MM-DD"))
         return x.valueOf()
     }
 
@@ -87,12 +89,49 @@ export default class Commons {
         return number
     }
 
-    addParamsToUrl(params, baseUrl) {
-        const queryString = Object.entries(params)
-            .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-            .join('&');
+    addParamsToUrl(params, baseUrl = null, addToCurrentUrl = false) {
+        let urlObj;
 
-        return `${baseUrl}?${queryString}`;
+        if (baseUrl === null) {
+            // Use the current URL if baseUrl is null
+            urlObj = new URL(window.location.href);
+        } else {
+            // Create a new URL object from the base URL
+            urlObj = new URL(baseUrl);
+        }
+
+        // Get the existing search parameters
+        const existingParams = new URLSearchParams(urlObj.search);
+
+        // Add new parameters or update existing ones
+        Object.entries(params).forEach(([key, value]) => {
+            existingParams.set(key, value);
+        });
+
+        // Update the URL's search string
+        urlObj.search = existingParams.toString();
+
+        // Get the updated URL as a string
+        const updatedUrl = urlObj.toString();
+
+        // If addToCurrentUrl is true, update the browser's address bar without refreshing the page
+        if (addToCurrentUrl) {
+            window.history.pushState({}, '', updatedUrl);
+        }
+
+        // Return the updated URL
+        return updatedUrl;
+    }
+
+    getUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        const paramObj = {};
+
+        params.forEach((value, key) => {
+            paramObj[key] = value;
+        });
+
+        return paramObj;
     }
 
     validateEmail(email) {

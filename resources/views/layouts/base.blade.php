@@ -35,7 +35,7 @@
     @include('parts.header')
 @show
 
-<div class="app">
+<div id="app">
 
     <div id="customNotifications" class="custom-notifications">
         @section('dynamic-notifications')

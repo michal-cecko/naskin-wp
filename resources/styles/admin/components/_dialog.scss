@@ -7,7 +7,7 @@
   opacity: 0;
   z-index: 50000;
   pointer-events: none;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease 0.2s;
 
   .backdrop {
     background: rgba(0, 0, 0, 0.5);
@@ -111,4 +111,29 @@
 .p-multiselect-panel,
 .p-datepicker{
   z-index: 5000000 !important;
+}
+
+#app {
+
+  .custom-dialog-wrapper {
+    display: none;
+  }
+
+  #akciaDialog {
+    img {
+      width: auto;
+      height: 100%;
+      border-radius: 20px;
+      max-width: 35rem;
+      display: block;
+      margin-inline: auto;
+    }
+    @include respond-below(md) {
+      img {
+        width: 100% !important;
+        height: auto;
+      }
+    }
+  }
+
 }

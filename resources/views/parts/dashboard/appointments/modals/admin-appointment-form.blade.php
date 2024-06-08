@@ -4,7 +4,7 @@
 @endphp
 
 <div class="divided-row">
-    <div :class="appointment.type === 'free' ? 'half' : 'third'" v-show="canChangeEmployeeOnView">
+    <div :class="visibleEditModal || appointment.type !== 'free' ? 'third' : 'half'" v-show="canChangeEmployeeOnView">
         <div class="field-container">
             <label for="employee">Pracovník</label>
             <select class="custom-select" v-model="chosenEmployeeInForms" id="employee">
@@ -13,7 +13,7 @@
             </select>
         </div>
     </div>
-    <div :class="appointment.type === 'free' || !canChangeEmployeeOnView ? 'half' : 'third'">
+    <div :class="appointment.type === 'free' || !canChangeEmployeeOnView ? 'half' : 'third'" v-if="!visibleEditModal">
         <div class="field-container">
             <label for="type">Typ</label>
             <select class="custom-select" v-model="appointment.type" id="type">
@@ -23,7 +23,8 @@
             </select>
         </div>
     </div>
-    <div :class="!canChangeEmployeeOnView ? 'half' : 'third'" v-if="appointment.type === 'reservation'">
+    <div :class="!canChangeEmployeeOnView && visibleEditModal ? 'half' : 'third'"
+         v-if="appointment.type === 'reservation'">
         <div class="field-container">
             <label for="source">Objednaný cez</label>
             <select class="custom-select" v-model="appointment.source" id="source">
@@ -51,7 +52,8 @@
             </p-multiselect>
         </div>
         <div class="services-total" v-show="appointment.services">
-            Celkom: <b>@{{ getTotalDuration(appointment.services, true) }} / @{{ getTotalPrice(appointment.services) }}€</b>
+            Celkom: <b>@{{ getTotalDuration(appointment.services, true) }} / @{{ getTotalPrice(appointment.services)
+                }}€</b>
         </div>
     </div>
     <div class="half">

@@ -16,6 +16,8 @@
 
 @section('content')
 
+    @include("parts.other.akcia")
+
     <section id="homepageHero">
         <div class="img-container">
             <img src="{{ main()->assets()->static("images/homepage/hero.jpg") }}" alt="Skincare routine image">

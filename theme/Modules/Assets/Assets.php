@@ -54,6 +54,7 @@ class Assets extends SaurusAssets
 
         wp_enqueue_script(handle: 'reservation-js', src: $this->dynamic('scripts/components/reservation-form.js'), ver: $this->ver);
         wp_enqueue_script(handle: 'header-js', src: $this->dynamic('scripts/components/header.js'), ver: $this->ver);
+        wp_enqueue_script(handle: 'dialogs-js', src: $this->dynamic('scripts/components/dialogs.js'), ver: $this->ver);
 
         if( in_array($this->user?->role, ['together-employee', 'employee']) ){
             wp_enqueue_style(handle: 'employee_role_web-scss', src: $this->dynamic('styles/admin/employee_role_web.scss'), ver: $this->ver);

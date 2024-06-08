@@ -9,6 +9,7 @@ class General extends Commons {
         this._prepareParametersRemoval()
         this._prepareNotifications()
         this._prepareSmoothScrolling()
+        this._prepareAkciaDialog()
     }
 
 
@@ -52,6 +53,15 @@ class General extends Commons {
                 e.preventDefault()
             })
         }
+    }
+
+    _prepareAkciaDialog() {
+        let akciaDialog = document.querySelector("#akciaDialog")
+        if (!akciaDialog) return;
+
+        setTimeout(() => {
+            akciaDialog.classList.add("shown")
+        }, 3000)
     }
 }
 

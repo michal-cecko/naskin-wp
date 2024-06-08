@@ -51,6 +51,11 @@ $activeColor: #b1bb5b;
       font-size: 1rem;
     }
 
+    .fc-timeGridDay-button,
+    .fc-timeGridWeek-button {
+      display: none !important;
+    }
+
     .fc-event {
       overflow: hidden;
       .event-content-container {
