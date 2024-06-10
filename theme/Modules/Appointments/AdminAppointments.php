@@ -94,11 +94,11 @@ class AdminAppointments {
 
             $appointment = AppointmentService::updateVacation(
                 appointment: (int)$data['id'],
+                employee: (int)$data['employeeID'],
                 startAt: Carbon::parse($data['date']['start']),
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
             );
-
         }
 
         wp_send_json_success(['message' => 'Termín bol úspešne upravený.', 'id' => $appointment->id]);

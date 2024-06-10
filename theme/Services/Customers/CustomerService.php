@@ -2,9 +2,13 @@
 
 namespace Theme\Services\Customers;
 
+use Saurus\App\Traits\Validation;
+use Theme\Exceptions\Customer\CustomerHasEmptyEmailException;
 use Theme\PostTypes\Customer;
 
 class CustomerService {
+
+    use Validation;
 
     public static function createCustomer(string $name, ?string $email = null, ?string $phone = null) {
 
@@ -38,6 +42,20 @@ class CustomerService {
     public static function updateLastAppointmentDate(Customer|int $customer, string $date): bool
     {
         return update_field('cust_last-appointment', $date, is_int($customer) ? $customer : $customer->ID);
+    }
+
+    /**
+     * @throws CustomerHasEmptyEmailException
+     */
+    public static function checkCustomerEmail(Customer|int $customer): string
+    {
+        $customer = is_int($customer) ? Customer::where("ID", $customer)->first() : $customer;
+
+        if(empty($customer->email)) {
+            throw new CustomerHasEmptyEmailException($customer);
+        }
+
+        return $customer->email;
     }
 
 }

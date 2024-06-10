@@ -93,7 +93,7 @@ class AppointmentsDashboardView
                 'title' => $service->title,
                 'duration' => $service->duration,
                 'price' => $service->price,
-                'category_id' => $catID
+                'category_id' => $catID,
             ];
             $serviceCategories[$catID]['services'][$service->id] = $services[$service->id];
             $colorsArray[$catID] = $cat?->color ?? "#000000";

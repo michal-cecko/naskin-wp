@@ -11,6 +11,11 @@ use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
 
+use Theme\Exceptions\Appointment\AppointmentEmailNotificationNotImplementedException;
+use Theme\Exceptions\Appointment\AppointmentInvalidDatetimeDifferenceException;
+use Theme\Exceptions\Appointment\AppointmentNotFoundException;
+use Theme\Exceptions\Email\EmailFailedToSendException;
+use Theme\Exceptions\Employee\EmployeeNotFoundException;
 use Theme\Mail\Appointments\Customer\AppointmentCancelledCustomer;
 use Theme\Mail\Appointments\Customer\AppointmentCreatedCustomer;
 use Theme\Mail\Appointments\Customer\AppointmentRemindCustomer;
@@ -31,19 +36,15 @@ class AppointmentService
      */
     public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
     {
-
         if (empty($customer['id'])) {
             $customer = CustomerService::createCustomer($customer['name'], $customer['email'], $customer['phone'] ?? null);
         } else {
             $customer = Customer::where("ID", $customer['id'])->first();
         }
 
-        if(!$endAt) {
-            $duration = $services->sum("duration");
-            $endAt = $startAt->copy()->addMinutes($duration);
-        } else {
-            $duration = $startAt->diffInMinutes($endAt);
-        }
+        self::checkAppointmentTimeDifference($startAt, $endAt);
+
+        [$duration, $endAt] = self::calculateDuration($startAt, $endAt, $services);
 
         $appointment = Appointment::create([
             'employee_id' => $employeeID,
@@ -89,25 +90,26 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], bool $notifyCustomer = false): ?Appointment
+    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false): ?Appointment
     {
         $eager = ["services", "customer"];
 
         if(is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->with($eager)->first();
-            if(!$appointment) return null;
+            if(!$appointment) throw new AppointmentNotFoundException();
         } else {
             $appointment->load($eager);
         }
 
-        if(is_int($employee)) {
-            $employee = Employee::where("id", $employee)->first();
-            if(!$employee) return null;
-        }
+        $employee = self::getEmployee($employee);
+
+        [$duration, $endAt] = self::calculateDuration($startAt, $endAt, $services);
 
         $appointment->update([
             'employee_id' => $employee->ID,
+            'break' => self::getBreakForDuration($duration),
             'start_at' => $startAt,
+            'source' => $source,
             'end_at' => $endAt,
             'note' => $note,
         ]);
@@ -132,9 +134,7 @@ class AppointmentService
         $appointment->services()->whereNotIn("appointment_services.service_id", $submittedServiceIds->toArray())->delete();
 
         if ($notifyCustomer) {
-            if (!self::notifyCustomer($appointment, AppointmentEmailType::UPDATED)) {
-                main()->log()->warning("Failed to send type::UPDATED email to customer for appointment with ID: {$appointment->id}");
-            }
+            self::notifyCustomer($appointment, AppointmentEmailType::UPDATED);
         }
 
         return $appointment;
@@ -166,14 +166,27 @@ class AppointmentService
         return $appointment;
     }
 
-    public static function updateVacation(Appointment|int $appointment, Carbon $startAt, Carbon $endAt = null, ?string $note = null): ?Appointment
+    /**
+     * @throws Exception
+     */
+    public static function updateVacation(Appointment|int $appointment, int|Employee $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null): ?Appointment
     {
         if(is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->first();
-            if(!$appointment) return null;
+            if(!$appointment) throw new AppointmentNotFoundException();
+        }
+
+        if(is_int($employee)) {
+            $employee = Employee::where("id", $employee)->first();
+            if(!$employee) throw new EmployeeNotFoundException();
+        }
+
+        if ($endAt !== null && $startAt->diffInMinutes($endAt, false) < 5) {
+            throw new AppointmentInvalidDatetimeDifferenceException();
         }
 
         $appointment->update([
+            'employee_id' => $employee->ID,
             'start_at' => $startAt,
             'end_at' => $endAt,
             'note' => $note,
@@ -196,26 +209,21 @@ class AppointmentService
      */
     public static function notifyCustomer(Appointment $appointment, AppointmentEmailType $type, array $additionalData = []): bool
     {
-        try {
-            $mailable = match ($type) {
-                AppointmentEmailType::CREATED => new AppointmentCreatedCustomer($appointment, $additionalData),
-                AppointmentEmailType::UPDATED => new AppointmentUpdatedCustomer($appointment, $additionalData),
-                AppointmentEmailType::CANCELLED => new AppointmentCancelledCustomer($appointment, $additionalData),
-                AppointmentEmailType::REMIND => new AppointmentRemindCustomer($appointment, $additionalData),
-                default => throw new Exception('Unsupported email type for customer notification: ' . $type->value)
-            };
-        } catch (Exception $th) {
-            main()->log()->error($th->getMessage());
-            return false;
+        $mailable = match ($type) {
+            AppointmentEmailType::CREATED => new AppointmentCreatedCustomer($appointment, $additionalData),
+            AppointmentEmailType::UPDATED => new AppointmentUpdatedCustomer($appointment, $additionalData),
+            AppointmentEmailType::CANCELLED => new AppointmentCancelledCustomer($appointment, $additionalData),
+            AppointmentEmailType::REMIND => new AppointmentRemindCustomer($appointment, $additionalData),
+            default => throw new AppointmentEmailNotificationNotImplementedException($type->value)
+        };
+
+        $email = CustomerService::checkCustomerEmail($appointment->customer);
+
+        if(!main()->mail()->send($mailable, $email)) {
+            throw new EmailFailedToSendException($email);
         }
 
-        $email = $appointment->customer?->email;
-
-        if (empty($email)) {
-            return false;
-        }
-
-        return main()->mail()->send($mailable, $email);
+        return true;
     }
 
     /**
@@ -420,6 +428,9 @@ class AppointmentService
         return $appointment->cancel_token === $token;
     }
 
+    /**
+     * @throws Exception
+     */
     public static function cancelAppointment($appointment, bool $notifyCustomer = false, bool $notifyEmployee = false, $isCancelledByEmployee = false): void
     {
         if($appointment->type === AppointmentType::VACATION) {
@@ -438,6 +449,9 @@ class AppointmentService
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public static function notifyAllAppointments() : int {
         $appointments = Appointment::where("has_been_reminded", false)
             ->where("status", AppointmentStatus::OK)
@@ -473,5 +487,56 @@ class AppointmentService
         );
 
         theme()->ics()->show();
+    }
+
+    /**
+     * @throws AppointmentInvalidDatetimeDifferenceException
+     */
+    private static function checkAppointmentTimeDifference(Carbon $startAt, ?Carbon $endAt): void
+    {
+        if ($endAt !== null && $startAt->diffInMinutes($endAt) < 5) {
+            throw new AppointmentInvalidDatetimeDifferenceException();
+        }
+    }
+
+    /**
+     * @throws AppointmentInvalidDatetimeDifferenceException
+     */
+    private static function durationAtleast5Minutes(float $duration): void
+    {
+        if ($duration < 5) {
+            throw new AppointmentInvalidDatetimeDifferenceException();
+        }
+    }
+
+    /**
+     * @throws AppointmentInvalidDatetimeDifferenceException
+     */
+    private static function calculateDuration(Carbon $startAt, ?Carbon $endAt, iterable $services): array
+    {
+        if(!$endAt) {
+            $duration = $services->sum("duration");
+            $endAt = $startAt->copy()->addMinutes($duration);
+        } else {
+            $duration = $startAt->diffInMinutes($endAt);
+        }
+
+        self::durationAtleast5Minutes($duration);
+
+        return [$duration, $endAt];
+    }
+
+    /**
+     * @throws EmployeeNotFoundException
+     */
+    private static function getEmployee(Employee|int $employee): Employee|int
+    {
+        if(is_int($employee)) {
+            $employee = Employee::where("id", $employee)->first();
+
+            if(!$employee) throw new EmployeeNotFoundException();
+        }
+
+        return $employee;
     }
 }

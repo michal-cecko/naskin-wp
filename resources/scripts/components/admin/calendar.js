@@ -256,7 +256,14 @@ class ReservationCalendar extends Commons {
                             }
 
                             if (props.type === "reservation") {
-                                html += '<div class="service">' + props.services.map((item) =>item?.title).join(", ") + '</div>';
+                                let isObject = props.services[0]?.id ?? false
+                                html += '<div class="service">'
+                                if (isObject) {
+                                    html += props.services.map((item) =>item?.title).join(", ")
+                                } else {
+                                    html += props.services.map((serviceID) => _thisVue.services[serviceID]?.title).join(", ")
+                                }
+                                html += '</div>';
                                 if (view === "timeGridWeek") {
                                 }
                                 //day
@@ -337,13 +344,13 @@ class ReservationCalendar extends Commons {
                             end: moment(this.appointment.datetime.end, this.dateFormat.input).format(this.dateFormat.payload),
                         },
                         type: this.appointment.type === "free" ? "free" : "reservation",
+                        note: this.appointment.note
                     }
 
                     if (this.appointment.type !== "free") {
                         body.source = this.appointment.source
                         body.services = this.appointment.services
                         body.customer = this.appointment.customer
-                        body.note = this.appointment.note
                     }
 
                     this.buttonLoader = true;
@@ -355,7 +362,8 @@ class ReservationCalendar extends Commons {
                             this.buttonLoader = false;
 
                             if (!response.success) {
-                                console.error(response)
+                                _thisClass.notify(response.data.message, "error")
+                                console.error(response);
                                 return false;
                             }
 
@@ -368,12 +376,12 @@ class ReservationCalendar extends Commons {
                                     source: this.appointment.source,
                                     type: this.appointment.type,
                                     note: this.appointment.note ?? null,
-                                    services: this.appointment.services,
+                                    services: this.appointment.services.map(id => this.services[id]),
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
-                                    employeeID: this.appointment.employeeID,
+                                    employeeID: this.chosenEmployeeInForms,
                                     customer: this.appointment.customer,
                                 },
-                                color: this.getActiveColor(this.employees?.[this.chosenEmployeeInForms]),
+                                color: this.getActiveColor(this.employees?.[this.chosenEmployeeInForms], this.appointment.type, Object.values(this.appointment.services ?? {})[0]),
                                 textColor: '#ffffff'
                             }
 
@@ -381,7 +389,7 @@ class ReservationCalendar extends Commons {
 
                             this.visibleCreateModal = false;
                             this.resetModals()
-                        });
+                        })
 
 
                     return true;
@@ -434,12 +442,12 @@ class ReservationCalendar extends Commons {
                             start: moment(this.appointment.datetime.start, this.dateFormat.input).format(this.dateFormat.payload),
                             end: moment(this.appointment.datetime.end, this.dateFormat.input).format(this.dateFormat.payload),
                         },
+                        note: this.appointment.note
                     }
 
                     if (this.appointment.type !== "free") {
                         data.source = this.appointment.source
                         data.services = this.appointment.services
-                        data.note = this.appointment.note
                     }
 
                     this.buttonLoader = true;
@@ -448,8 +456,11 @@ class ReservationCalendar extends Commons {
                         .then(response => response.json())
                         .then(response => {
 
+                            this.buttonLoader = false;
+
                             if (!response.success) {
-                                console.error(response)
+                                _thisClass.notify(response.data.message, "error")
+                                console.error(response);
                                 return false;
                             }
 
@@ -465,12 +476,12 @@ class ReservationCalendar extends Commons {
                                     source: this.appointment.source,
                                     type: this.appointment.type,
                                     note: this.appointment.note ?? null,
-                                    services: this.appointment.services?.map((appService => this.services[appService])),
+                                    services: this.appointment.services.map(id => this.services[id]),
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
-                                    employeeID: this.appointment.employeeID,
+                                    employeeID: this.chosenEmployeeInForms,
                                     customer: this.appointment.customer,
                                 },
-                                color: this.getActiveColor(this.employees?.[this.chosenEmployeeInForms]),
+                                color: this.getActiveColor(this.employees?.[this.chosenEmployeeInForms], this.appointment.type, Object.values(this.appointment.services ?? {})[0]),
                                 textColor: '#ffffff'
                             }
 
@@ -478,12 +489,11 @@ class ReservationCalendar extends Commons {
 
                             this.calendar.addEvent(event);
 
-                            this.buttonLoader = false;
                             this.visibleEditModal = false;
                             this.resetModals()
 
                             return true;
-                        });
+                        })
                 },
 
                 async removeAppointment() {
@@ -500,14 +510,15 @@ class ReservationCalendar extends Commons {
                             this.buttonLoader = false;
 
                             if (!response.success) {
-                                console.error(response)
-                                return
+                                _thisClass.notify(response.data.message, "error")
+                                console.error(response);
+                                return false;
                             }
 
                             this.appointmentToDelete.remove()
                             this.visibleDeleteModal = false;
                             this.notify = false;
-                        });
+                        })
                 },
 
                 fetchAppointments(date, employeeID, dateRange = "timeGridWeek") {
@@ -521,7 +532,11 @@ class ReservationCalendar extends Commons {
                         .then(response => response.json())
                         .then(response => {
 
-                            console.log(response)
+                            if (!response.success) {
+                                _thisClass.notify(response.data.message, "error")
+                                console.error(response);
+                                return false;
+                            }
 
                             let appointments = [];
                             for (const [ID, appointment] of Object.entries(response.data.appointments)) {
@@ -555,10 +570,6 @@ class ReservationCalendar extends Commons {
 
                             return appointments;
                         })
-                        .catch(error => {
-                            console.error(error);
-                            return null;
-                        });
                 },
 
                 debouncedFetchCustomers() {
@@ -580,6 +591,13 @@ class ReservationCalendar extends Commons {
                     return fetch(_thisClass.addParamsToUrl(params, `${_thisClass.apiUrl}/customers/search`))
                         .then(response => response.json())
                         .then(response => {
+
+                            if (!response.success) {
+                                _thisClass.notify(response.data.message, "error")
+                                console.error(response);
+                                return false;
+                            }
+
                             this.customers = response.data;
                             this.shownOptions = true
                         })
@@ -634,12 +652,14 @@ class ReservationCalendar extends Commons {
                 },
 
                 loadEditModal(appToEdit) {
+                    console.log("loading ed modal", appToEdit, this.employeeServices);
                     this.resetAppointmentVariable()
                     let type = appToEdit.extendedProps.type
 
                     if (type !== "free") {
                         this.appointment.customer = appToEdit.extendedProps.customer
                         this.appointment.services = appToEdit.extendedProps.services.map((service) => service.id)
+                        this.appointment.source = appToEdit.extendedProps.source
                     }
 
                     this.chosenEmployeeInForms = appToEdit.extendedProps.employeeID
@@ -649,8 +669,6 @@ class ReservationCalendar extends Commons {
                         start: moment(appToEdit.start).format(this.dateFormat.input),
                         end: moment(appToEdit.end).format(this.dateFormat.input),
                     }
-
-                    console.log(appToEdit.end, moment(appToEdit.end).format(this.dateFormat.input))
                 },
 
                 resetAppointmentVariable() {
@@ -687,15 +705,17 @@ class ReservationCalendar extends Commons {
 
                     if (!service) {
                         service = Object.values(this.appointment.services)[0]
+                    } else if (Number.isInteger(service)) {
+                        service = this.services[service] ?? null
                     }
 
                     if(appointmentType === "free") {
-                        console.log(service, appointmentType, appointmentEmployee)
-
                         return appointmentEmployee?.vacation_color ?? this.freeAppColor
                     }
 
-                    return this.serviceColors[service?.service_category_id];
+                    let catID = service?.service_category_id ?? service?.category_id ?? null
+
+                    return this.serviceColors?.[catID];
                 },
 
                 getTotalDuration(serviceIDs, humanTime = false) {
@@ -730,13 +750,15 @@ class ReservationCalendar extends Commons {
                         for (const key in this.services) {
                             if ((allowedServices).includes(parseInt(key))) {
                                 filteredArr.push(this.services[key]);
-                                console.log("added", this.services[key])
                             }
                         }
                     }
 
-                    //this.appointment.services = [];
                     this.employeeServices = filteredArr;
+
+                    if (this.appointment.services.length) {
+                        this.appointment.services = this.appointment.services.filter((service) => this.employeeServices.map((service) => service.id).includes(service));
+                    }
                 },
             },
             computed: {
