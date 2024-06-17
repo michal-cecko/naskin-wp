@@ -152,12 +152,17 @@ class AppointmentService
         ]);
     }
 
+    /**
+     * @throws AppointmentInvalidDatetimeDifferenceException
+     */
     public static function createVacation(int $employeeID, Carbon $startAt, Carbon $endAt, ?string $note = null): Appointment
     {
+        self::checkAppointmentTimeDifference($startAt, $endAt);
+
         $appointment = Appointment::create([
             'employee_id' => $employeeID,
             'start_at' => $startAt,
-            'end_at' => $startAt,
+            'end_at' => $endAt,
             'status' => AppointmentStatus::OK,
             'note' => $note,
             'type' => AppointmentType::VACATION,
