@@ -76,6 +76,7 @@ $activeColor: #b1bb5b;
         font-size: 0.75rem;
         color: #000;
         font-weight: 500;
+        box-shadow: 0 0 0 1px var(--fc-page-bg-color);
       }
 
       .event-content-container {
