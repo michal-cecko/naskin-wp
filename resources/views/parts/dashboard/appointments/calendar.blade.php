@@ -2,7 +2,7 @@
 
 <div id="calendarContainer">
     <input type="hidden" id="page-data" data-colors='@json($services['colors'])' data-services='@json($services['services'])'
-           data-durations='@json($services['durations'])' data-employees='@json($employees)'>
+           data-durations='@json($services['durations'])' data-breaks='@json($breaks)' data-employees='@json($employees)'>
 
     <input type="hidden" id="logged-user" data-id="{{$currentUser->id}}"
          data-name="{{$currentUser->first_name}}" data-role="{{$currentUser->role}}">

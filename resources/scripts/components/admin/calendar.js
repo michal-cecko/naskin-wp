@@ -71,6 +71,7 @@ class ReservationCalendar extends Commons {
                     customerSearchQuery: "",
                     shownOptions: false,
                     debounceTimer: null,
+                    ignoreInputWatchers: false,
 
                     notify: false,
 
@@ -99,6 +100,8 @@ class ReservationCalendar extends Commons {
 
                 let services = JSON.parse(pageData?.services)
                 this.services = Object.assign({}, services);
+
+                this.breaks = JSON.parse(pageData?.breaks)
 
                 let urlParams = _thisClass.getUrlParams()
                 let urlEmployee = urlParams[this.urlEmployeeKey] ? this.employees[urlParams.employee] : null
@@ -173,6 +176,7 @@ class ReservationCalendar extends Commons {
                             _thisVue.appointment.datetime = {
                                 start: moment(info.start, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.input),
                                 end: moment(info.end, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.input),
+                                end_with_break: null,
                             };
 
                             _thisVue.visibleCreateModal = true;
@@ -223,6 +227,7 @@ class ReservationCalendar extends Commons {
                         eventDidMount: function (info) {
                             let html = '<span class="delete-button">&times;</span>';
                             let eventEl = info.el;
+                            let props = info.event.extendedProps;
 
                             let deleteButtonEl = eventEl.querySelector('.delete-button');
                             if (!deleteButtonEl) {
@@ -234,6 +239,15 @@ class ReservationCalendar extends Commons {
                                     _thisVue.visibleDeleteModal = true;
                                 });
                             }
+
+                            if (!props.break) return;
+
+                            html = '<div class="break" style="height: ' + (19.5 * (props.break / 5)) + 'px">' + props.break + 'min</div>';
+                            let breakEl = eventEl.querySelector('.breakEl');
+                            if (!breakEl) {
+                                eventEl.insertAdjacentHTML('beforeend', html);
+                            }
+
                         },
 
                         eventContent: function (info) {
@@ -377,6 +391,8 @@ class ReservationCalendar extends Commons {
                                     id: response.data.id,
                                     source: this.appointment.source,
                                     type: this.appointment.type,
+                                    break: this.appointmentBreakInMinutes,
+                                    end_with_break: this.getEndWithBreak(moment(this.appointment.datetime.end, this.dateFormat.input), this.appointmentBreakInMinutes),
                                     note: this.appointment.note ?? null,
                                     services: this.appointment.services.map(id => this.services[id]),
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
@@ -477,6 +493,8 @@ class ReservationCalendar extends Commons {
                                     id: response.data.id,
                                     source: this.appointment.source,
                                     type: this.appointment.type,
+                                    break: this.appointmentBreakInMinutes,
+                                    end_with_break: this.getEndWithBreak(moment(this.appointment.datetime.end, this.dateFormat.input), this.appointmentBreakInMinutes),
                                     note: this.appointment.note ?? null,
                                     services: this.appointment.services.map(id => this.services[id]),
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
@@ -558,6 +576,8 @@ class ReservationCalendar extends Commons {
                                         source: appointment.source,
                                         type: appointment.type,
                                         note: appointment.note,
+                                        break: appointment.break,
+                                        end_with_break: appointment.break ? moment(appointment.datetime.to_with_break, this.dateFormat.payload) : null,
                                         services: appointment.services?.map((appService => this.services[appService.service_id])) ?? {},
                                         employee: appointment.employee,
                                         employeeID: appointment.employeeID,
@@ -658,6 +678,11 @@ class ReservationCalendar extends Commons {
                     this.resetAppointmentVariable()
                     let type = appToEdit.extendedProps.type
 
+                    this.ignoreInputWatchers = true;
+                    setTimeout(() => {
+                        this.ignoreInputWatchers = false;
+                    }, 500);
+
                     if (type !== "free") {
                         this.appointment.customer = appToEdit.extendedProps.customer
                         this.appointment.services = appToEdit.extendedProps.services.map((service) => service.id)
@@ -670,6 +695,7 @@ class ReservationCalendar extends Commons {
                     this.appointment.datetime = {
                         start: moment(appToEdit.start).format(this.dateFormat.input),
                         end: moment(appToEdit.end).format(this.dateFormat.input),
+                        end_with_break: appToEdit.extendedProps.end_with_break ?? null,
                     }
                 },
 
@@ -679,6 +705,7 @@ class ReservationCalendar extends Commons {
                         datetime: {},
                         type: "reservation",
                         source: "phone",
+                        break: null,
                         services: [],
                     }
                 },
@@ -764,7 +791,13 @@ class ReservationCalendar extends Commons {
                 },
                 formatEventTime(event) {
                     const start = moment(event.start);
-                    const end = moment(event.end);
+                    let end = moment(event.end);
+                    const endWithBreak = event.extendedProps.end_with_break;
+                    if (!!endWithBreak) {
+                        end = endWithBreak;
+                    }
+
+                    console.log("start", start, "end", end, "endWithBreak", endWithBreak)
 
                     if (start.isSame(end, 'day')) {
                         // Event is on the same day
@@ -773,6 +806,9 @@ class ReservationCalendar extends Commons {
                         // Event spans more than one day
                         return start.format('DD.MM HH:mm') + ' - ' + end.format('DD.MM HH:mm');
                     }
+                },
+                getEndWithBreak(momentEnd, minutes) {
+                    return momentEnd.add(minutes, 'minutes');
                 }
             },
             computed: {
@@ -808,6 +844,32 @@ class ReservationCalendar extends Commons {
                         return startDate + " - " + endDate;
                     }
                 },
+                appointmentBreakInMinutes() {
+                    if (this.appointment.break) return this.appointment.break;
+
+                    const start = moment(this.appointment.datetime.start, this.dateFormat.input);
+                    const end = moment(this.appointment.datetime.end, this.dateFormat.input);
+                    const duration = end.diff(start, 'minutes');
+
+                    let breakVal = null;
+                    this.breaks.some((durationBreakRecord) => {
+                        if (duration <= durationBreakRecord.duration) {
+                            breakVal = durationBreakRecord.break;
+                            return true; // This will break out of the some loop
+                        }
+                        return false;
+                    });
+
+                    console.log("appBreak:", breakVal)
+
+                    return breakVal;
+                },
+                appointmentDatetimeEndWithBreak() {
+                    if (!this.appointment.datetime.end) return null;
+                    if (!this.appointmentBreakInMinutes) return null;
+
+                    return moment(this.appointment.datetime.end, this.dateFormat.input).add(this.appointmentBreakInMinutes, 'minutes').format("HH:mm");
+                },
             },
             watch: {
                 chosenEmployeeInForms(newID) {
@@ -816,12 +878,16 @@ class ReservationCalendar extends Commons {
                     this.setServiceList()
                 },
                 'appointment.services'(newServices) {
+                    if(this.ignoreInputWatchers) return;
+
                     let start = this.appointment.datetime.start
                     if (start && this.appointment.type === "reservation") {
                         this.appointment.datetime.end = moment(start, this.dateFormat.input).add(this.getTotalDuration(newServices), "minutes").format(this.dateFormat.input)
                     }
                 },
                 'appointment.datetime.start'(newStart) {
+                    if(this.ignoreInputWatchers) return;
+
                     let start = newStart
                     let services = this.appointment?.services ?? [];
                     if (services.length && start && this.appointment.type === "reservation") {
@@ -830,7 +896,51 @@ class ReservationCalendar extends Commons {
                 },
             }
         });
-        app.use(primevue.config.default);
+        app.use(primevue.config.default,
+            {
+                locale: {
+                    dayNames: [
+                        "Nedeľa",
+                        "Pondelok",
+                        "Utorok",
+                        "Streda",
+                        "Štvrtok",
+                        "Piatok",
+                        "Sobota",
+                    ],
+                    dayNamesShort: ["Ne", "Po", "Ut", "St", "Št", "Pi", "So"],
+                    dayNamesMin: ["Ne", "Po", "Ut", "St", "Št", "Pi", "So"],
+                    firstDayOfWeek: 1,
+                    monthNames: [
+                        "Január",
+                        "Február",
+                        "Marec",
+                        "Apríl",
+                        "Máj",
+                        "Jún",
+                        "Júl",
+                        "August",
+                        "September",
+                        "Október",
+                        "November",
+                        "December",
+                    ],
+                    monthNamesShort: [
+                        "Jan",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "Máj",
+                        "Jún",
+                        "Júl",
+                        "Aug",
+                        "Sep",
+                        "Okt",
+                        "Nov",
+                        "Dec",
+                    ],
+                },
+            });
         app.directive("click-outside", clickOutsideDirective);
 
         app.component('p-datepicker', primevue.calendar);

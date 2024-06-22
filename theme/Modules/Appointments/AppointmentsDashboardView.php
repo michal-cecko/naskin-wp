@@ -3,6 +3,7 @@
 namespace Theme\Modules\Appointments;
 
 use Theme\PostTypes\Service;
+use Theme\Services\Appointments\AppointmentService;
 use Theme\Taxonomies\ServiceCategory;
 use Theme\Users\Employee;
 use Theme\Users\User;
@@ -65,6 +66,7 @@ class AppointmentsDashboardView
         $data['services'] = $this->getServices();
         $data['employees'] = $this->getEmployees();
         $data['currentUser'] = $this->currentUser;
+        $data['breaks'] = AppointmentService::getBreaks();
 
         return $data;
     }

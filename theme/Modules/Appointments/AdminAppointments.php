@@ -174,9 +174,11 @@ class AdminAppointments {
                         'employee' => $appointment->employee->first_name,
                         'employeeID' => $appointment->employee->ID,
                         'services' => $appointment->services->append("service_category_id"),
+                        'break' => $appointment->break,
                         'datetime' => [
                             'from' => $appointment->start_at->format("Y-m-d H:i:s"),
                             'to' => $appointment->end_at->format("Y-m-d H:i:s"),
+                            'to_with_break' => $appointment->end_at_with_break->format("Y-m-d H:i:s"),
                         ],
                         'customer' => [
                             'id' => $appointment->customer_id,

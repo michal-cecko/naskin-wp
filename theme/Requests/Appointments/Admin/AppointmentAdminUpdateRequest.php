@@ -26,7 +26,7 @@ class AppointmentAdminUpdateRequest extends AuthenticatedAdminRequest {
 
             'type' => ['required', 'in:' . implode(",", AppointmentType::stringCases())],
 
-            'source' => ['nullable', 'sometimes', 'in:' . implode(",", AppointmentSource::stringCases())],
+            'source' => ['required', 'in:' . implode(",", AppointmentSource::stringCases())],
 
             'services' => ['sometimes', 'array'],
             'services.*' => ['required_if:services,array', 'integer', new PostExists(postModel: Service::class)],

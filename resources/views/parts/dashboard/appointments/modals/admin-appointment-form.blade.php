@@ -71,6 +71,9 @@
                           date-format="dd/mm/yy"
                           placeholder="Vyberte koniec"></p-datepicker>
         </div>
+        <div class="end-with-break" v-if="appointment.type === 'reservation' && !!appointmentDatetimeEndWithBreak">
+            S prestávkou do <b>@{{appointmentDatetimeEndWithBreak}}</b> (@{{ appointmentBreakInMinutes }} min)
+        </div>
     </div>
 </div>
 <div class="divided-row" v-if="appointment.type === 'reservation'">
