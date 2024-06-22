@@ -87,6 +87,7 @@ class AdminAppointments {
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
                 services: $services,
+                source: AppointmentSource::getCaseFromValue($data['source']),
                 notifyCustomer: $data['notify'],
             );
 
@@ -169,12 +170,13 @@ class AdminAppointments {
 
                     $return[$appointment->id] = [
                         'type' => $appointment->type->value,
+                        'source' => $appointment->source?->value ?? null,
                         'employee' => $appointment->employee->first_name,
                         'employeeID' => $appointment->employee->ID,
                         'services' => $appointment->services->append("service_category_id"),
                         'datetime' => [
                             'from' => $appointment->start_at->format("Y-m-d H:i:s"),
-                            'to' => $appointment->end_at->format("Y-m-d H:i:s")
+                            'to' => $appointment->end_at->format("Y-m-d H:i:s"),
                         ],
                         'customer' => [
                             'id' => $appointment->customer_id,

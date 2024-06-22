@@ -59,6 +59,10 @@ $activeColor: #b1bb5b;
     .fc-event {
       overflow: hidden;
       .event-content-container {
+        .time {
+          margin-right: 1rem;
+        }
+
         .title {
           font-weight: bold;
         }

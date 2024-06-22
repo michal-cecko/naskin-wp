@@ -284,6 +284,7 @@ class AppointmentService
                     ->orWhereDate('end_at', '>', $currentDate->toDateString());
             })->where("employee_id", $currentEmployee->id)
                 ->where("status", AppointmentStatus::OK)
+                ->orderBy("start_at", "ASC")
                 ->get();
 
             $obsadeneArr = [];
@@ -291,7 +292,36 @@ class AppointmentService
                 $startAt = $appointment->start_at;
                 $endAt = $appointment->end_at_with_break;
 
-                $obsadeneArr[$startAt->format("Y-m-d")][] = ['start' => $startAt->format("H:i"), "end" => $endAt->format("H:i")];
+                if (!$startAt->isSameDay($endAt)) {
+                    $currentDay = $startAt->copy();
+                    $endOfDay = $currentDay->copy()->endOfDay();
+                    $startOfEndDay = $endAt->copy()->startOfDay();
+
+                    // First day
+                    $obsadeneArr[$currentDay->format("Y-m-d")][] = [
+                        'start' => $startAt->format("H:i"),
+                        'end' => $endOfDay->format("H:i")
+                    ];
+
+                    // Intermediate days
+                    while ($currentDay->addDay()->startOfDay()->isBefore($startOfEndDay)) {
+                        $obsadeneArr[$currentDay->format("Y-m-d")][] = [
+                            'start' => '00:00',
+                            'end' => '23:59'
+                        ];
+                    }
+
+                    // Last day
+                    $obsadeneArr[$endAt->format("Y-m-d")][] = [
+                        'start' => '00:00',
+                        'end' => $endAt->format("H:i")
+                    ];
+                } else {
+                    $obsadeneArr[$startAt->format("Y-m-d")][] = [
+                        'start' => $startAt->format("H:i"),
+                        'end' => $endAt->format("H:i")
+                    ];
+                }
             };
 
             //Decrementing here one day, so I can modify date +1 day at the start of the loop

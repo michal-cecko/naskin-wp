@@ -66,7 +66,7 @@ class ReservationCalendar extends Commons {
 
                     buttonLoader: false,
 
-                    dateRange: { start: null, end: null },
+                    dateRange: {start: null, end: null},
                     customers: {},
                     customerSearchQuery: "",
                     shownOptions: false,
@@ -119,19 +119,18 @@ class ReservationCalendar extends Commons {
 
                 let params = {}
 
-                if(!urlEmployee) {
+                if (!urlEmployee) {
                     params[this.urlEmployeeKey] = this.chosenEmployeeOnView
                 }
 
-                if(!urlDate) {
+                if (!urlDate) {
                     params[this.urlDateKey] = moment().format(this.dateFormat.url_date)
                 }
 
-                _thisClass.addParamsToUrl(params, null,true)
+                _thisClass.addParamsToUrl(params, null, true)
 
                 this.serviceColors = JSON.parse(pageData?.colors)
                 this.serviceDurations = JSON.parse(pageData?.durations)
-
 
 
                 this.initCalendar();
@@ -185,6 +184,7 @@ class ReservationCalendar extends Commons {
                         eventResizableFromStart: false,
                         initialView: 'timeGridWeek',
                         initialDate: initialDate,
+                        nextDayThreshold: "00:00:00",
                         rerenderDelay: 500,
                         headerToolbar: {
                             left: 'prev,next today',
@@ -241,13 +241,15 @@ class ReservationCalendar extends Commons {
                             let view = info.view.type;
                             let props = event.extendedProps;
 
-                            let html = '<div class="event-content-container ' + view + '"><div class="time">' + moment(event.start).format('HH:mm') + ' - ' + moment(event.end).format('HH:mm') + '</div>';
+                            let html = '<div class="event-content-container ' + view + '">' +
+                                '<div class="time">' +
+                                _thisVue.formatEventTime(event) + '</div>';
                             html += '<div class="title">' + event.title + '</div>';
 
                             let empl = _thisVue.employees[props.employeeID]?.name ?? props.employee ?? null
                             if (_thisVue.chosenEmployeeOnView === -1) {
                                 if (empl) {
-                                    if(props.type === "free") {
+                                    if (props.type === "free") {
                                         html += '<div class="employee">Vybaví: ' + empl + '</div>';
                                     } else {
                                         html += '<div class="employee">' + empl + '</div>';
@@ -259,7 +261,7 @@ class ReservationCalendar extends Commons {
                                 let isObject = props.services[0]?.id ?? false
                                 html += '<div class="service">'
                                 if (isObject) {
-                                    html += props.services.map((item) =>item?.title).join(", ")
+                                    html += props.services.map((item) => item?.title).join(", ")
                                 } else {
                                     html += props.services.map((serviceID) => _thisVue.services[serviceID]?.title).join(", ")
                                 }
@@ -628,7 +630,7 @@ class ReservationCalendar extends Commons {
 
                     let now = moment(this.dateRange.start).add(1, "hour").format(this.dateFormat.url_date)
                     let params = {[this.urlEmployeeKey]: this.chosenEmployeeOnView}
-                    _thisClass.addParamsToUrl(params, null,true)
+                    _thisClass.addParamsToUrl(params, null, true)
 
                     let appointments = await this.fetchAppointments(now, id, this.calendar.view.type);
                     this.exchangeAppointmentsOnView(appointments)
@@ -709,7 +711,7 @@ class ReservationCalendar extends Commons {
                         service = this.services[service] ?? null
                     }
 
-                    if(appointmentType === "free") {
+                    if (appointmentType === "free") {
                         return appointmentEmployee?.vacation_color ?? this.freeAppColor
                     }
 
@@ -760,6 +762,18 @@ class ReservationCalendar extends Commons {
                         this.appointment.services = this.appointment.services.filter((service) => this.employeeServices.map((service) => service.id).includes(service));
                     }
                 },
+                formatEventTime(event) {
+                    const start = moment(event.start);
+                    const end = moment(event.end);
+
+                    if (start.isSame(end, 'day')) {
+                        // Event is on the same day
+                        return start.format('HH:mm') + ' - ' + end.format('HH:mm');
+                    } else {
+                        // Event spans more than one day
+                        return start.format('DD.MM HH:mm') + ' - ' + end.format('DD.MM HH:mm');
+                    }
+                }
             },
             computed: {
                 canChangeEmployeeOnView() {
@@ -769,7 +783,7 @@ class ReservationCalendar extends Commons {
                     let services = this.appointmentToDelete.extendedProps.services ?? [];
                     let toReturn = "";
                     services.forEach((service) => {
-                        if(Number.isInteger(service)) {
+                        if (Number.isInteger(service)) {
                             toReturn += this.services[service].title + ", ";
                         } else {
                             toReturn += service.title + ", ";
@@ -793,7 +807,7 @@ class ReservationCalendar extends Commons {
                         // If the start and end dates are different, return both dates and times
                         return startDate + " - " + endDate;
                     }
-                }
+                },
             },
             watch: {
                 chosenEmployeeInForms(newID) {

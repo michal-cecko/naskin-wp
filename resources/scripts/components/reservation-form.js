@@ -51,41 +51,41 @@ class ReservationForm extends Commons {
 
         const {createApp} = Vue;
         let app = createApp({
-            data() {
-                return {
-                    step: 1,
+                data() {
+                    return {
+                        step: 1,
 
-                    chosenCategory: null,
-                    chosenServices: {},
-                    chosenEmployee: null,
-                    chosenTime: {},
-                    date: null,
+                        chosenCategory: null,
+                        chosenServices: {},
+                        chosenEmployee: null,
+                        chosenTime: {},
+                        date: null,
 
-                    customer: {
-                        name: "",
-                        email: "",
-                        phone: "",
-                        note: "",
-                    },
+                        customer: {
+                            name: "",
+                            email: "",
+                            phone: "",
+                            note: "",
+                        },
 
-                    errors: [],
+                        errors: [],
 
-                    saveCustomerToCookies: false,
+                        saveCustomerToCookies: false,
 
-                    availableDates: {},
-                    timeOptions: {},
+                        availableDates: {},
+                        timeOptions: {},
 
-                    datesLoading: false,
-                    sending: false,
-                    sent: false,
+                        datesLoading: false,
+                        sending: false,
+                        sent: false,
 
-                    isVisibleOrder: false,
+                        isVisibleOrder: false,
 
-                    container: null,
-                    contentContainer: null,
-                    cards: {},
-                }
-            },
+                        container: null,
+                        contentContainer: null,
+                        cards: {},
+                    }
+                },
                 created() {
                     this.categories = JSON.parse(reservationNode.dataset.categories);
                     console.log(`Reservation Vue component has been created.`)
@@ -163,6 +163,21 @@ class ReservationForm extends Commons {
                         this.step = nextStep
                         if (nextStep !== 5) {
                             this.isVisibleOrder = false
+                        }
+
+                        if (nextStep === 2) {
+                            let onlyEmployee = this.availableEmployees?.[0] ?? null;
+                            if (onlyEmployee && this.availableEmployees.length === 1) {
+                                if (!returning) {
+                                    this.chooseEmployee(onlyEmployee.id)
+                                    await this.changeStep(nextStep + 1)
+                                } else {
+                                    this.chooseEmployee( -1)
+                                    await this.changeStep(nextStep - 1)
+                                }
+
+                                return;
+                            }
                         }
 
                         if (nextStep === 3) {
