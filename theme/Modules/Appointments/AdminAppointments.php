@@ -17,6 +17,7 @@ use Theme\Requests\Appointments\Admin\AppointmentAdminStoreRequest;
 use Theme\Requests\Appointments\Admin\AppointmentAdminTableRequest;
 use Theme\Requests\Appointments\Admin\AppointmentAdminUpdateRequest;
 use Theme\Services\Appointments\AppointmentService;
+use Theme\Users\Employee;
 
 class AdminAppointments {
     use Validation;
@@ -137,11 +138,13 @@ class AdminAppointments {
             $dateToFetchTo = $datetime->endOfDay()->format("Y-m-d H:i:s");
         }
 
+        $employee = intval($data['employeeID']) > 0 ? Employee::where("ID", $data['employeeID'])->first() : null;
+
         $appointments = Appointment::where(function ($query) use ($dateToFetchFrom, $dateToFetchTo) {
             $query->whereBetween("start_at", [$dateToFetchFrom, $dateToFetchTo])
                 ->orWhereBetween("end_at", [$dateToFetchFrom, $dateToFetchTo]);
-        })->where("status", AppointmentStatus::OK)->when(intval($data['employeeID']) > 0, function ($query) use ($data) {
-            $query->where("employee_id", $data['employeeID']);
+        })->where("status", AppointmentStatus::OK)->when($employee, function ($query) use ($employee) {
+            $query->whereIn("employee_id", [$employee->id, ...$employee->mutual_calendar_blocking_employees]);
         })->with(["employee", 'services.service', 'customer'])->get();
 
         $return = [];

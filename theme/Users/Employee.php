@@ -6,6 +6,11 @@ use Theme\PostTypes\Service;
 
 class Employee extends User
 {
+    public function getMutualCalendarBlockingEmployeesAttribute(): iterable
+    {
+        return get_field("blocking-calendar", $this->acf_id);
+    }
+
     public function getAllowedServiceIdsAttribute(): iterable
     {
         $serviceIDs = get_field("services", $this->acf_id);

@@ -279,16 +279,20 @@ class AppointmentService
             }
 
             $appointments = Appointment::where(function ($query) use ($currentEmployee, $currentDate) {
-                $query->where('employee_id', $currentEmployee->id)
-                    ->whereDate('start_at', '>=', $currentDate->toDateString())
+                $query->whereDate('start_at', '>=', $currentDate->toDateString())
                     ->orWhereDate('end_at', '>', $currentDate->toDateString());
-            })->where("employee_id", $currentEmployee->id)
+            })->whereIn('employee_id', [$currentEmployee->id, ...$currentEmployee->mutual_calendar_blocking_employees])
                 ->where("status", AppointmentStatus::OK)
-                ->orderBy("start_at", "ASC")
+                ->orderBy("id", "DESC")
                 ->get();
 
             $obsadeneArr = [];
             foreach ($appointments as $appointment) {
+
+                if($appointment->type === AppointmentType::VACATION && $appointment->employee_id !== $currentEmployee->id) {
+                    continue;
+                }
+
                 $startAt = $appointment->start_at;
                 $endAt = $appointment->end_at_with_break;
 
