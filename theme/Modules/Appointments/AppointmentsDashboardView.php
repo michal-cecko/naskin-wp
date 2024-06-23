@@ -115,7 +115,8 @@ class AppointmentsDashboardView
         if( $this->currentUser?->role !== 'employee') {
             $arr = Employee::all();
         } else {
-            $arr = [Employee::where("ID", $this->currentUser?->id)->first()];
+            $this->currentUser = Employee::where("ID", $this->currentUser->id)->first();
+            $arr = Employee::whereIn("ID", [$this->currentUser?->id, ...$this->currentUser->mutual_calendar_blocking_employees])->get();
         }
 
         $employeesFinal = collect([]);
@@ -129,7 +130,6 @@ class AppointmentsDashboardView
                 'vacation_color' => $employee->vacation_color
             ]);
         }
-
 
         return $employeesFinal;
     }

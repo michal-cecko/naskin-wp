@@ -79,6 +79,28 @@ $activeColor: #b1bb5b;
         box-shadow: 0 0 0 1px var(--fc-page-bg-color);
       }
 
+      .block{
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        background: rgba(#606060, 0.8);
+        z-index: 9;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        text-align: center;
+        padding: 0.4rem;
+        opacity: 1;
+        transition: 0.3s ease all;
+        @include hover() {
+          opacity: 0;
+        }
+      }
+
       .event-content-container {
         .time {
           margin-right: 1rem;

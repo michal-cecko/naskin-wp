@@ -8,29 +8,17 @@ class Employee extends User
 {
     public function getMutualCalendarBlockingEmployeesAttribute(): iterable
     {
-        return get_field("blocking-calendar", $this->acf_id);
+        return get_field("blocking-calendar", $this->acf_id) ?? [];
     }
 
     public function getAllowedServiceIdsAttribute(): iterable
     {
-        $serviceIDs = get_field("services", $this->acf_id);
-
-        if(empty($serviceIDs)) {
-            return [];
-        }
-
-        return $serviceIDs;
+        return get_field("services", $this->acf_id) ?? [];
     }
 
     public function getAllowedServicesAttribute(): iterable
     {
-        $serviceIDs = get_field("services", $this->acf_id);
-
-        if(empty($serviceIDs)) {
-            return collect([]);
-        }
-
-        return Service::whereIn("id", $serviceIDs)->get()->append(['price', 'duration']);
+        return Service::whereIn("id", get_field("services", $this->acf_id) ?? [])->get()->append(['price', 'duration']);
     }
 
     public function getVacationColorAttribute() {

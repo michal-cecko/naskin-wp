@@ -19,7 +19,8 @@ use Theme\Requests\Appointments\Admin\AppointmentAdminUpdateRequest;
 use Theme\Services\Appointments\AppointmentService;
 use Theme\Users\Employee;
 
-class AdminAppointments {
+class AdminAppointments
+{
     use Validation;
 
     public function __construct()
@@ -111,7 +112,7 @@ class AdminAppointments {
     {
         $data = $request->validated();
 
-        $notify = !empty((int) $data['notify']);
+        $notify = !empty((int)$data['notify']);
 
         $appointment = Appointment::find($data['id']);
 
@@ -119,7 +120,6 @@ class AdminAppointments {
 
         wp_send_json_success(['message' => 'Termín bol úspešne zrušený.']);
     }
-
 
 
     public function tableAdmin(AppointmentAdminTableRequest $request): void
@@ -151,48 +151,50 @@ class AdminAppointments {
 
         foreach ($appointments ?? [] as $appointment) {
 
-                if (!$appointment->employee) continue;
+            if (!$appointment->employee) continue;
 
-                if ($appointment->type === AppointmentType::VACATION) {
-                    $return[$appointment->id] = [
-                        'type' => $appointment->type->value,
-                        'employee' => $appointment->employee->first_name,
-                        'employeeID' => $appointment->employee->ID,
-                        'note' => $appointment->note,
-                        'datetime' => [
-                            'from' => $appointment->start_at->format("Y-m-d H:i:s"),
-                            'to' => $appointment->end_at->format("Y-m-d H:i:s")
-                        ]
-                    ];
-                } else {
+            if ($employee && $appointment->employee_id !== $employee->id && $appointment->type === AppointmentType::VACATION) continue;
 
-                    if(!$appointment->customer) {
-                        main()->log()->error("Customer for app: {$appointment->id} was not found");
-                        continue;
-                    }
+            if ($appointment->type === AppointmentType::VACATION) {
+                $return[$appointment->id] = [
+                    'type' => $appointment->type->value,
+                    'employee' => $appointment->employee->first_name,
+                    'employeeID' => $appointment->employee->ID,
+                    'note' => $appointment->note,
+                    'datetime' => [
+                        'from' => $appointment->start_at->format("Y-m-d H:i:s"),
+                        'to' => $appointment->end_at->format("Y-m-d H:i:s")
+                    ]
+                ];
+            } else {
 
-                    $return[$appointment->id] = [
-                        'type' => $appointment->type->value,
-                        'source' => $appointment->source?->value ?? null,
-                        'employee' => $appointment->employee->first_name,
-                        'employeeID' => $appointment->employee->ID,
-                        'services' => $appointment->services->append("service_category_id"),
-                        'break' => $appointment->break,
-                        'datetime' => [
-                            'from' => $appointment->start_at->format("Y-m-d H:i:s"),
-                            'to' => $appointment->end_at->format("Y-m-d H:i:s"),
-                            'to_with_break' => $appointment->end_at_with_break->format("Y-m-d H:i:s"),
-                        ],
-                        'customer' => [
-                            'id' => $appointment->customer_id,
-                            'name' => $appointment->customer->name,
-                            'email' => $appointment->customer->email,
-                            'phone' => $appointment->customer->phone,
-                        ],
-                        'note' => $appointment->note,
-                    ];
+                if (!$appointment->customer) {
+                    main()->log()->error("Customer for app: {$appointment->id} was not found");
+                    continue;
                 }
+
+                $return[$appointment->id] = [
+                    'type' => $appointment->type->value,
+                    'source' => $appointment->source?->value ?? null,
+                    'employee' => $appointment->employee->first_name,
+                    'employeeID' => $appointment->employee->ID,
+                    'services' => $appointment->services->append("service_category_id"),
+                    'break' => $appointment->break,
+                    'datetime' => [
+                        'from' => $appointment->start_at->format("Y-m-d H:i:s"),
+                        'to' => $appointment->end_at->format("Y-m-d H:i:s"),
+                        'to_with_break' => $appointment->end_at_with_break->format("Y-m-d H:i:s"),
+                    ],
+                    'customer' => [
+                        'id' => $appointment->customer_id,
+                        'name' => $appointment->customer->name,
+                        'email' => $appointment->customer->email,
+                        'phone' => $appointment->customer->phone,
+                    ],
+                    'note' => $appointment->note,
+                ];
             }
+        }
 
         wp_send_json_success(["appointments" => $return], 200);
     }

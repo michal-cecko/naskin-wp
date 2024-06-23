@@ -230,7 +230,7 @@ class ReservationCalendar extends Commons {
                             let props = info.event.extendedProps;
 
                             let deleteButtonEl = eventEl.querySelector('.delete-button');
-                            if (!deleteButtonEl) {
+                            if (!deleteButtonEl && _thisVue.onlyLoggedInEmployeeCondition(info.event)) {
                                 eventEl.insertAdjacentHTML('beforeend', html);
                                 deleteButtonEl = eventEl.querySelector('.delete-button');
                                 deleteButtonEl.addEventListener('click', function () {
@@ -240,12 +240,20 @@ class ReservationCalendar extends Commons {
                                 });
                             }
 
-                            if (!props.break) return;
+                            if (props.break && _thisVue.onlyLoggedInEmployeeCondition(info.event)) {
+                                html = '<div class="break" style="height: ' + (19.5 * (props.break / 5)) + 'px">' + props.break + 'min</div>';
+                                let breakEl = eventEl.querySelector('.breakEl');
+                                if (!breakEl) {
+                                    eventEl.insertAdjacentHTML('beforeend', html);
+                                }
+                            }
 
-                            html = '<div class="break" style="height: ' + (19.5 * (props.break / 5)) + 'px">' + props.break + 'min</div>';
-                            let breakEl = eventEl.querySelector('.breakEl');
-                            if (!breakEl) {
-                                eventEl.insertAdjacentHTML('beforeend', html);
+                            if (!_thisVue.onlyLoggedInEmployeeCondition(info.event)) {
+                                html = '<div class="block">' + _thisVue.employees[`${props.employeeID}`]?.name + ' má službu</div>';
+                                let blockingEl = eventEl.querySelector('.breakEl');
+                                if (!blockingEl) {
+                                    eventEl.insertAdjacentHTML('beforeend', html);
+                                }
                             }
 
                         },
@@ -261,9 +269,9 @@ class ReservationCalendar extends Commons {
                             html += '<div class="title">' + event.title + '</div>';
 
                             let empl = _thisVue.employees[props.employeeID]?.name ?? props.employee ?? null
-                            if (_thisVue.chosenEmployeeOnView === -1) {
+                            if (_thisVue.chosenEmployeeOnView === -1 || props.employeeID !== _thisVue.chosenEmployeeOnView) {
                                 if (empl) {
-                                    if (props.type === "free") {
+                                    if (props.type !== "free") {
                                         html += '<div class="employee">Vybaví: ' + empl + '</div>';
                                     } else {
                                         html += '<div class="employee">' + empl + '</div>';
@@ -306,9 +314,10 @@ class ReservationCalendar extends Commons {
                             };
                         },
                         eventClick: function (info) {
-                            if (info.jsEvent.target.classList.contains('delete-button')) {
-                                return false;
-                            }
+                            if (info.jsEvent.target.classList.contains('delete-button')) return false;
+
+                            if(!_thisVue.onlyLoggedInEmployeeCondition(info.event)) return false;
+
                             _thisVue.editingAppointment = info.event;
                             _thisVue.loadEditModal(info.event);
                             _thisVue.visibleEditModal = true;
@@ -411,6 +420,10 @@ class ReservationCalendar extends Commons {
 
 
                     return true;
+                },
+
+                onlyLoggedInEmployeeCondition(event){
+                    return +event.extendedProps.employeeID === +this.loggedInEmployee.id || this.loggedInEmployee.role === "administrator";
                 },
 
                 checkErrors() {
@@ -878,7 +891,7 @@ class ReservationCalendar extends Commons {
                     this.setServiceList()
                 },
                 'appointment.services'(newServices) {
-                    if(this.ignoreInputWatchers) return;
+                    if (this.ignoreInputWatchers) return;
 
                     let start = this.appointment.datetime.start
                     if (start && this.appointment.type === "reservation") {
@@ -886,7 +899,7 @@ class ReservationCalendar extends Commons {
                     }
                 },
                 'appointment.datetime.start'(newStart) {
-                    if(this.ignoreInputWatchers) return;
+                    if (this.ignoreInputWatchers) return;
 
                     let start = newStart
                     let services = this.appointment?.services ?? [];
