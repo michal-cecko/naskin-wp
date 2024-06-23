@@ -188,7 +188,7 @@
                     <div class="button-container">
                         <button class="btn btn--brownish_yellow next-step"
                                 :class="!canContinue(2) ? 'btn-disabled' : ''" :disabled="!canContinue(2)"
-                                v-if="step === 1" @click="changeStep(2)">Vybrať pracovníčku
+                                v-if="step === 1" @click="changeStep(2)">Vybrať dátum
                         </button>
                         <button class="btn btn--brownish_yellow next-step"
                                 :class="!canContinue(3) ? 'btn-disabled' : ''" :disabled="!canContinue(3)"

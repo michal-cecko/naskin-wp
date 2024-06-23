@@ -25,16 +25,18 @@
                                 <thead>
                                 <tr>
                                     <th>Služba</th>
-                                    <th>Trvanie</th>
-                                    <th>Cena</th>
+                                    <th class="hide-mobile">Trvanie</th>
+                                    <th class="hide-mobile">Cena</th>
+                                    <th class="hide-desktop">Cena</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @foreach($category->publishedPosts as $service)
                                     <tr>
                                         <td>{{$service->title}}</td>
-                                        <td>{{$service->duration}} min</td>
-                                        <td>{{$service->price}} €</td>
+                                        <td class="hide-mobile">{{$service->duration}} min</td>
+                                        <td class="hide-mobile">{{$service->price}} €</td>
+                                        <td class="hide-desktop">{{$service->price}}€ / {{$service->duration}}min</td>
                                     </tr>
                                 @endforeach
                                 </tbody>

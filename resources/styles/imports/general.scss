@@ -1,2 +1,14 @@
 @import "../imports/scss-necessary";
 @import "../imports/page-necessary";
+
+.hide-desktop {
+  @include respond-above(md) {
+    display: none !important;
+  }
+}
+
+.hide-mobile {
+  @include respond-below(md) {
+    display: none !important;
+  }
+}
