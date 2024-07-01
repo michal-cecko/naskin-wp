@@ -15,6 +15,8 @@ class AppointmentAdminStoreRequest extends AuthenticatedAdminRequest {
 
     public function rules(): array {
 
+        $reservation = AppointmentType::RESERVATION->value;
+
         return [
             'employeeID' => ['required', 'integer', new Exists("users", "ID")],
 
@@ -24,12 +26,12 @@ class AppointmentAdminStoreRequest extends AuthenticatedAdminRequest {
 
             'type' => ['required', 'in:' . implode(",", AppointmentType::stringCases())],
 
-            'source' => ['required', 'in:' . implode(",", AppointmentSource::stringCases())],
+            'source' => ['required_if:type,' . $reservation, 'in:' . implode(",", AppointmentSource::stringCases())],
 
-            'services' => ['required_if:type,' . AppointmentType::RESERVATION->value, 'array'],
-            'services.*' => ['required_if:type,' . AppointmentType::RESERVATION->value, 'integer', new PostExists(postModel: Service::class)],
+            'services' => ['required_if:type,' . $reservation, 'array'],
+            'services.*' => ['required_if:type,' . $reservation, 'integer', new PostExists(postModel: Service::class)],
 
-            'customer' => ['required_if:type,' . AppointmentType::RESERVATION->value, 'array'],
+            'customer' => ['required_if:type,' . $reservation, 'array'],
             'customer.id' => ['sometimes', 'nullable', 'integer', new PostExists(postModel: Customer::class)],
             'customer.name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'customer.email' => ['sometimes', 'nullable', 'max:255'],

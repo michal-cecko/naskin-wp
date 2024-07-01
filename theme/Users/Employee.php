@@ -8,7 +8,8 @@ class Employee extends User
 {
     public function getMutualCalendarBlockingEmployeesAttribute(): iterable
     {
-        return get_field("blocking-calendar", $this->acf_id) ?? [];
+        $value = get_field("blocking-calendar", $this->acf_id) ?? [];
+        return empty($value) ? [] : $value;
     }
 
     public function getAllowedServiceIdsAttribute(): iterable

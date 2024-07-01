@@ -15,6 +15,8 @@ class AppointmentAdminUpdateRequest extends AuthenticatedAdminRequest {
 
     public function rules(): array {
 
+        $reservation = AppointmentType::RESERVATION->value;
+
         return [
             'id' => ['required', 'integer', new Exists("appointments", "id")],
 
@@ -26,9 +28,9 @@ class AppointmentAdminUpdateRequest extends AuthenticatedAdminRequest {
 
             'type' => ['required', 'in:' . implode(",", AppointmentType::stringCases())],
 
-            'source' => ['required', 'in:' . implode(",", AppointmentSource::stringCases())],
+            'source' => ['required_if:type,' . $reservation, 'in:' . implode(",", AppointmentSource::stringCases())],
 
-            'services' => ['sometimes', 'array'],
+            'services' => ['required_if:type,' . $reservation, 'array'],
             'services.*' => ['required_if:services,array', 'integer', new PostExists(postModel: Service::class)],
 
             'note' => 'sometimes|nullable|string|max:1000',

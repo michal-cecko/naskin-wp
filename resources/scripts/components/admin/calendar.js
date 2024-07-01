@@ -858,6 +858,7 @@ class ReservationCalendar extends Commons {
                     }
                 },
                 appointmentBreakInMinutes() {
+                    if (this.appointment.type === "free") return null;
                     if (this.appointment.break) return this.appointment.break;
 
                     const start = moment(this.appointment.datetime.start, this.dateFormat.input);
@@ -872,8 +873,6 @@ class ReservationCalendar extends Commons {
                         }
                         return false;
                     });
-
-                    console.log("appBreak:", breakVal)
 
                     return breakVal;
                 },

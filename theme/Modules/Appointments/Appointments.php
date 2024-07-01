@@ -7,6 +7,7 @@ use Exception;
 use Saurus\App\Enums\ApiMethod;
 use Saurus\App\Traits\Validation;
 use Theme\Enum\AppointmentSource;
+use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
 use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Service;
@@ -120,4 +121,31 @@ class Appointments
 
         AppointmentService::generateICS($appointment);
     }
+
+    /**
+     * @action acf/save_post 20
+    */
+    function update_breaks_on_future_appointments_on_break_settings_acf_update($post_id): void
+    {
+        if ($post_id !== 'options') return;
+
+        // Check if the specific field is being saved
+        // field_664c10d7d6393 = breaks_after_appointment
+        if (isset($_POST['acf']['field_664c10d7d6393'])) {
+
+            $appointments = Appointment::where(function ($query) {
+                $query->where('start_at', '>=', Carbon::now())->orWhere('end_at', '>=', Carbon::now());
+            })->where("status", AppointmentStatus::OK)->where("type", AppointmentType::RESERVATION)->get();
+
+            $breaks = AppointmentService::getBreaks();
+            if (empty($breaks)) return;
+
+            foreach ($appointments as $appointment) {
+                $appointment->break = AppointmentService::getBreakForDuration($appointment->duration_without_break, $breaks);
+                $appointment->save();
+            }
+
+        }
+    }
+
 }
