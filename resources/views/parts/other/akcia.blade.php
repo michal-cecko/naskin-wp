@@ -8,7 +8,7 @@
             <button type="button" class="close"></button>
         </div>
         <div class="custom-dialog--body">
-            <img src="{{ main()->assets()->static("images/akcie/pedikura-akcia.jpg") }}" alt="Akcia pedikúra + gél lak">
+            <img src="{{ main()->assets()->static("images/akcie/jul.jpg") }}" alt="Akcie na júl">
         </div>
     </div>
 
