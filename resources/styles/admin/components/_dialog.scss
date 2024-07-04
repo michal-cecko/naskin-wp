@@ -108,9 +108,13 @@
   }
 }
 
-.p-multiselect-panel,
-.p-datepicker{
-  z-index: 5000000 !important;
+body:has(.custom-dialog-wrapper.shown) {
+  overflow: hidden;
+}
+
+.p-inputtext {
+  padding: 5px 10px !important;
+  border: 1px solid #d1d5db !important;
 }
 
 #app {

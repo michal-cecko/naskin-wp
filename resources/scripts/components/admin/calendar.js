@@ -908,8 +908,18 @@ class ReservationCalendar extends Commons {
                 },
             }
         });
-        app.use(primevue.config.default,
+
+        app.use(PrimeVue.Config,
             {
+                zIndex: {
+                    overlay: 1000000,
+                },
+                theme: {
+                    preset: PrimeVue.Themes.Aura,
+                    options: {
+                        darkModeSelector: '.my-app-dark',
+                    }
+                },
                 locale: {
                     dayNames: [
                         "Nedeľa",
@@ -951,15 +961,15 @@ class ReservationCalendar extends Commons {
                         "Nov",
                         "Dec",
                     ],
-                },
+                }
             });
         app.directive("click-outside", clickOutsideDirective);
 
-        app.component('p-datepicker', primevue.calendar);
-        app.component('p-multiselect', primevue.multiselect);
-        app.component('p-input-text', primevue.inputtext);
-        app.component('p-dialog', primevue.dialog);
-        app.component('p-confirmdialog', primevue.confirmdialog);
+        app.component('p-datepicker', PrimeVue.DatePicker);
+        app.component('p-multiselect', PrimeVue.MultiSelect);
+        app.component('p-input-text', PrimeVue.InputText);
+        app.component('p-dialog', PrimeVue.Dialog);
+        app.component('p-confirmdialog', PrimeVue.ConfirmDialog);
 
         app.mount("#calendarContainer");
     }

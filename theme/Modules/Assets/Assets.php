@@ -113,14 +113,9 @@ class Assets extends SaurusAssets
     }
 
     private function enqueuePrimevue() : void {
-        wp_enqueue_script('primevue-js', 'https://unpkg.com/primevue/core/core.min.js');
+        wp_enqueue_script('primevue-js', 'https://unpkg.com/primevue/umd/primevue.min.js');
+        wp_enqueue_script('primevue-aura-js', 'https://unpkg.com/@primevue/themes/umd/aura.min.js');
         wp_enqueue_style('primevue-theme-css', 'https://unpkg.com/primevue/resources/themes/lara-light-blue/theme.css');
-
-        wp_enqueue_script('pvc-confirm-dialog', 'https://unpkg.com/primevue/confirmdialog/confirmdialog.min.js');
-        wp_enqueue_script('pvc-dialog', 'https://unpkg.com/primevue/dialog/dialog.min.js');
-        wp_enqueue_script('pvc-input-text', 'https://unpkg.com/primevue/inputtext/inputtext.min.js');
-        wp_enqueue_script('pvc-multiselect', 'https://unpkg.com/primevue/multiselect/multiselect.min.js');
-        wp_enqueue_script('pvc-datepicker', 'https://unpkg.com/primevue/calendar/calendar.min.js');
     }
 }
 
