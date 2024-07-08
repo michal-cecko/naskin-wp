@@ -10,7 +10,6 @@ class NameDay extends Model
 
     protected $fillable = [
         'name',
-        'day',
-        'month'
+        'date',
     ];
 }
