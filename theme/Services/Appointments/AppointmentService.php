@@ -16,6 +16,7 @@ use Theme\Exceptions\Appointment\AppointmentInvalidDatetimeDifferenceException;
 use Theme\Exceptions\Appointment\AppointmentNotFoundException;
 use Theme\Exceptions\Email\EmailFailedToSendException;
 use Theme\Exceptions\Employee\EmployeeNotFoundException;
+use Theme\Helpers\ModelRelationsHelper;
 use Theme\Mail\Appointments\Customer\AppointmentCancelledCustomer;
 use Theme\Mail\Appointments\Customer\AppointmentCreatedCustomer;
 use Theme\Mail\Appointments\Customer\AppointmentRemindCustomer;
@@ -34,7 +35,7 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
+    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
     {
         if (empty($customer['id'])) {
             $customer = CustomerService::createCustomer($customer['name'], $customer['email'], $customer['phone'] ?? null);
@@ -50,6 +51,7 @@ class AppointmentService
             'employee_id' => $employeeID,
             'start_at' => $startAt,
             'end_at' => $endAt,
+            'total' => self::calculateTotal($services),
             'break' => AppointmentService::getBreakForDuration($duration),
             'customer_id' => $customer->id,
             'note' => $note,
@@ -69,7 +71,9 @@ class AppointmentService
             CustomerService::updateLastAppointmentDate($customer, $appointment->start_at->format("Y-m-d H:i"));
         }
 
-        $appointment->load(["employee", "services"]);
+        $appointment->load(["employee", "services", "payments"]);
+
+        self::syncPaymentsWithAppointment($appointment, $payments);
 
         if ($notifyCustomer) {
             if (!self::notifyCustomer($appointment, AppointmentEmailType::CREATED)) {
@@ -90,9 +94,9 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false): ?Appointment
+    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false): ?Appointment
     {
-        $eager = ["services", "customer"];
+        $eager = ["services", "customer", "payments"];
 
         if(is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->with($eager)->first();
@@ -107,6 +111,7 @@ class AppointmentService
 
         $appointment->update([
             'employee_id' => $employee->ID,
+            'total' => self::calculateTotal($services),
             'break' => self::getBreakForDuration($duration),
             'start_at' => $startAt,
             'source' => $source,
@@ -132,6 +137,8 @@ class AppointmentService
             }
         }
         $appointment->services()->whereNotIn("appointment_services.service_id", $submittedServiceIds->toArray())->delete();
+
+        self::syncPaymentsWithAppointment($appointment, $payments);
 
         if ($notifyCustomer) {
             self::notifyCustomer($appointment, AppointmentEmailType::UPDATED);
@@ -577,5 +584,34 @@ class AppointmentService
         }
 
         return $employee;
+    }
+
+    public static function syncPaymentsWithAppointment($appointment, iterable $payments = []) : void
+    {
+        $submittedPaymentIDs = collect($payments)->pluck("id")->filter();
+
+        $appointment->loadMissing("payments");
+
+        if (!empty($payments)) {
+            foreach ($payments as $paymentData) {
+                if (isset($paymentData['id'])) {
+                    if ($currentPayment = $appointment->payments->where("id", $paymentData['id'])->first()) {
+                        $currentPayment->update($paymentData);
+                    }
+                } else {
+                    $currentPayment = $appointment->payments()->create($paymentData);
+                    $submittedPaymentIDs->push($currentPayment->id);
+                }
+            }
+        }
+
+        $appointment->touch();
+
+        // Delete any options that were not present in the submitted data -- they have been deleted on FE
+        ModelRelationsHelper::deleteNotSubmittedRelatedRecords($appointment, 'payments', $submittedPaymentIDs);
+    }
+
+    public static function calculateTotal(iterable $appointmentServices): int {
+        return collect($appointmentServices)->sum("price");
     }
 }

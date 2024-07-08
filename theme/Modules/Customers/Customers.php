@@ -4,6 +4,7 @@ namespace Theme\Modules\Customers;
 
 use Saurus\App\Enums\ApiMethod;
 use Saurus\App\Traits\Validation;
+use Theme\Modules\Customers\Table\CustomerDetailAppointmentsTable;
 use Theme\PostTypes\Customer;
 use Theme\Requests\Customers\CustomerSearchRequest;
 
@@ -18,6 +19,22 @@ class Customers {
     private function initRest(): void
     {
         main()->api()->addApiEndpoint(ApiMethod::GET, "/customers/search", "customer.search", [$this, 'searchCustomers']);
+    }
+
+    /**
+     * @action add_meta_boxes
+     * @return void
+     */
+    public function registerMetaboxForShowingCustomersAppointmentsTable(): void
+    {
+        global $post;
+        $customer = Customer::with("appointmentsInLatestOrder.services")->where("id", $post?->ID)->first();
+        if(!$customer) return;
+
+        $table = new CustomerDetailAppointmentsTable($customer);
+        $content = $table->render();
+
+        main()->metaboxes()->registerMetabox(id: "customer_appointments_table", title: "Rezervácie", viewOrHtml: $content, postType: Customer::getPostTypeSlug(), passedHtmlToViewParam: true, context: "normal", priority: "high");
     }
 
     /**

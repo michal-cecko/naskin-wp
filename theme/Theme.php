@@ -13,6 +13,7 @@ use Theme\Modules\Customers\CustomersDashboardTable;
 use Theme\Modules\EmployeeRole\EmployeeRole;
 use Theme\Modules\Ics\Ics;
 use Theme\Modules\Plugins\Acf;
+use Theme\Modules\Services\Services;
 use Theme\Modules\Services\ServicesDashboardTable;
 use Theme\Modules\Services\ServicesTransient;
 use Theme\Modules\Setup\BladeDirectives;
@@ -27,6 +28,7 @@ class Theme extends Singleton
     private Acf $acf;
     private ServicesTransient $servicesTransient;
     private ServicesDashboardTable $servicesDashboardTable;
+    private Services $services;
     private Appointments $appointments;
     private AppointmentsDashboardView $appointmentsDashboardView;
     private BladeDirectives $bladeDirectives;
@@ -42,6 +44,7 @@ class Theme extends Singleton
         $this->acf = Main::initModule(new Acf());
         $this->ics = Main::initModule(new Ics());
         $this->servicesTransient = Main::initModule(new ServicesTransient());
+        $this->services = Main::initModule(new Services());
         $this->appointments = Main::initModule(new Appointments());
         $this->appointmentsDashboardView = Main::initModule(new AppointmentsDashboardView());
         $this->servicesDashboardTable = Main::initModule(new ServicesDashboardTable());

@@ -54,6 +54,7 @@ class AdminAppointments
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
                 services: $services,
+                payments: $data['payments'] ?? [],
                 source: AppointmentSource::getCaseFromValue($data['source']),
                 notifyCustomer: $data['notify'],
                 notifyEmployee: false,
@@ -89,6 +90,7 @@ class AdminAppointments
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
                 services: $services,
+                payments: $data['payments'] ?? [],
                 source: AppointmentSource::getCaseFromValue($data['source']),
                 notifyCustomer: $data['notify'],
             );
@@ -145,7 +147,7 @@ class AdminAppointments
                 ->orWhereBetween("end_at", [$dateToFetchFrom, $dateToFetchTo]);
         })->where("status", AppointmentStatus::OK)->when($employee, function ($query) use ($employee) {
             $query->whereIn("employee_id", [$employee->id, ...$employee->mutual_calendar_blocking_employees]);
-        })->with(["employee", 'services.service', 'customer'])->get();
+        })->with(["employee", 'services.service', 'customer', "payments"])->get();
 
         $return = [];
 
@@ -179,6 +181,7 @@ class AdminAppointments
                     'employee' => $appointment->employee->first_name,
                     'employeeID' => $appointment->employee->ID,
                     'services' => $appointment->services->append("service_category_id"),
+                    'payments' => $appointment->payments,
                     'break' => $appointment->break,
                     'datetime' => [
                         'from' => $appointment->start_at->format("Y-m-d H:i:s"),

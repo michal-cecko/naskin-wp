@@ -375,6 +375,7 @@ class ReservationCalendar extends Commons {
                     if (this.appointment.type !== "free") {
                         body.source = this.appointment.source
                         body.services = this.appointment.services
+                        body.payments = this.appointment.payments
                         body.customer = this.appointment.customer
                     }
 
@@ -404,6 +405,7 @@ class ReservationCalendar extends Commons {
                                     end_with_break: this.getEndWithBreak(moment(this.appointment.datetime.end, this.dateFormat.input), this.appointmentBreakInMinutes),
                                     note: this.appointment.note ?? null,
                                     services: this.appointment.services.map(id => this.services[id]),
+                                    payments: this.appointment.payments,
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
                                     employeeID: this.chosenEmployeeInForms,
                                     customer: this.appointment.customer,
@@ -451,6 +453,23 @@ class ReservationCalendar extends Commons {
                         return false;
                     }
 
+                    if(this.appointment.type !== "free" && this.appointment.payments.length !== 0) {
+                        let err = false;
+
+                        this.appointment.payments.forEach(payment => {
+                            if(!payment.amount) {
+                                _thisClass.notify("Nezadali ste sumu platby.", "error")
+                                err = true;
+                            }
+                            if(!payment.type) {
+                                _thisClass.notify("Nezadali ste typ platby.", "error")
+                                err = true;
+                            }
+                        })
+
+                        if(err) return false;
+                    }
+
                     if (this.appointment.type !== "free" && !this.appointment.customer?.id && !this.appointment.customer?.name) {
                         _thisClass.notify("Vyberte zákazníka alebo zadajte údaje nového.", "error")
                         return false;
@@ -479,6 +498,7 @@ class ReservationCalendar extends Commons {
                     if (this.appointment.type !== "free") {
                         data.source = this.appointment.source
                         data.services = this.appointment.services
+                        data.payments = this.appointment.payments
                     }
 
                     this.buttonLoader = true;
@@ -510,6 +530,7 @@ class ReservationCalendar extends Commons {
                                     end_with_break: this.getEndWithBreak(moment(this.appointment.datetime.end, this.dateFormat.input), this.appointmentBreakInMinutes),
                                     note: this.appointment.note ?? null,
                                     services: this.appointment.services.map(id => this.services[id]),
+                                    payments: this.appointment.payments,
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
                                     employeeID: this.chosenEmployeeInForms,
                                     customer: this.appointment.customer,
@@ -592,6 +613,7 @@ class ReservationCalendar extends Commons {
                                         break: appointment.break,
                                         end_with_break: appointment.break ? moment(appointment.datetime.to_with_break, this.dateFormat.payload) : null,
                                         services: appointment.services?.map((appService => this.services[appService.service_id])) ?? {},
+                                        payments: appointment.payments ?? [],
                                         employee: appointment.employee,
                                         employeeID: appointment.employeeID,
                                         customer: appointment.customer ?? null,
@@ -699,6 +721,7 @@ class ReservationCalendar extends Commons {
                     if (type !== "free") {
                         this.appointment.customer = appToEdit.extendedProps.customer
                         this.appointment.services = appToEdit.extendedProps.services.map((service) => service.id)
+                        this.appointment.payments = appToEdit.extendedProps.payments
                         this.appointment.source = appToEdit.extendedProps.source
                     }
 
@@ -720,6 +743,7 @@ class ReservationCalendar extends Commons {
                         source: "phone",
                         break: null,
                         services: [],
+                        payments: [],
                     }
                 },
 
@@ -822,7 +846,20 @@ class ReservationCalendar extends Commons {
                 },
                 getEndWithBreak(momentEnd, minutes) {
                     return momentEnd.add(minutes, 'minutes');
-                }
+                },
+                addPayment() {
+                    if (!this.appointment.payments) this.appointment.payments = []
+
+                    this.appointment.payments.push({
+                        amount: null,
+                        type: "c",
+                        note: null,
+                    })
+                },
+                removePayment(index) {
+                    console.log(this.appointment.payments, index, this.appointment.payments[index])
+                    this.appointment.payments.splice(index, 1)
+                },
             },
             computed: {
                 canChangeEmployeeOnView() {
@@ -970,6 +1007,7 @@ class ReservationCalendar extends Commons {
         app.component('p-input-text', PrimeVue.InputText);
         app.component('p-dialog', PrimeVue.Dialog);
         app.component('p-confirmdialog', PrimeVue.ConfirmDialog);
+        app.component('p-number', PrimeVue.InputNumber);
 
         app.mount("#calendarContainer");
     }

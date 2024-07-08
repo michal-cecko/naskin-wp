@@ -31,6 +31,11 @@ class ServiceCategory extends TaxonomyType
         );
     }
 
+    public function publishedPostsPluginOrdered() : BelongsToMany
+    {
+        return $this->publishedPosts()->orderBy('menu_order', "ASC")->orderBy("post_title", "ASC");
+    }
+
     public static function getTaxonomySlug(): string
     {
         return "service-category";

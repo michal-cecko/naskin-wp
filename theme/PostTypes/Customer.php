@@ -2,10 +2,20 @@
 
 namespace Theme\PostTypes;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Saurus\App\Modules\Wordpress\Posts\PostType;
+use Theme\Models\Appointment\Appointment;
 
 class Customer extends PostType
 {
+    public function appointments(): HasMany {
+        return $this->hasMany(Appointment::class, 'customer_id', 'ID');
+    }
+
+    public function appointmentsInLatestOrder() : HasMany {
+        return $this->appointments()->orderBy('start_at', 'DESC');
+    }
+
     public function getNameAttribute() : string {
         return $this->title;
     }

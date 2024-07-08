@@ -2,6 +2,7 @@
 
 namespace Theme\Models\Appointment;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Saurus\App\Modules\Wordpress\Models\Model;
@@ -27,6 +28,7 @@ class Appointment extends Model
         'has_been_reminded',
         'status',
         'source',
+        'total',
     ];
 
     protected $casts = [
@@ -45,7 +47,7 @@ class Appointment extends Model
         return main()->api()->getApiEndpointUrl(routeName: "appointment.customer-cancel", routeParams: ['i' => $this->id, 't' => $this->cancel_token]);
     }
 
-    public function getEndAtWithBreakAttribute() {
+    public function getEndAtWithBreakAttribute() : Carbon {
         if(!$this->break) {
             return $this->end_at;
         }
@@ -61,11 +63,11 @@ class Appointment extends Model
         return main()->api()->getApiEndpointUrl(routeName: "appointment.ics", routeParams: ['id' => $this->id, 't' => config("appointments.cron-ics-token")]);
     }
 
-    public function getDurationWithoutBreakAttribute() {
+    public function getDurationWithoutBreakAttribute() : int {
         return $this->start_at->diffInMinutes($this->end_at);
     }
 
-    public function getDurationWithBreakAttribute() {
+    public function getDurationWithBreakAttribute() : int {
         return $this->start_at->diffInMinutes($this->end_at_with_break);
     }
 
@@ -77,6 +79,11 @@ class Appointment extends Model
     public function services(): HasMany
     {
         return $this->hasMany(AppointmentService::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(AppointmentPayment::class);
     }
 
     public function customer(): BelongsTo

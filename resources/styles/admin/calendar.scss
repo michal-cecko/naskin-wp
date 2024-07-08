@@ -341,12 +341,18 @@ $gap: 1rem;
     }
 
     &--body {
+
+      .row,
       .divided-row {
+        width: 100%;
         position: relative;
         display: flex;
         flex-wrap: wrap;
         column-gap: 1rem;
         row-gap: 0.5rem;
+      }
+
+      .divided-row {
 
         .full {
           flex: 1 1 100%;
@@ -363,12 +369,18 @@ $gap: 1rem;
           max-width: calc(33.3333% - ($gap / 3));
         }
 
+        .quarter {
+          flex: 1 1 calc(25% - $gap);
+          max-width: calc(25% - ($gap / 4));
+        }
+
         @include respond-below(md) {
           flex-direction: column;
 
           .full,
           .half,
-          .third {
+          .third,
+          .quarter {
             flex-basis: 100%;
             max-width: 100%;
           }
@@ -384,6 +396,22 @@ $gap: 1rem;
           margin-top: 0.5rem;
           text-align: right;
           font-size: 0.9rem;
+        }
+
+        .payment-note-container {
+          display: grid;
+          grid-template-columns: 1fr 2rem;
+          column-gap: 0.5rem;
+          .remove-payment {
+            cursor: pointer;
+            color: #999;
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+            &:hover {
+              color: #ce3b3b;
+            }
+          }
         }
       }
     }

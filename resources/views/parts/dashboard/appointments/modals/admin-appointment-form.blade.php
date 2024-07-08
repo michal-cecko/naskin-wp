@@ -1,5 +1,5 @@
 @php
-    use Theme\Enum\AppointmentSource;
+    use Theme\Enum\AppointmentPaymentType;use Theme\Enum\AppointmentSource;
     use Theme\Enum\AppointmentType;
 @endphp
 
@@ -114,6 +114,40 @@
             <label for="phone">Telefón</label>
             <input class="custom-text-input" type="text" v-model="appointment.customer.phone">
         </div>
+    </div>
+</div>
+<div class="divided-row">
+    <div class="heading-part">
+        <h3>Platby</h3>
+    </div>
+    <div class="row" v-for="(payment, key) in (appointment.payments ?? [])" :key="key">
+        <div class="quarter">
+            <div class="field-container">
+                <label for="amount">Suma (€)</label>
+                <p-number v-model="payment.amount" :inputId="`payment-amount-${key}`" mode="currency" currency="EUR" placeholder="Suma (€)"
+                          locale="sk-SK"></p-number>
+            </div>
+        </div>
+        <div class="quarter">
+            <div class="field-container">
+                <label for="amount">Typ</label>
+                <select class="custom-select" v-model="payment.type" :id="`payment-type-${key}`">
+                    @foreach(AppointmentPaymentType::translatedCases() as $key => $value)
+                        <option value="{{$key}}" @selected($loop->index === 0)>{{$value}}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        <div class="half payment-note-container">
+            <div class="field-container">
+                <label for="amount">Poznámka</label>
+                <input class="custom-text-input" type="text" v-model="payment.note" placeholder="Poznámka..." :id="`payment-note-${key}`">
+            </div>
+            <div class="dashicons-before dashicons-trash remove-payment" @click="removePayment(key)"></div>
+        </div>
+    </div>
+    <div class="full">
+        <button type="button" class="button button-primary button-small" @click="addPayment" style="margin-top: 0.4rem">Pridať platbu</button>
     </div>
 </div>
 <div class="divided-row">

@@ -1,4 +1,6 @@
-@php use Theme\Helpers\ThemeHelper; @endphp
+@php
+    use Theme\Helpers\ThemeHelper;
+@endphp
 
 @extends('layouts.base')
 

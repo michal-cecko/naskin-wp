@@ -1,5 +1,6 @@
 <?php
 
+use Theme\Enum\AppointmentPaymentType;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
@@ -18,6 +19,10 @@ return [
         AppointmentType::class => [
             'reservation' => 'Rezervácia',
             'free' => 'Voľno',
+        ],
+        AppointmentPaymentType::class => [
+            'c' => 'Hotovosť',
+            'g' => 'Darčeková karta',
         ],
     ]
 ];

@@ -15,7 +15,8 @@ class ServiceCategoryService {
         $categories = get_transient($transient_key);
 
         if ($categories === false) {
-            $categories = ServiceCategoryMapper::collection(ServiceCategory::with(['publishedPosts', 'term'])->get());
+            $categories = ServiceCategory::with(['publishedPostsPluginOrdered', 'term'])->get();
+            $categories = ServiceCategoryMapper::collection($categories);
             set_transient($transient_key, $categories, $expiration_time);
         }
 

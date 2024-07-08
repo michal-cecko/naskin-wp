@@ -12,7 +12,7 @@ class ServiceCategoryMapper extends Mapper {
         $data['id'] = (int) $model->term_id;
         $data['name'] = $model->term->name;
         $data['image'] = $model->image;
-        $data['services'] = ServiceMapper::collection($model->publishedPosts);
+        $data['services'] = ServiceMapper::collection($model->publishedPostsPluginOrdered);
 
         return $data;
     }
