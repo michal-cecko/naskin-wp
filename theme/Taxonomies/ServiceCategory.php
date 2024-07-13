@@ -36,6 +36,11 @@ class ServiceCategory extends TaxonomyType
         return $this->publishedPosts()->orderBy('menu_order', "ASC")->orderBy("post_title", "ASC");
     }
 
+    public function publishedPostsGroupedByTitle() : BelongsToMany
+    {
+        return $this->publishedPosts()->groupBy('post_title');
+    }
+
     public static function getTaxonomySlug(): string
     {
         return "service-category";

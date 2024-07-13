@@ -16,7 +16,7 @@
                             <div class="swiper-slide">
                                 <a href="{{ site_url() }}/cennik/#{{$term->slug}}" class="service-card">
                                     <div class="image-container">
-                                        <img src="{{get_field("service_image", $service->id)}}" alt="{{$service->name}}">
+                                        <img src="{{get_field("serv-image", $service->id)}}" alt="{{$service->name}}">
                                     </div>
                                 </a>
                                 <span>{{$service->title}}</span>

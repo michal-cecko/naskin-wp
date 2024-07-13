@@ -8,21 +8,22 @@ use Theme\Enum\AppointmentType;
 return [
     'translations' => [
         AppointmentSource::class => [
-            'in_person' => 'Osobne',
-            'phone' => 'Telefonicky',
-            'web' => 'Online',
+            AppointmentSource::IN_PERSON->value => 'Osobne',
+            AppointmentSource::PHONE->value => 'Telefonicky',
+            AppointmentSource::WEB->value => 'Online',
         ],
         AppointmentStatus::class => [
-            'ok' => 'OK',
-            'cancelled' => 'Zrušená',
+            AppointmentStatus::OK->value => 'OK',
+            AppointmentStatus::CANCELLED->value => 'Zrušená',
         ],
         AppointmentType::class => [
-            'reservation' => 'Rezervácia',
-            'free' => 'Voľno',
+            AppointmentType::RESERVATION->value => 'Rezervácia',
+            AppointmentType::VACATION->value => 'Voľno',
         ],
         AppointmentPaymentType::class => [
-            'c' => 'Hotovosť',
-            'g' => 'Darčeková karta',
+            AppointmentPaymentType::CASH->value => 'Hotovosť',
+            AppointmentPaymentType::GIFTCARD->value => 'Darčeková karta',
+            AppointmentPaymentType::BANK_CARD->value => 'Banková karta',
         ],
     ]
 ];

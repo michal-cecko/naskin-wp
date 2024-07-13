@@ -32,7 +32,7 @@ class Customers {
         if(!$customer) return;
 
         $table = new CustomerDetailAppointmentsTable($customer);
-        $content = $table->render();
+        $content = $table->generate();
 
         main()->metaboxes()->registerMetabox(id: "customer_appointments_table", title: "Rezervácie", viewOrHtml: $content, postType: Customer::getPostTypeSlug(), passedHtmlToViewParam: true, context: "normal", priority: "high");
     }

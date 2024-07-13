@@ -17,6 +17,7 @@ class ServicesDashboardTable {
         $columns['category'] = 'Kategória';
         $columns['description'] = 'Popis';
         $columns['price'] = 'Cena';
+        $columns['photo'] = 'Obrázok na webe';
         $columns['date'] = 'Dátum';
 
         return $columns;
@@ -37,7 +38,10 @@ class ServicesDashboardTable {
                 echo !empty($price = get_field('serv-price', $post_id)) ? $price . "€" : "Bez ceny";
                 break;
             case 'description':
-                echo !empty($popis = get_field('serv-description', $post_id)) ? $popis : "Bez popisu";
+                echo !empty($popis = get_field('serv-description', $post_id)) ? wp_trim_words($popis, 15, "...") : "<i style='color:gray'>Bez popisu</i>";
+                break;
+            case 'photo':
+                echo !empty($img = get_field('serv-image', $post_id)) ? "<div class='img-round-thumbnail'><img src='{$img}' alt=''/></div>"  : "<i style='color:gray'>Bez obrázku</i>";
                 break;
         }
     }

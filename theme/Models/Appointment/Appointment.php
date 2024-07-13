@@ -90,4 +90,16 @@ class Appointment extends Model
     {
         return $this->belongsTo(Customer::class, "customer_id", "ID");
     }
+
+    public function getLogStringAttribute() : string {
+        if($this->type === AppointmentType::VACATION) {
+            return "{$this->employee->first_name}, od {$this->start_at->format('Y-m-d H:i')} do {$this->end_at->format('Y-m-d H:i')}";
+        }
+
+        return "#{$this->id} {$this->customer->title}, od {$this->start_at->format('Y-m-d H:i')} do {$this->end_at->format('Y-m-d H:i')}, pod pracovníkom {$this->employee->first_name}";
+    }
+
+    public function getLogServicesStringAttribute() : string {
+        return $this->services->map(fn ($service) => "{$service->name}, {$service->duration}min")->implode(' + ');
+    }
 }

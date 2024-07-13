@@ -74,9 +74,7 @@ class Appointments
             notifyEmployee: true
         );
 
-        if(!$appointment) {
-            wp_send_json_error(__('Nastala chyba pri vytváraní rezervácie. Dajte nám o tom vedieť, prosím.', THEME_DOMAIN), 500);
-        }
+        main()->log()->infoDbFile("Vytvorená rezervácia online, {$appointment->log_string}. Služby: {$appointment->log_services}");
 
         wp_send_json_success("Rezervácia bola úspešne vytvorená. Ďakujeme.");
     }
@@ -94,6 +92,7 @@ class Appointments
 
         AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: true, notifyEmployee: true, isCancelledByEmployee: true);
 
+        main()->log()->warningDbFile("Zrušená online rezervácia zákazníkom, {$appointment->log_string}, služby: {$appointment->log_services}");
         wp_redirect(home_url(). "?c=1");
         exit();
     }

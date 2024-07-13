@@ -71,19 +71,19 @@ class AppointmentService
             CustomerService::updateLastAppointmentDate($customer, $appointment->start_at->format("Y-m-d H:i"));
         }
 
-        $appointment->load(["employee", "services", "payments"]);
+        $appointment->load(["employee", "services", "payments", "customer"]);
 
         self::syncPaymentsWithAppointment($appointment, $payments);
 
         if ($notifyCustomer) {
             if (!self::notifyCustomer($appointment, AppointmentEmailType::CREATED)) {
-                main()->log()->warning("Failed to send type::CREATED email to customer for appointment with ID: {$appointment->id}");
+                main()->log()->errorDbFile("Nepodarilo sa odoslať email o vytvorení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}");
             }
         }
 
         if ($notifyEmployee) {
             if (!self::notifyEmployee($appointment, AppointmentEmailType::CREATED)) {
-                main()->log()->warning("Failed to send type::CREATED email to customer for appointment with ID: {$appointment->id}");
+                main()->log()->errorDbFile("Nepodarilo sa odoslať email o vytvorení rezervácie na pracovníkov email: {$appointment->employee->email}, Rezervácia: {$appointment->log_string}");
             }
         }
 
@@ -96,7 +96,7 @@ class AppointmentService
      */
     public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false): ?Appointment
     {
-        $eager = ["services", "customer", "payments"];
+        $eager = ["services", "customer", "payments", "employee"];
 
         if(is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->with($eager)->first();
@@ -141,7 +141,9 @@ class AppointmentService
         self::syncPaymentsWithAppointment($appointment, $payments);
 
         if ($notifyCustomer) {
-            self::notifyCustomer($appointment, AppointmentEmailType::UPDATED);
+            if(!self::notifyCustomer($appointment, AppointmentEmailType::UPDATED)) {
+                main()->log()->errorDbFile("Nepodarilo sa odoslať email o upravení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}");
+            }
         }
 
         return $appointment;

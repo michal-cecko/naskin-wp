@@ -14,7 +14,7 @@ class TaxonomyServiceCategory extends TaxonomyView
     }
 
     private function getServices() {
-        return $this->term->publishedPosts;
+        return $this->term->publishedPostsGroupedByTitle;
     }
 
     private function getAcfValues(): bool|array
