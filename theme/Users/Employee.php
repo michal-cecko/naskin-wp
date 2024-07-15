@@ -14,7 +14,8 @@ class Employee extends User
 
     public function getAllowedServiceIdsAttribute(): iterable
     {
-        return get_field("services", $this->acf_id) ?? [];
+        $serviceIDs = get_field("services", $this->acf_id);
+        return !empty($serviceIDs) ? $serviceIDs : [];
     }
 
     public function getAllowedServicesAttribute(): iterable

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Saurus\App\Traits\ModelDirtyPropsTracker;
 use Theme\Enum\AppointmentEmailType;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
@@ -77,13 +78,13 @@ class AppointmentService
 
         if ($notifyCustomer) {
             if (!self::notifyCustomer($appointment, AppointmentEmailType::CREATED)) {
-                main()->log()->errorDbFile("Nepodarilo sa odoslať email o vytvorení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}");
+                main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}");
             }
         }
 
         if ($notifyEmployee) {
             if (!self::notifyEmployee($appointment, AppointmentEmailType::CREATED)) {
-                main()->log()->errorDbFile("Nepodarilo sa odoslať email o vytvorení rezervácie na pracovníkov email: {$appointment->employee->email}, Rezervácia: {$appointment->log_string}");
+                main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie na pracovníkov email: {$appointment->employee->email}, Rezervácia: {$appointment->log_string}");
             }
         }
 
@@ -94,7 +95,7 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false): ?Appointment
+    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false): array
     {
         $eager = ["services", "customer", "payments", "employee"];
 
@@ -109,7 +110,7 @@ class AppointmentService
 
         [$duration, $endAt] = self::calculateDuration($startAt, $endAt, $services);
 
-        $appointment->update([
+        $appointment->fill([
             'employee_id' => $employee->ID,
             'total' => self::calculateTotal($services),
             'break' => self::getBreakForDuration($duration),
@@ -118,6 +119,8 @@ class AppointmentService
             'end_at' => $endAt,
             'note' => $note,
         ]);
+        $changes = $appointment->getChangedColumns();
+        $appointment->save();
 
         if(!$appointment->start_at->equalTo($startAt)) {
             $lastAppointment = get_field('cust_last-appointment', $appointment->customer->ID);
@@ -142,11 +145,11 @@ class AppointmentService
 
         if ($notifyCustomer) {
             if(!self::notifyCustomer($appointment, AppointmentEmailType::UPDATED)) {
-                main()->log()->errorDbFile("Nepodarilo sa odoslať email o upravení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}");
+                main()->log()->errorDB("Nepodarilo sa odoslať email o upravení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}");
             }
         }
 
-        return $appointment;
+        return ['appointment' => $appointment, 'changes' => $changes];
 
     }
 
@@ -183,7 +186,7 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function updateVacation(Appointment|int $appointment, int|Employee $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null): ?Appointment
+    public static function updateVacation(Appointment|int $appointment, int|Employee $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null): array
     {
         if(is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->first();
@@ -199,14 +202,16 @@ class AppointmentService
             throw new AppointmentInvalidDatetimeDifferenceException();
         }
 
-        $appointment->update([
+        $appointment->fill([
             'employee_id' => $employee->ID,
             'start_at' => $startAt,
             'end_at' => $endAt,
             'note' => $note,
         ]);
+        $changes = $appointment->getChangedColumns();
+        $appointment->save();
 
-        return $appointment;
+        return ['appointment' => $appointment, 'changes' => $changes];
     }
 
     public static function generateCancelToken(): string
@@ -380,6 +385,11 @@ class AppointmentService
 
                     $currentStart = $currentTime->format("H:i");
                     $currentEnd = $currentTime->modify("+" . $serviceDuration . " minutes")->modify("+" . self::getBreakForDuration($serviceDuration, $breaks) . " minutes")->format("H:i");
+
+                    //2hrs added bcs of Slovakia timezone
+                    if($currentTime->lt(Carbon::now()->addHours(2))) {
+                        continue;
+                    }
 
                     //echo "termin: from" . $currentStart . " to $currentEnd\n";
                     if ($lunchStart && $lunchEnd) {

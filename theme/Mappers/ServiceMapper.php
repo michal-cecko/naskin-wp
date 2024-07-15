@@ -3,8 +3,6 @@
 namespace Theme\Mappers;
 
 use Saurus\App\Modules\Mapper\Mapper;
-use Theme\Taxonomies\ServiceCategory;
-use Theme\Users\Employee;
 
 class ServiceMapper extends Mapper {
     public static function toArray($model) : array {

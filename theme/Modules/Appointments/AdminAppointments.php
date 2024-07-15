@@ -60,7 +60,7 @@ class AdminAppointments
                 notifyEmployee: false,
             );
 
-            main()->log()->infoDbFile("Vytvorená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services}");
+            main()->log()->infoDB("Vytvorená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services_string}", resources: [$appointment]);
 
         } else {
 
@@ -71,7 +71,7 @@ class AdminAppointments
                 note: $data['note'],
             );
 
-            main()->log()->infoDbFile("Vytvorené voľno pracovníka {$appointment->log_string}");
+            main()->log()->infoDB("Vytvorené voľno pracovníka {$appointment->log_string}", resources: [$appointment]);
 
 
         }
@@ -88,7 +88,7 @@ class AdminAppointments
 
             $services = Service::whereIn("id", $data['services'])->get();
 
-            $appointment = AppointmentService::updateReservation(
+            ['appointment' => $appointment, 'changes' => $changes] = AppointmentService::updateReservation(
                 appointment: (int)$data['id'],
                 employee: (int)$data['employeeID'],
                 startAt: Carbon::parse($data['date']['start']),
@@ -100,11 +100,11 @@ class AdminAppointments
                 notifyCustomer: $data['notify'],
             );
 
-            main()->log()->infoDbFile("Upravená rezervácia pracovníkom {$appointment->log_string}");
+            main()->log()->infoDB("Upravená rezervácia pracovníkom {$appointment->log_string}", changes: $changes, resources: [$appointment]);
 
         } else {
 
-            $appointment = AppointmentService::updateVacation(
+            ['appointment' => $appointment, 'changes' => $changes] = AppointmentService::updateVacation(
                 appointment: (int)$data['id'],
                 employee: (int)$data['employeeID'],
                 startAt: Carbon::parse($data['date']['start']),
@@ -112,7 +112,7 @@ class AdminAppointments
                 note: $data['note'],
             );
 
-            main()->log()->infoDbFile("Upravené voľno {$appointment->log_string}");
+            main()->log()->infoDB("Upravené voľno {$appointment->log_string}", changes: $changes, resources: [$appointment]);
 
         }
 
@@ -131,9 +131,9 @@ class AdminAppointments
         AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: $notify, isCancelledByEmployee: true);
 
         if($appointment->type === AppointmentType::VACATION) {
-            main()->log()->warningDbFile("Zrušené voľno pracovníka {$appointment->log_string}");
+            main()->log()->warningDB("Zrušené voľno pracovníka {$appointment->log_string}", resources: [$appointment]);
         } else {
-            main()->log()->warningDbFile("Zrušená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services}");
+            main()->log()->warningDB("Zrušená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services_string}", resources: [$appointment]);
         }
 
         wp_send_json_success(['message' => 'Termín bol úspešne zrušený.']);

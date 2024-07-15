@@ -11,7 +11,6 @@ use Theme\Modules\Assets\Assets;
 use Theme\Modules\Customers\Customers;
 use Theme\Modules\Customers\CustomersDashboardTable;
 use Theme\Modules\EmployeeRole\EmployeeRole;
-use Theme\Modules\Ics\Ics;
 use Theme\Modules\Plugins\Acf;
 use Theme\Modules\Services\Services;
 use Theme\Modules\Services\ServicesDashboardTable;
@@ -24,7 +23,6 @@ class Theme extends Singleton
 {
     private Assets $assets;
     private ThemeSetup $themeSetup;
-    private Ics $ics;
     private Acf $acf;
     private ServicesTransient $servicesTransient;
     private ServicesDashboardTable $servicesDashboardTable;
@@ -42,7 +40,6 @@ class Theme extends Singleton
         $this->assets = Main::initModule(new Assets());
         $this->themeSetup = Main::initModule(new ThemeSetup());
         $this->acf = Main::initModule(new Acf());
-        $this->ics = Main::initModule(new Ics());
         $this->servicesTransient = Main::initModule(new ServicesTransient());
         $this->services = Main::initModule(new Services());
         $this->appointments = Main::initModule(new Appointments());
@@ -61,10 +58,5 @@ class Theme extends Singleton
     public function acf(): Acf
     {
         return $this->acf;
-    }
-
-    public function ics(): Ics
-    {
-        return $this->ics;
     }
 }
