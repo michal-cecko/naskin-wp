@@ -93,7 +93,7 @@ class Appointment extends Model
 
     public function getLogStringAttribute() : string {
         if($this->type === AppointmentType::VACATION) {
-            return "{$this->employee->first_name}, od {$this->start_at->format('d.m.Y H:i')} do {$this->end_at->format('d.m.Y H:i')}";
+            return "{$this->employee->first_name}, od {$this->start_at->format('d.m.Y H:i')} do {$this->end_at->format('d.m.Y H:i')}" . (!empty($this->note)) ? ", pozn.: {$this->note}" : "";
         }
 
         return "#{$this->id} {$this->customer->title}, od {$this->start_at->format('d.m.Y H:i')} do {$this->end_at->format('d.m.Y H:i')}, pod pracovníkom {$this->employee->first_name}";
