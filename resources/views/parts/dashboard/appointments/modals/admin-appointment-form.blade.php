@@ -116,7 +116,7 @@
         </div>
     </div>
 </div>
-<div class="divided-row">
+<div class="divided-row" v-if="appointment.type === 'reservation'">
     <div class="heading-part">
         <h3>Platby</h3>
     </div>

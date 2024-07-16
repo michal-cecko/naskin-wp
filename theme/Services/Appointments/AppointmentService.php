@@ -294,7 +294,7 @@ class AppointmentService
 
             $appointments = Appointment::where(function ($query) use ($currentEmployee, $currentDate) {
                 $query->whereDate('start_at', '>=', $currentDate->toDateString())
-                    ->orWhereDate('end_at', '>', $currentDate->toDateString());
+                    ->orWhereDate('end_at', '>=', $currentDate->toDateString());
             })->whereIn('employee_id', [$currentEmployee->id, ...$currentEmployee->mutual_calendar_blocking_employees])
                 ->where("status", AppointmentStatus::OK)
                 ->orderBy("id", "DESC")

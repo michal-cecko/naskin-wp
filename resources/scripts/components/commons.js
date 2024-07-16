@@ -4,7 +4,7 @@ export default class Commons {
         this.baseUrl = PHPVars.home_url;
         this.templateDirUri = PHPVars.template_directory_uri;
         this.recaptchaKey = PHPVars.recaptcha_key;
-        this.phoneMQ = window.matchMedia('(max-width: 768px)');
+        this.phoneMQ = window.matchMedia('(max-width: 576px)');
     }
 
     getDateFromTimestamp(timestamp, addTime = false) {

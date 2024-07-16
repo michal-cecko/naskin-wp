@@ -919,7 +919,19 @@ $contentWidthDualGap: 2rem;
       padding: 1.7rem 1.7rem 3rem 1.7rem;
 
       .content {
-        width: calc(100vw - 2rem - 3.4rem);
+        width: calc(100vw - 7.75rem) !important;
+
+        &.choose-service {
+          width: calc(200vw - 14.75rem) !important;
+
+          .services-grid {
+            grid-template-columns: repeat(2, calc(50vw - 4.2rem)) !important
+          }
+
+          &.shown-services {
+            margin-left: calc((100vw - 6.5rem) * -1);
+          }
+        }
 
         &.choose-date {
           .date-picker {

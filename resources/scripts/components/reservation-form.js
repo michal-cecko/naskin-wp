@@ -439,7 +439,8 @@ class ReservationForm extends Commons {
                         if (_thisClass.phoneMQ.matches) {
                             if (!this.container) this.container = document.querySelector(".reservation-container")
                             let width = this.container.offsetWidth
-                            val = ((this.step - 1) * (width - 27.2));
+                            let percentage = width / 100;
+                            val = ((this.step - 1) * (width - (percentage * 7.75)));
                             style = 'translateX(-' + val + 'px)'
                         } else {
                             style = 'translateX(-' + val + 'rem)'
