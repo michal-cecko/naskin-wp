@@ -39,35 +39,40 @@ class Appointment extends Model
         'end_at' => "datetime",
     ];
 
-    public function getCancelUrlAttribute() : ?string {
-        if($this->status !== AppointmentStatus::OK) {
+    public function getCancelUrlAttribute(): ?string
+    {
+        if ($this->status !== AppointmentStatus::OK) {
             return null;
         }
 
         return main()->api()->getApiEndpointUrl(routeName: "appointment.customer-cancel", routeParams: ['i' => $this->id, 't' => $this->cancel_token]);
     }
 
-    public function getEndAtWithBreakAttribute() : Carbon {
-        if(!$this->break) {
+    public function getEndAtWithBreakAttribute(): Carbon
+    {
+        if (!$this->break) {
             return $this->end_at;
         }
 
         return $this->end_at->addMinutes($this->break);
     }
 
-    public function getIcsUrlAttribute() : ?string {
-        if($this->start_at->isPast()) {
+    public function getIcsUrlAttribute(): ?string
+    {
+        if ($this->start_at->isPast()) {
             return null;
         }
 
         return main()->api()->getApiEndpointUrl(routeName: "appointment.ics", routeParams: ['id' => $this->id, 't' => config("appointments.cron-ics-token")]);
     }
 
-    public function getDurationWithoutBreakAttribute() : int {
+    public function getDurationWithoutBreakAttribute(): int
+    {
         return $this->start_at->diffInMinutes($this->end_at);
     }
 
-    public function getDurationWithBreakAttribute() : int {
+    public function getDurationWithBreakAttribute(): int
+    {
         return $this->start_at->diffInMinutes($this->end_at_with_break);
     }
 
@@ -91,19 +96,22 @@ class Appointment extends Model
         return $this->belongsTo(Customer::class, "customer_id", "ID");
     }
 
-    public function getLogStringAttribute() : string {
-        if($this->type === AppointmentType::VACATION) {
-            return "{$this->employee->first_name}, od {$this->start_at->format('d.m.Y H:i')} do {$this->end_at->format('d.m.Y H:i')}" . (!empty($this->note)) ? ", pozn.: {$this->note}" : "";
+    public function getLogStringAttribute(): string
+    {
+        if ($this->type === AppointmentType::VACATION) {
+            return "{$this->employee?->display_name}, od {$this->start_at->format('d.m.Y H:i')} do {$this->end_at->format('d.m.Y H:i')}" . (!empty($this->note) ? ", pozn.: {$this->note}" : "");
         }
 
-        return "#{$this->id} {$this->customer->title}, od {$this->start_at->format('d.m.Y H:i')} do {$this->end_at->format('d.m.Y H:i')}, pod pracovníkom {$this->employee->first_name}";
+        return "#{$this->id} {$this->customer->title}, od {$this->start_at->format('d.m.Y H:i')} do {$this->end_at->format('d.m.Y H:i')}, pod pracovníkom {$this->employee->first_name}" . (!empty($this->note) ? ", pozn.: {$this->note}" : "");
     }
 
-    public function getLogServicesStringAttribute() : string {
-        return $this->services->map(fn ($service) => "{$service->name} ({$service->duration}min)")->implode(' + ');
+    public function getLogServicesStringAttribute(): string
+    {
+        return $this->services->map(fn($service) => "{$service->name} ({$service->duration}min)")->implode(' + ');
     }
 
-    public function getCustomerStringAttribute() : string {
+    public function getCustomerStringAttribute(): string
+    {
         return "{$this->customer->title} - {$this->customer->email} - {$this->customer->phone}";
     }
 }
