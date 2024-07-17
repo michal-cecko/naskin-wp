@@ -83,10 +83,9 @@ class Assets extends SaurusAssets
         $this->enqueuePrimevue();
 
         wp_enqueue_script(handle: 'admin-js', src: $this->dynamic('scripts/admin.js'), ver: $this->ver);
-        wp_enqueue_script(handle: 'calendar-js', src: $this->dynamic('scripts/components/admin/calendar.js'), ver: $this->ver);
         wp_enqueue_style(handle: 'admin-scss', src: $this->dynamic('styles/admin/admin.scss'), ver: $this->ver);
-        wp_enqueue_style(handle: 'calendar-scss', src: $this->dynamic('styles/admin/calendar.scss'), ver: $this->ver);
 
+        $this->enqueueCalendarAssets();
 
         if( in_array($this->user?->role, ['together-employee', 'employee']) ){
             wp_enqueue_style(handle: 'employee_role_dashboard-scss', src: $this->dynamic('styles/admin/employee_role_dashboard.scss'), ver: $this->ver);
@@ -98,6 +97,17 @@ class Assets extends SaurusAssets
 
 
     // Helpers
+
+    private function enqueueCalendarAssets() {
+        global $pagenow;
+
+        if($pagenow !== "admin.php" || ($_GET['page'] ?? null) !== "appointments") {
+            return;
+        }
+
+        wp_enqueue_script(handle: 'calendar-js', src: $this->dynamic('scripts/components/admin/calendar.js'), ver: $this->ver);
+        wp_enqueue_style(handle: 'calendar-scss', src: $this->dynamic('styles/admin/calendar.scss'), ver: $this->ver);
+    }
 
     private function enqueueVue() : void {
         wp_enqueue_script('vue-js', 'https://unpkg.com/vue@3/dist/vue.global.js');
@@ -115,7 +125,6 @@ class Assets extends SaurusAssets
     private function enqueuePrimevue() : void {
         wp_enqueue_script('primevue-js', 'https://unpkg.com/primevue/umd/primevue.min.js');
         wp_enqueue_script('primevue-aura-js', 'https://unpkg.com/@primevue/themes/umd/aura.min.js');
-        wp_enqueue_style('primevue-theme-css', 'https://unpkg.com/primevue/resources/themes/lara-light-blue/theme.css');
     }
 }
 

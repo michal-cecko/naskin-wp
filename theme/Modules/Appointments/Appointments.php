@@ -74,7 +74,7 @@ class Appointments
             notifyEmployee: true
         );
 
-        main()->log()->infoDB("Vytvorená rezervácia online, {$appointment->log_string}. Služby: {$appointment->log_services_string}. Zákazník: {$appointment->customer_string}", resources: [$appointment]);
+        main()->log()->infoDB("Vytvorená rezervácia online, {$appointment->log_string}. Služby: {$appointment->log_services_string}. Zákazník: {$appointment->customer_string}", resources: [$appointment, $appointment->customer]);
 
         wp_send_json_success("Rezervácia bola úspešne vytvorená. Ďakujeme.");
     }
@@ -92,7 +92,7 @@ class Appointments
 
         AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: true, notifyEmployee: true, isCancelledByEmployee: true);
 
-        main()->log()->warningDB("Zrušená online rezervácia zákazníkom, {$appointment->log_string}, služby: {$appointment->log_services_string}. Zákazník: {$appointment->customer_string}", resources: [$appointment]);
+        main()->log()->warningDB("Zrušená online rezervácia zákazníkom, {$appointment->log_string}, služby: {$appointment->log_services_string}. Zákazník: {$appointment->customer_string}", resources: [$appointment, $appointment->customer]);
         wp_redirect(home_url(). "?c=1");
         exit();
     }

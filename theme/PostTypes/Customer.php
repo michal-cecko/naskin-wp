@@ -5,8 +5,9 @@ namespace Theme\PostTypes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Saurus\App\Modules\Wordpress\Posts\PostType;
 use Theme\Models\Appointment\Appointment;
+use Saurus\App\Modules\Log\ILoggable;
 
-class Customer extends PostType
+class Customer extends PostType implements ILoggable
 {
     public function appointments(): HasMany {
         return $this->hasMany(Appointment::class, 'customer_id', 'ID');
@@ -26,6 +27,16 @@ class Customer extends PostType
 
     public function getEmailAttribute() : ?string {
         return get_field("cust_email", $this->id);
+    }
+
+    public function getLogLinkAttribute(): ?string
+    {
+        return $this->edit_link;
+    }
+
+    public function getLogTitleAttribute(): string
+    {
+        return $this->title;
     }
 
     public static function getPostTypeSlug(): string

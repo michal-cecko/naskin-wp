@@ -11,8 +11,9 @@ use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
 use Theme\PostTypes\Customer;
 use Theme\Users\Employee;
+use Saurus\App\Modules\Log\ILoggable;
 
-class Appointment extends Model
+class Appointment extends Model implements ILoggable
 {
     protected $table = 'appointments';
 
@@ -105,6 +106,15 @@ class Appointment extends Model
         return "#{$this->id} {$this->customer->title}, od {$this->start_at->format('d.m.Y H:i')} do {$this->end_at->format('d.m.Y H:i')}, pod pracovníkom {$this->employee->first_name}" . (!empty($this->note) ? ", pozn.: {$this->note}" : "");
     }
 
+    public function getShortLogStringAttribute(): string
+    {
+        if ($this->type === AppointmentType::VACATION) {
+            return "Voľno od {$this->start_at->format('d.m.y H:i')} do {$this->end_at->format('d.m.y H:i')}";
+        }
+
+        return "Rezervácia od {$this->start_at->format('d.m.y H:i')} do {$this->end_at->format('d.m.y H:i')}";
+    }
+
     public function getLogServicesStringAttribute(): string
     {
         return $this->services->map(fn($service) => "{$service->name} ({$service->duration}min)")->implode(' + ');
@@ -113,5 +123,16 @@ class Appointment extends Model
     public function getCustomerStringAttribute(): string
     {
         return "{$this->customer->title} - {$this->customer->email} - {$this->customer->phone}";
+    }
+
+    public function getLogLinkAttribute(): ?string
+    {
+        // TODO: Implement getLogLinkAttribute() method.
+        return "";
+    }
+
+    public function getLogTitleAttribute(): string
+    {
+       return $this->short_log_string;
     }
 }

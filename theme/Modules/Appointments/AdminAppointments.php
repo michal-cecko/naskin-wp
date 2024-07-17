@@ -60,7 +60,7 @@ class AdminAppointments
                 notifyEmployee: false,
             );
 
-            main()->log()->infoDB("Vytvorená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services_string}", resources: [$appointment]);
+            main()->log()->infoDB("Vytvorená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services_string}", resources: [$appointment, $appointment->customer]);
 
         } else {
 
@@ -71,7 +71,7 @@ class AdminAppointments
                 note: $data['note'],
             );
 
-            main()->log()->infoDB("Vytvorené voľno pracovníka {$appointment->log_string}", resources: [$appointment]);
+            main()->log()->infoDB("Vytvorené voľno pracovníka {$appointment->log_string}", resources: [$appointment, $appointment->employee]);
 
 
         }
@@ -100,7 +100,7 @@ class AdminAppointments
                 notifyCustomer: $data['notify'],
             );
 
-            main()->log()->infoDB("Upravená rezervácia pracovníkom {$appointment->log_string}", changes: $changes, resources: [$appointment]);
+            main()->log()->infoDB("Upravená rezervácia pracovníkom {$appointment->log_string}", changes: $changes, resources: [$appointment, $appointment->customer]);
 
         } else {
 
@@ -112,7 +112,7 @@ class AdminAppointments
                 note: $data['note'],
             );
 
-            main()->log()->infoDB("Upravené voľno {$appointment->log_string}", changes: $changes, resources: [$appointment]);
+            main()->log()->infoDB("Upravené voľno {$appointment->log_string}", changes: $changes, resources: [$appointment, $appointment->employee]);
 
         }
 
@@ -131,9 +131,9 @@ class AdminAppointments
         AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: $notify, isCancelledByEmployee: true);
 
         if($appointment->type === AppointmentType::VACATION) {
-            main()->log()->warningDB("Zrušené voľno pracovníka {$appointment->log_string}", resources: [$appointment]);
+            main()->log()->warningDB("Zrušené voľno pracovníka {$appointment->log_string}", resources: [$appointment, $appointment->employee]);
         } else {
-            main()->log()->warningDB("Zrušená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services_string}", resources: [$appointment]);
+            main()->log()->warningDB("Zrušená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services_string}", resources: [$appointment, $appointment->customer]);
         }
 
         wp_send_json_success(['message' => 'Termín bol úspešne zrušený.']);

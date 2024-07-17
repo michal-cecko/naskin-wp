@@ -1,6 +1,5 @@
 import path from 'path';
 import { defineConfig } from 'vite';
-import copy from './.vite/copy';
 
 const ROOT = path.resolve('../../../')
 const BASE = __dirname.replace(ROOT, '');

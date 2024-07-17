@@ -78,13 +78,13 @@ class AppointmentService
 
         if ($notifyCustomer) {
             if (!self::notifyCustomer($appointment, AppointmentEmailType::CREATED)) {
-                main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}");
+                main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer]);
             }
         }
 
         if ($notifyEmployee) {
             if (!self::notifyEmployee($appointment, AppointmentEmailType::CREATED)) {
-                main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie na pracovníkov email: {$appointment->employee->email}, Rezervácia: {$appointment->log_string}");
+                main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie na pracovníkov email: {$appointment->employee->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->employee]);
             }
         }
 
@@ -145,7 +145,7 @@ class AppointmentService
 
         if ($notifyCustomer) {
             if(!self::notifyCustomer($appointment, AppointmentEmailType::UPDATED)) {
-                main()->log()->errorDB("Nepodarilo sa odoslať email o upravení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}");
+                main()->log()->errorDB("Nepodarilo sa odoslať email o upravení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer]);
             }
         }
 
