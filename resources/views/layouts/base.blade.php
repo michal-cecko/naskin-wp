@@ -1,5 +1,3 @@
-
-
 <!doctype html>
 <html {!! language_attributes() !!}>
 <head>
@@ -7,8 +5,10 @@
 
     <meta charset="utf-8">
 
-    <meta name="description" content="Salón Naskin je moderný salón krásy v srdci Považskej Bystrice. Ponúkame kozmetiku, masáže, pedikúru a ďalšie služby s profesionálnym prístupom a kvalitnými produktami.">
-    <meta name="keywords" content="cukrový nástrek PB, cukrový nástrek Považská, cukrový nástrek Považská Bystrica, kozmetika PB, kozmetika Považská, kozmetika Považská Bystrica, laminácia obočia PB, laminácia obočia Považská, laminácia obočia Považská Bystrica, depilácia PB, depilácia Považská, depilácia Považská Bystrica, pedikúra PB, pedikúra Považská, pedikúra Považská Bystrica, gél lak PB, gél lak Považská, gél lak Považská Bystrica, masáže PB, masáže Považská, masáže Považská Bystrica, masáž PB lávové kamene, masáž Považská lávové kamene, masáž Považská Bystrica lávové kamene, tejpovanie PB, tejpovanie Považská, tejpovanie Považská Bystrica, skincare PB, skincare Považská, skincare Považská Bystrica">
+    <meta name="description"
+          content="Salón Naskin je moderný salón krásy v srdci Považskej Bystrice. Ponúkame kozmetiku, masáže, pedikúru a ďalšie služby s profesionálnym prístupom a kvalitnými produktami.">
+    <meta name="keywords"
+          content="cukrový nástrek PB, cukrový nástrek Považská, cukrový nástrek Považská Bystrica, kozmetika PB, kozmetika Považská, kozmetika Považská Bystrica, laminácia obočia PB, laminácia obočia Považská, laminácia obočia Považská Bystrica, depilácia PB, depilácia Považská, depilácia Považská Bystrica, pedikúra PB, pedikúra Považská, pedikúra Považská Bystrica, gél lak PB, gél lak Považská, gél lak Považská Bystrica, masáže PB, masáže Považská, masáže Považská Bystrica, masáž PB lávové kamene, masáž Považská lávové kamene, masáž Považská Bystrica lávové kamene, tejpovanie PB, tejpovanie Považská, tejpovanie Považská Bystrica, skincare PB, skincare Považská, skincare Považská Bystrica">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <link rel='shortcut icon' type='image/x-icon' href='{{ main()->assets()->static("favicon/favicon.ico")}}'/>
     <link rel="apple-touch-icon" sizes="180x180" href="{{ main()->assets()->static("favicon/apple-touch-icon.png")}}">
@@ -19,9 +19,15 @@
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
 
+
     @hasSection('head')
         @yield('head')
     @endif
+
+
+    {{-- Global site tag (gtag.js) - Google Analytics --}}
+    @include("parts.scripts.gtag")
+
 
     <title>NASKIN | Salón krásy</title>
 </head>

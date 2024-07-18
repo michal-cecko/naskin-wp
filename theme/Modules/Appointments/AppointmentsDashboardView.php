@@ -2,6 +2,7 @@
 
 namespace Theme\Modules\Appointments;
 
+use Theme\Modules\Customers\Table\CustomerDetailAppointmentsTable;
 use Theme\PostTypes\Service;
 use Theme\Services\Appointments\AppointmentService;
 use Theme\Taxonomies\ServiceCategory;
@@ -36,7 +37,7 @@ class AppointmentsDashboardView
     }
 
     /**
-     * Add custom dashboard page link to sidebar menu
+     * Add appointment calendar + table views links to sidebar menu
      *
      * @action admin_menu
      * @return void
@@ -44,19 +45,35 @@ class AppointmentsDashboardView
     public function add_appointments_to_menu(): void
     {
         add_menu_page(
-            page_title: __('Termíny', THEME_DOMAIN),
-            menu_title: __('Termíny', THEME_DOMAIN),
+            page_title: __('Kalendár termínov', THEME_DOMAIN),
+            menu_title: __('Kalendár termínov', THEME_DOMAIN),
             capability: 'read',
             menu_slug: 'appointments',
-            callback: [$this, 'render_appointments_table'],
+            callback: [$this, 'renderAppointmentsCalendar'],
             icon_url: 'dashicons-calendar-alt',
             position: 2
         );
+
+        add_submenu_page(
+            parent_slug: 'appointments',
+            page_title: __('Zoznam termínov', THEME_DOMAIN),
+            menu_title: __('Zoznam termínov', THEME_DOMAIN),
+            capability: 'read',
+            menu_slug: 'appointments-list',
+            callback: [$this, 'renderAppointmentsList']
+        );
     }
 
-    public function render_appointments_table(): void
+
+    public function renderAppointmentsCalendar(): void
     {
-        templates()->render("parts.dashboard.appointments.calendar", $this->getAppointmentViewData());
+        templates()->render("pages.dashboard.appointments.appointments-calendar", $this->getAppointmentViewData());
+    }
+
+    public function renderAppointmentsList(): void
+    {
+        $table = new AppointmentsDashboardListTable();
+        echo $table->generate();
     }
 
     private function getAppointmentViewData(): array

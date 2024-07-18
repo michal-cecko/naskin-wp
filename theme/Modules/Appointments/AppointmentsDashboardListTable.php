@@ -1,15 +1,17 @@
 <?php
 
-namespace Theme\Modules\Customers\Table;
+namespace Theme\Modules\Appointments;
 
 use Saurus\App\Modules\Templates\Table\CustomTable;
+use Theme\Enum\AppointmentType;
+use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Customer;
 
-class CustomerDetailAppointmentsTable extends CustomTable
+class AppointmentsDashboardListTable extends CustomTable
 {
-    public string $pageView = 'parts.dashboard.appointments.tables.customer-appointments-table';
+    public string $pageView = 'pages.dashboard.appointments.appointments-list';
 
-    public function __construct(protected $customer){}
+    public function __construct(){}
 
     public function columns(): array
     {
@@ -17,17 +19,26 @@ class CustomerDetailAppointmentsTable extends CustomTable
             'id' => [
                 'label' => __('ID', THEME_DOMAIN),
             ],
-            'start_at' => [
-                'label' => __('Začiatok', THEME_DOMAIN),
+            'type' => [
+                'label' => __('Typ termínu', THEME_DOMAIN),
+                'sortable' => true,
+            ],
+            'customer' => [
+                'label' => __('Zákazník', THEME_DOMAIN),
                 'sortable' => true,
                 'has_row_actions' => true,
             ],
-            'end_at' => [
-                'label' => __('Koniec', THEME_DOMAIN),
-                'sortable' => true,
-            ],
             'employee' => [
                 'label' => __('Pracovník', THEME_DOMAIN),
+                'sortable' => true,
+                'has_row_actions' => true,
+            ],
+            'start_at' => [
+                'label' => __('Začiatok', THEME_DOMAIN),
+                'sortable' => true,
+            ],
+            'end_at' => [
+                'label' => __('Koniec', THEME_DOMAIN),
                 'sortable' => true,
             ],
             'services' => [
@@ -59,7 +70,7 @@ class CustomerDetailAppointmentsTable extends CustomTable
 
     public function rows() : iterable {
         $finalRows = [];
-        $rows = $this->customer->appointmentsInLatestOrder;
+        $rows = Appointment::with(["services", "employee", "customer"])->orderBy("id", "DESC")->get();
         foreach ($rows as $appointment) {
             $rowData = $this->rowData($appointment);
             $finalRows[$rowData['id']] = $rowData['data'];
@@ -84,13 +95,15 @@ class CustomerDetailAppointmentsTable extends CustomTable
         $rowDataToReturn = [];
 
         $rowDataToReturn['id'] = $appointment->id;
+        $rowDataToReturn['customer'] = $appointment->type === AppointmentType::VACATION ? "<i>---</i>" : self::anchor($appointment->customer?->title, $appointment->customer?->log_link);
+        $rowDataToReturn['employee'] = self::anchor($appointment->employee->first_name, $appointment->employee->log_link);
+        $rowDataToReturn['type'] = $appointment->type?->translated();
         $rowDataToReturn['start_at'] = $appointment->start_at->format("d.m.y H:i");
         $rowDataToReturn['end_at'] = $appointment->end_at->format("d.m.y H:i");
-        $rowDataToReturn['employee'] = self::anchor($appointment->employee->first_name, $appointment->employee->log_link);
-        $rowDataToReturn['services'] = $appointment->formatted_services;
+        $rowDataToReturn['services'] = $appointment->type === AppointmentType::VACATION ? "<i>---</i>" : $appointment->formatted_services;
         $rowDataToReturn['total'] = $appointment->total . " €";
         $rowDataToReturn['status'] = $appointment->status?->translated();
-        $rowDataToReturn['source'] = $appointment->source?->translated();
+        $rowDataToReturn['source'] = $appointment->type === AppointmentType::VACATION ? "<i>---</i>" : $appointment->source?->translated();
         $rowDataToReturn['created_at'] = $appointment->created_at->format("d.m.y H:i");
         $rowDataToReturn['updated_at'] = $appointment->updated_at->format("d.m.y H:i");
 
