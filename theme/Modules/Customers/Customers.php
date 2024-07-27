@@ -4,7 +4,7 @@ namespace Theme\Modules\Customers;
 
 use Saurus\App\Enums\ApiMethod;
 use Saurus\App\Traits\Validation;
-use Theme\Modules\Customers\Table\CustomerDetailAppointmentsTable;
+use Theme\Modules\Customers\Table\CustomerDetailAppointmentsTableComponent;
 use Theme\PostTypes\Customer;
 use Theme\Requests\Customers\CustomerSearchRequest;
 
@@ -28,11 +28,11 @@ class Customers {
     public function registerMetaboxForShowingCustomersAppointmentsTable(): void
     {
         global $post;
-        $customer = Customer::with("appointmentsInLatestOrder.services")->where("id", $post?->ID)->first();
+        $customer = Customer::with("latestAppointments.services")->where("id", $post?->ID)->first();
         if(!$customer) return;
 
-        $table = new CustomerDetailAppointmentsTable($customer);
-        $content = $table->generate();
+        $wrapper = new CustomerEditPageMetaboxComponent($customer);
+        $content = $wrapper->generate();
 
         main()->metaboxes()->registerMetabox(id: "customer_appointments_table", title: "Rezervácie", viewOrHtml: $content, postType: Customer::getPostTypeSlug(), passedHtmlToViewParam: true, context: "normal", priority: "high");
     }

@@ -180,4 +180,69 @@ export default class Commons {
 
         const swiper = new Swiper(selector, options);
     }
+
+    usePrimevue(vueInstance) {
+        vueInstance.use(PrimeVue.Config,
+            {
+                zIndex: {
+                    overlay: 1000000,
+                },
+                theme: {
+                    preset: PrimeVue.Themes.Aura,
+                    options: {
+                        darkModeSelector: '.my-app-dark',
+                    }
+                },
+                locale: {
+                    dayNames: [
+                        "Nedeľa",
+                        "Pondelok",
+                        "Utorok",
+                        "Streda",
+                        "Štvrtok",
+                        "Piatok",
+                        "Sobota",
+                    ],
+                    dayNamesShort: ["Ne", "Po", "Ut", "St", "Št", "Pi", "So"],
+                    dayNamesMin: ["Ne", "Po", "Ut", "St", "Št", "Pi", "So"],
+                    firstDayOfWeek: 1,
+                    monthNames: [
+                        "Január",
+                        "Február",
+                        "Marec",
+                        "Apríl",
+                        "Máj",
+                        "Jún",
+                        "Júl",
+                        "August",
+                        "September",
+                        "Október",
+                        "November",
+                        "December",
+                    ],
+                    monthNamesShort: [
+                        "Jan",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "Máj",
+                        "Jún",
+                        "Júl",
+                        "Aug",
+                        "Sep",
+                        "Okt",
+                        "Nov",
+                        "Dec",
+                    ],
+                }
+            });
+
+        vueInstance.component('p-datepicker', PrimeVue.DatePicker);
+        vueInstance.component('p-select', PrimeVue.Select);
+        vueInstance.component('p-multiselect', PrimeVue.MultiSelect);
+        vueInstance.component('p-input-text', PrimeVue.InputText);
+        vueInstance.component('p-dialog', PrimeVue.Dialog);
+        vueInstance.component('p-confirmdialog', PrimeVue.ConfirmDialog);
+        vueInstance.component('p-number', PrimeVue.InputNumber);
+    }
 }

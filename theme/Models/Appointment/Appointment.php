@@ -5,7 +5,7 @@ namespace Theme\Models\Appointment;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Saurus\App\Modules\Templates\Table\CustomTable;
+use Saurus\App\Modules\Templates\Table\TableComponent;
 use Saurus\App\Modules\Wordpress\Models\Model;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
@@ -141,7 +141,7 @@ class Appointment extends Model implements ILoggable
     {
         $formattedServices = [];
         foreach ($this->services as $service) {
-            $formattedServices[] = CustomTable::anchor($service->name, get_edit_post_link($service->service_id)) . " | " . $service->price . " €";
+            $formattedServices[] = TableComponent::anchor($service->name, get_edit_post_link($service->service_id)) . " | " . $service->price . " €";
         }
         return implode("<br>", $formattedServices);
     }

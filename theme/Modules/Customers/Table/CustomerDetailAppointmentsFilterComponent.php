@@ -1,0 +1,62 @@
+<?php
+
+namespace Theme\Modules\Customers\Table;
+
+use Saurus\App\Enums\FilterType;
+use Saurus\App\Modules\Templates\Filter\FilterComponent;
+use Theme\Enum\AppointmentSource;
+use Theme\Enum\AppointmentStatus;
+use Theme\PostTypes\Service;
+use Theme\Users\Employee;
+
+class CustomerDetailAppointmentsFilterComponent extends FilterComponent
+{
+    public function fields() : array {
+        $fields = [];
+
+        $fields['start_at'] = [
+            'label' => __('Začiatok termínu od', THEME_DOMAIN),
+            'type' => FilterType::DATETIME,
+            'operator' => ">="
+        ];
+
+        $fields['end_at'] = [
+            'label' => __('Koniec termínu do', THEME_DOMAIN),
+            'type' => FilterType::DATETIME,
+            'operator' => "<="
+        ];
+
+        $fields['employee_id'] = [
+            'label' => __('Pracovníčka', THEME_DOMAIN),
+            'type' => FilterType::SELECT,
+            'datatype' => "int",
+            'show_options_filter' => true,
+            'options' => Employee::all()->map(fn($employee) => ['key' => $employee->id, 'value' => $employee->first_name])->toArray(),
+        ];
+
+        $fields["services{$this->relationSeparator}service_id"] = [
+            'label' => __('Služby', THEME_DOMAIN),
+            'type' => FilterType::MULTISELECT,
+            'datatype' => "int",
+            'multiple' => true,
+            'show_options_filter' => true,
+            'options' => Service::all()->map(fn($service) => ['key' => $service->id, 'value' => "{$service->title} ({$service->price}€)"])->toArray(),
+        ];
+
+        $fields["status"] = [
+            'label' => __('Status', THEME_DOMAIN),
+            'datatype' => "string",
+            'type' => FilterType::SELECT,
+            'options' => collect(AppointmentStatus::translatedCases())->map(fn($value, $key) => ['key' => $key, 'value' => $value])->values()->toArray(),
+        ];
+
+        $fields["source"] = [
+            'label' => __('Zdroj', THEME_DOMAIN),
+            'datatype' => "string",
+            'type' => FilterType::SELECT,
+            'options' => collect(AppointmentSource::translatedCases())->map(fn($value, $key) => ['key' => $key, 'value' => $value])->values()->toArray(),
+        ];
+
+        return $fields;
+    }
+}

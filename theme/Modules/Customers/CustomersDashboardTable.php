@@ -7,7 +7,6 @@ use Theme\PostTypes\Customer;
 
 class CustomersDashboardTable
 {
-
     /**
      * Adds custom columns to the customers table
      *

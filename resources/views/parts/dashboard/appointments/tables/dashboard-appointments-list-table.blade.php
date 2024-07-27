@@ -1,1 +1,1 @@
-@extends("parts.table.table")
+@extends("modules.table.table")

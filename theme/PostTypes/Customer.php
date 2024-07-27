@@ -13,7 +13,7 @@ class Customer extends PostType implements ILoggable
         return $this->hasMany(Appointment::class, 'customer_id', 'ID');
     }
 
-    public function appointmentsInLatestOrder() : HasMany {
+    public function latestAppointments() : HasMany {
         return $this->appointments()->orderBy('start_at', 'DESC');
     }
 

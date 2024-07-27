@@ -90,7 +90,12 @@ class Appointments
             exit();
         }
 
-        AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: true, notifyEmployee: true, isCancelledByEmployee: true);
+        if(!$appointment->status === AppointmentStatus::CANCELLED) {
+            wp_redirect(home_url(). "?c=2");
+            exit();
+        }
+
+        AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: true, notifyEmployee: true, isCancelledByEmployee: false);
 
         main()->log()->warningDB("Zrušená online rezervácia zákazníkom, {$appointment->log_string}, služby: {$appointment->log_services_string}. Zákazník: {$appointment->customer_string}", resources: [$appointment, $appointment->customer]);
         wp_redirect(home_url(). "?c=1");

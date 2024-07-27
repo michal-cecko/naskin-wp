@@ -2,16 +2,16 @@ $red: #d23f40;
 .button{
   transition: all 0.3s ease;
   &.button-danger {
-    background: $red;
-    border-color: $red;
-    color: white;
+    background: $red !important;
+    border-color: $red !important;
+    color: white !important;
     @include hover() {
-      background: darken($red, 10%);
-      border-color: darken($red, 10%);
-      color: white;
+      background: darken($red, 10%) !important;
+      border-color: darken($red, 10%) !important;
+      color: white !important;
     }
     &:focus {
-      box-shadow: 0 0 0 1px $red;
+      box-shadow: 0 0 0 1px #fff, 0 0 0 3px $red !important;
     }
   }
 }

@@ -2,14 +2,23 @@
 
 namespace Theme\Modules\Customers\Table;
 
-use Saurus\App\Modules\Templates\Table\CustomTable;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Saurus\App\Interfaces\IFilterComponent;
+use Saurus\App\Modules\Templates\Table\TableComponent;
 use Theme\PostTypes\Customer;
 
-class CustomerDetailAppointmentsTable extends CustomTable
+class CustomerDetailAppointmentsTableComponent extends TableComponent
 {
     public string $pageView = 'parts.dashboard.appointments.tables.customer-appointments-table';
 
-    public function __construct(protected $customer){}
+    public function __construct(protected $customer, string $id, ?IFilterComponent $filter = null){
+        parent::__construct(id: $id, filter: $filter);
+    }
+
+    public function recordsQuery() {
+        return $this->customer->latestAppointments();
+    }
 
     public function columns(): array
     {
@@ -57,23 +66,13 @@ class CustomerDetailAppointmentsTable extends CustomTable
         ];
     }
 
-    public function rows() : iterable {
-        $finalRows = [];
-        $rows = $this->customer->appointmentsInLatestOrder;
-        foreach ($rows as $appointment) {
-            $rowData = $this->rowData($appointment);
-            $finalRows[$rowData['id']] = $rowData['data'];
-        }
-        return $finalRows;
-    }
-
     public function rowActions(mixed $rowData): array
     {
         $actions = [];
 
-        //TODO: add edit and delete actions
+        /*//TODO: add edit and delete actions
         $actions['edit'] = get_edit_post_link($rowData->id);
-        $actions['delete'] = get_edit_post_link($rowData->id);
+        $actions['delete'] = get_edit_post_link($rowData->id);*/
 
         return $actions;
     }

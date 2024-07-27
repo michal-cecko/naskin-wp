@@ -2,7 +2,11 @@
 
 namespace Theme\Modules\Appointments;
 
-use Theme\Modules\Customers\Table\CustomerDetailAppointmentsTable;
+use Saurus\App\Main;
+use Theme\Modules\Appointments\Table\AppointmentsDashboardListFilterComponent;
+use Theme\Modules\Appointments\Table\AppointmentsDashboardListTableComponent;
+use Theme\Modules\Customers\Table\CustomerDetailAppointmentsFilterComponent;
+use Theme\Modules\Customers\Table\CustomerDetailAppointmentsTableComponent;
 use Theme\PostTypes\Service;
 use Theme\Services\Appointments\AppointmentService;
 use Theme\Taxonomies\ServiceCategory;
@@ -72,8 +76,11 @@ class AppointmentsDashboardView
 
     public function renderAppointmentsList(): void
     {
-        $table = new AppointmentsDashboardListTable();
-        echo $table->generate();
+        $appointmentsTableFilter = Main::initModule(new AppointmentsDashboardListFilterComponent("f_1"));
+        $appointmentsTable = Main::initModule(new AppointmentsDashboardListTableComponent(id: "t", filter: $appointmentsTableFilter));
+        $appointmentsTableFilter->setConnectedComponents($appointmentsTable);
+
+        echo $appointmentsTable->generate();
     }
 
     private function getAppointmentViewData(): array

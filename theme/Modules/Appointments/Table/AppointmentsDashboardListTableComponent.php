@@ -1,17 +1,15 @@
 <?php
 
-namespace Theme\Modules\Appointments;
+namespace Theme\Modules\Appointments\Table;
 
-use Saurus\App\Modules\Templates\Table\CustomTable;
+use Illuminate\Database\Eloquent\Builder;
+use Saurus\App\Modules\Templates\Table\TableComponent;
 use Theme\Enum\AppointmentType;
 use Theme\Models\Appointment\Appointment;
-use Theme\PostTypes\Customer;
 
-class AppointmentsDashboardListTable extends CustomTable
+class AppointmentsDashboardListTableComponent extends TableComponent
 {
     public string $pageView = 'pages.dashboard.appointments.appointments-list';
-
-    public function __construct(){}
 
     public function columns(): array
     {
@@ -68,14 +66,9 @@ class AppointmentsDashboardListTable extends CustomTable
         ];
     }
 
-    public function rows() : iterable {
-        $finalRows = [];
-        $rows = Appointment::with(["services", "employee", "customer"])->orderBy("id", "DESC")->get();
-        foreach ($rows as $appointment) {
-            $rowData = $this->rowData($appointment);
-            $finalRows[$rowData['id']] = $rowData['data'];
-        }
-        return $finalRows;
+    public function recordsQuery(): Builder
+    {
+        return Appointment::with(["services", "employee", "customer"])->orderBy("id", "DESC");
     }
 
     public function rowActions(mixed $rowData): array

@@ -946,68 +946,9 @@ class ReservationCalendar extends Commons {
             }
         });
 
-        app.use(PrimeVue.Config,
-            {
-                zIndex: {
-                    overlay: 1000000,
-                },
-                theme: {
-                    preset: PrimeVue.Themes.Aura,
-                    options: {
-                        darkModeSelector: '.my-app-dark',
-                    }
-                },
-                locale: {
-                    dayNames: [
-                        "Nedeľa",
-                        "Pondelok",
-                        "Utorok",
-                        "Streda",
-                        "Štvrtok",
-                        "Piatok",
-                        "Sobota",
-                    ],
-                    dayNamesShort: ["Ne", "Po", "Ut", "St", "Št", "Pi", "So"],
-                    dayNamesMin: ["Ne", "Po", "Ut", "St", "Št", "Pi", "So"],
-                    firstDayOfWeek: 1,
-                    monthNames: [
-                        "Január",
-                        "Február",
-                        "Marec",
-                        "Apríl",
-                        "Máj",
-                        "Jún",
-                        "Júl",
-                        "August",
-                        "September",
-                        "Október",
-                        "November",
-                        "December",
-                    ],
-                    monthNamesShort: [
-                        "Jan",
-                        "Feb",
-                        "Mar",
-                        "Apr",
-                        "Máj",
-                        "Jún",
-                        "Júl",
-                        "Aug",
-                        "Sep",
-                        "Okt",
-                        "Nov",
-                        "Dec",
-                    ],
-                }
-            });
         app.directive("click-outside", clickOutsideDirective);
 
-        app.component('p-datepicker', PrimeVue.DatePicker);
-        app.component('p-multiselect', PrimeVue.MultiSelect);
-        app.component('p-input-text', PrimeVue.InputText);
-        app.component('p-dialog', PrimeVue.Dialog);
-        app.component('p-confirmdialog', PrimeVue.ConfirmDialog);
-        app.component('p-number', PrimeVue.InputNumber);
+        _thisClass.usePrimevue(app);
 
         app.mount("#calendarContainer");
     }

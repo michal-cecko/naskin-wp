@@ -26,7 +26,7 @@ class ServicesTransient {
      */
     function invalidate_cache_on_service_save($post_id, $post, $update): void
     {
-        if (WordpressHelper::isAutoSave()) {
+        if (main()->wpHelper()->isAutoSave()) {
             return;
         }
 
