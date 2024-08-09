@@ -10,14 +10,15 @@ class ServiceCategory extends TaxonomyType
 {
     const DEFAULT_COLOR = "#000000";
 
-    public function getImageAttribute(): string
+    public function getImageAttribute(): ?string
     {
-        return main()->assets()->static("images/services/{$this->term->slug}.jpg");
+        $color = get_field("image", $this->acf_id);
+        return !empty($color) ? $color : null;
     }
 
     public function getColorAttribute(): string
     {
-        $color = get_field("color", self::getTaxonomySlug() . "_" . $this->term_id);
+        $color = get_field("color", $this->acf_id);
         return !empty($color) ? $color : self::DEFAULT_COLOR;
     }
 

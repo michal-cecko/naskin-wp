@@ -109,7 +109,7 @@
                     <div class="text-part">
 
                         <h4 class="heading">Depilácia</h4>
-                        <p class="body-text">Sem nejaký popis...</p>
+                        <p class="body-text">Hladká a jemná pokožka bez nechcených chĺpkov.</p>
                         <a href="{{site_url()}}/sluzby/depilacia" class="btn btn--dirty_beige btn--normal">Zobraziť&nbsp;všetko</a>
                     </div>
                 </div>
@@ -142,10 +142,21 @@
                              alt="Cukrový nástrek, sfarbenie do hneda, bezpečné opálenie">
                     </div>
                     <div class="text-part">
-
                         <h4 class="heading">Cukrový nástrek</h4>
                         <p class="body-text">Potrebujete rýchlo a bezpečne zhnednúť ?</p>
                         <a href="{{site_url()}}/cennik/#cukrovy-nastrek"
+                           class="btn btn--dirty_beige btn--normal">Cenník</a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="image-container">
+                        <img src="{{main()->assets()->static("images/services/lpg.jpg")}}"
+                             alt="Neinvazívne nebolestivé ošetrenie spojivového tkaniva">
+                    </div>
+                    <div class="text-part">
+                        <h4 class="heading">LPG</h4>
+                        <p class="body-text">Neinvazívne nebolestivé ošetrenie spojivového tkaniva.</p>
+                        <a href="{{site_url()}}/cennik/#lpg"
                            class="btn btn--dirty_beige btn--normal">Cenník</a>
                     </div>
                 </div>
