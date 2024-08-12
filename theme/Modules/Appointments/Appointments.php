@@ -85,12 +85,12 @@ class Appointments
 
         $appointment = Appointment::find($data['i']);
 
-        if(!AppointmentService::checkCancelToken($appointment, $data['t'])) {
+        if(!$appointment ||!AppointmentService::checkCancelToken($appointment, $data['t'])) {
             wp_redirect(home_url(). "?c=0");
             exit();
         }
 
-        if(!$appointment->status === AppointmentStatus::CANCELLED) {
+        if($appointment->status === AppointmentStatus::CANCELLED) {
             wp_redirect(home_url(). "?c=2");
             exit();
         }

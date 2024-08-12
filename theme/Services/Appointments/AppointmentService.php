@@ -217,7 +217,7 @@ class AppointmentService
     public static function generateCancelToken(): string
     {
         do {
-            $token = Str::random(12);
+            $token = Str::random(128);
         } while(Appointment::where("cancel_token", $token)->first());
 
         return $token;
@@ -537,14 +537,14 @@ class AppointmentService
     {
         $name = "NASKIN - Rezervácia";
 
-        theme()->ics()->setData(
+        main()->ics()->setData(
             start: $appointment->start_at,
             end: $appointment->end_at,
             name: $name,
             location: get_field("address", "options")
         );
 
-        theme()->ics()->show();
+        main()->ics()->show();
     }
 
     /**
