@@ -11,7 +11,9 @@ class ServiceCategoryMapper extends Mapper {
 
         $data['id'] = (int) $model->term_id;
         $data['name'] = $model->term->name;
+        $data['slug'] = $model->term->slug;
         $data['image'] = $model->image;
+        $data['shortDesc'] = $model->shortDesc;
         $data['services'] = ServiceMapper::collection($model->publishedPostsPluginOrdered);
 
         return $data;

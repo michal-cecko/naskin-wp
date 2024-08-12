@@ -16,6 +16,12 @@ class ServiceCategory extends TaxonomyType
         return !empty($color) ? $color : null;
     }
 
+    public function getShortDescAttribute(): ?string
+    {
+        $shortDesc = get_field("short_desc", $this->acf_id);
+        return !empty($shortDesc) ? $shortDesc : null;
+    }
+
     public function getColorAttribute(): string
     {
         $color = get_field("color", $this->acf_id);

@@ -9,6 +9,7 @@ use Theme\Taxonomies\ServiceCategory;
 class ServiceCategoryService {
     public static function getServiceCategories()
     {
+        self::invalidateServiceCategoryCache();
         $transient_key = AppointmentTransient::FRONTEND_GETTER->value;
         $expiration_time = 30 * 24 * 60 * 60; // 30 days
 
