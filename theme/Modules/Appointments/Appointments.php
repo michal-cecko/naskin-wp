@@ -83,7 +83,7 @@ class Appointments
     {
         $data = $request->validated();
 
-        $appointment = Appointment::find($data['i']);
+        $appointment = Appointment::where("type", AppointmentType::RESERVATION)->find($data['i']);
 
         if(!$appointment ||!AppointmentService::checkCancelToken($appointment, $data['t'])) {
             wp_redirect(home_url(). "?c=0");

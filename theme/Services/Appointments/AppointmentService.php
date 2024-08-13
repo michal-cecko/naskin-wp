@@ -489,7 +489,7 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function cancelAppointment($appointment, bool $notifyCustomer = false, bool $notifyEmployee = false, $isCancelledByEmployee = false): void
+    public static function cancelAppointment(Appointment $appointment, bool $notifyCustomer = false, bool $notifyEmployee = false, $isCancelledByEmployee = false): void
     {
         if($appointment->type === AppointmentType::VACATION) {
             $appointment->delete();

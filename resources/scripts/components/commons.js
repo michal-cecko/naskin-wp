@@ -35,6 +35,7 @@ export default class Commons {
         container.appendChild(div);
         setTimeout(function () {
             div.classList.remove("shown");
+            console.log("removing notification")
             setTimeout(function () {
                 div.remove();
             }, 500);

@@ -22,18 +22,20 @@ class General extends Commons {
         let value = params.get("c");
         params.delete("c");
         url.search = params.toString();
-        window.location.replace(url.toString());
+
+        history.replaceState(null, '', `${url.pathname}?${params.toString()}`);
 
         if (value === "0") {
-            this.notify("Nebolo možné nájsť rezerváciu na zrušenie.", "error", 15000)
+            console.log("Showing dynamic notifi")
+            this.notify("Nebolo možné nájsť rezerváciu na zrušenie.", "error", 5000)
         }
 
         if (value === "1") {
-            this.notify("Vaša rezervácia bola zrušená.", "success", 15000)
+            this.notify("Vaša rezervácia bola zrušená.", "success", 5000)
         }
 
         if (value === "2") {
-            this.notify("Táto rezervácia už bola v minulosti zrušená.", "warning", 15000)
+            this.notify("Táto rezervácia už bola v minulosti zrušená.", "warning", 5000)
         }
     }
 
