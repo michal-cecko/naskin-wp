@@ -22,6 +22,12 @@ class ServiceCategory extends TaxonomyType
         return !empty($shortDesc) ? $shortDesc : null;
     }
 
+    public function getStaticBreakAttribute(): ?string
+    {
+        $break = get_field("static_break", $this->acf_id);
+        return !empty($break) ? intval($break) : null;
+    }
+
     public function getColorAttribute(): string
     {
         $color = get_field("color", $this->acf_id);

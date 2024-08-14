@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Saurus\App\Traits\ModelDirtyPropsTracker;
 use Theme\Enum\AppointmentEmailType;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
@@ -53,7 +52,7 @@ class AppointmentService
             'start_at' => $startAt,
             'end_at' => $endAt,
             'total' => self::calculateTotal($services),
-            'break' => AppointmentService::getBreakForDuration($duration),
+            'break' => self::getAppointmentBreak($duration, $services),
             'customer_id' => $customer->id,
             'note' => $note,
             'source' => $source,
@@ -113,7 +112,7 @@ class AppointmentService
         $appointment->fill([
             'employee_id' => $employee->ID,
             'total' => self::calculateTotal($services),
-            'break' => self::getBreakForDuration($duration),
+            'break' => self::getAppointmentBreak($duration, $services),
             'start_at' => $startAt,
             'source' => $source,
             'end_at' => $endAt,
@@ -596,6 +595,18 @@ class AppointmentService
         }
 
         return $employee;
+    }
+
+    public static function getAppointmentBreak(float $duration, iterable $services) : null|int
+    {
+        foreach ($services as $service) {
+            $break = $service->serviceCategory->static_break;
+            if ($break !== null && $break = intval($break)) {
+                return $break;
+            }
+        }
+
+        return AppointmentService::getBreakForDuration($duration);
     }
 
     public static function syncPaymentsWithAppointment($appointment, iterable $payments = []) : void

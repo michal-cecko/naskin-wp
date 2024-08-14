@@ -112,6 +112,7 @@ class AppointmentsDashboardView
             $catID = $cat?->term_id ?? "uncategorized";
             if(!isset($serviceCategories[$catID])) $serviceCategories[$catID] = [
                 'name' => $cat?->term?->name ?? "Bez kategórie",
+                'static_break' => $cat?->static_break,
                 'services' => []
             ];
             $services[$service->id] = [
@@ -120,6 +121,7 @@ class AppointmentsDashboardView
                 'duration' => $service->duration,
                 'price' => $service->price,
                 'category_id' => $catID,
+                'static_break' => $serviceCategories[$catID]['static_break'] ?? null,
             ];
             $serviceCategories[$catID]['services'][$service->id] = $services[$service->id];
             $colorsArray[$catID] = $cat?->color ?? "#000000";

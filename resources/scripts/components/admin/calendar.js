@@ -101,6 +101,8 @@ class ReservationCalendar extends Commons {
                 let services = JSON.parse(pageData?.services)
                 this.services = Object.assign({}, services);
 
+                console.log(this.services)
+
                 this.breaks = JSON.parse(pageData?.breaks)
 
                 let urlParams = _thisClass.getUrlParams()
@@ -896,13 +898,27 @@ class ReservationCalendar extends Commons {
                 },
                 appointmentBreakInMinutes() {
                     if (this.appointment.type === "free") return null;
-                    if (this.appointment.break) return this.appointment.break;
+
+                    let breakVal = null;
+
+                    if (this.appointment.services.length) {
+                        this.appointment.services.forEach(serviceID => {
+                            console.log(this.services[serviceID])
+                            let currentBreakVal = +(this.services[serviceID]?.static_break ?? -1);
+                            if ( currentBreakVal > -1) {
+                                console.log("currentBreakVal", currentBreakVal)
+                                breakVal = currentBreakVal;
+                                return;
+                            }
+                        });
+                    }
+
+                    if (breakVal !== null) return breakVal;
 
                     const start = moment(this.appointment.datetime.start, this.dateFormat.input);
                     const end = moment(this.appointment.datetime.end, this.dateFormat.input);
                     const duration = end.diff(start, 'minutes');
 
-                    let breakVal = null;
                     this.breaks.some((durationBreakRecord) => {
                         if (duration <= durationBreakRecord.duration) {
                             breakVal = durationBreakRecord.break;
