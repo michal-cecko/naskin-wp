@@ -1,7 +1,7 @@
 @extends('layouts.dashboard-layout')
 
 @section('title')
-    Zoznam všetkých termínov
+    Zoznam všetkých výdavkov
 @endsection
 
 @section('content')

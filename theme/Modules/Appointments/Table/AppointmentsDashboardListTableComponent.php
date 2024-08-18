@@ -9,7 +9,7 @@ use Theme\Models\Appointment\Appointment;
 
 class AppointmentsDashboardListTableComponent extends TableComponent
 {
-    public string $pageView = 'pages.dashboard.appointments.appointments-list';
+    public string $view = 'parts.dashboard.appointments.tables.dashboard-appointments-list-table';
 
     public function columns(): array
     {

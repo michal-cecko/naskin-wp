@@ -11,6 +11,7 @@ use Theme\Modules\Assets\Assets;
 use Theme\Modules\Customers\Customers;
 use Theme\Modules\Customers\CustomersDashboardTable;
 use Theme\Modules\EmployeeRole\EmployeeRole;
+use Theme\Modules\Expenses\ExpensesDashboardView;
 use Theme\Modules\Plugins\Acf;
 use Theme\Modules\Services\Services;
 use Theme\Modules\Services\ServicesDashboardTable;
@@ -50,6 +51,7 @@ class Theme extends Singleton
         $this->customersDashboardTable = Main::initModule(new CustomersDashboardTable());
         $this->employeeRole = Main::initModule(new EmployeeRole());
         $this->adminAppointments = Main::initModule(new AdminAppointments());
+        $this->expensesDashboardView = Main::initModule(new ExpensesDashboardView());
     }
 
 

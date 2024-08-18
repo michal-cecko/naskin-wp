@@ -4,8 +4,70 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2afc7cab14d3e7df8ca61a3ad9c50b03",
-    "packages": [],
+    "content-hash": "d0f05de02e8b1c0f45c1aba3c89d196a",
+    "packages": [
+        {
+            "name": "bulkgate/php-sdk",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/BulkGate/php-sdk.git",
+                "reference": "7314255bbf276c64cd8998b769bc7ab33fa9b170"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/BulkGate/php-sdk/zipball/7314255bbf276c64cd8998b769bc7ab33fa9b170",
+                "reference": "7314255bbf276c64cd8998b769bc7ab33fa9b170",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-zlib": "*",
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.5",
+                "nette/di": "^3.0",
+                "nette/tester": "~2.0",
+                "phpstan/phpstan": "^1.9",
+                "tracy/tracy": "^2.9"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "TOPefekt s.r.o.",
+                    "homepage": "https://www.bulkgate.com"
+                },
+                {
+                    "name": "Lukáš Piják",
+                    "homepage": "http://www.lukaspijak.com"
+                }
+            ],
+            "description": "Simple PHP SDK for sending SMS/Viber via BulkGate portal.",
+            "homepage": "https://www.bulkgate.com",
+            "keywords": [
+                "bulkgate",
+                "nette",
+                "sms",
+                "viber"
+            ],
+            "support": {
+                "issues": "https://github.com/BulkGate/php-sdk/issues",
+                "source": "https://github.com/BulkGate/php-sdk/tree/1.0.1"
+            },
+            "time": "2022-11-22T15:10:34+00:00"
+        }
+    ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",

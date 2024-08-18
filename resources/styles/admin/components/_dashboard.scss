@@ -1,10 +1,12 @@
-.searchable-select{
+.searchable-select {
   position: relative;
   width: 100%;
-  .searchbar{
+
+  .searchbar {
     width: 100%;
   }
-  .options{
+
+  .options {
     z-index: 200;
     position: absolute;
     left: 0;
@@ -19,8 +21,9 @@
     border-radius: 6px !important;
     padding: 5px 10px !important;
     color: #6b7280 !important;
+
     .option,
-    .nothing{
+    .nothing {
       font-size: 0.9rem;
       padding: 0 8px;
       min-height: 30px;
@@ -28,33 +31,36 @@
       background: white;
       border-bottom: 1px solid #d1d5db;
       transition: all 0.15s ease;
-      &:last-child{
+
+      &:last-child {
         border-bottom: 0;
       }
     }
-    .option{
+
+    .option {
       cursor: pointer;
       @media(hover: hover) {
-        &:hover{
+        &:hover {
           background: #f1f1f1;
         }
       }
     }
   }
 
-  &.show{
-    .options{
+  &.show {
+    .options {
       display: block;
     }
   }
 }
 
-.img-round-thumbnail{
+.img-round-thumbnail {
   width: 2rem;
   height: 2rem;
   overflow: hidden;
   border-radius: 50%;
-  img{
+
+  img {
     width: 100%;
     height: 100%;
     object-fit: cover;

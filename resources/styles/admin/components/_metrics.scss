@@ -1,0 +1,31 @@
+#income_metric {
+  .dashicons-before {
+    &::before {
+      color: green;
+    }
+  }
+}
+
+#reservations_count_metric {
+  .dashicons-before {
+    &::before {
+      color: cornflowerblue;
+    }
+  }
+}
+
+#expense_sum_metric {
+  .dashicons-before {
+    &::before {
+      color: #c93636;
+    }
+  }
+}
+
+#expense_count_metric {
+  .dashicons-before {
+    &::before {
+      color: cornflowerblue;
+    }
+  }
+}

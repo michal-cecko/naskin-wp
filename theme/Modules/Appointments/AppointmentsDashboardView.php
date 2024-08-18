@@ -2,7 +2,10 @@
 
 namespace Theme\Modules\Appointments;
 
+use Saurus\App\Interfaces\IFilterComponent;
 use Saurus\App\Main;
+use Saurus\App\Modules\Templates\Card\MetricCard;
+use Theme\Models\Appointment\Appointment;
 use Theme\Modules\Appointments\Table\AppointmentsDashboardListFilterComponent;
 use Theme\Modules\Appointments\Table\AppointmentsDashboardListTableComponent;
 use Theme\Modules\Customers\Table\CustomerDetailAppointmentsFilterComponent;
@@ -64,7 +67,7 @@ class AppointmentsDashboardView
             menu_title: __('Zoznam termínov', THEME_DOMAIN),
             capability: 'read',
             menu_slug: 'appointments-list',
-            callback: [$this, 'renderAppointmentsList']
+            callback: [$this, 'renderAppointmentsListPage']
         );
     }
 
@@ -74,13 +77,17 @@ class AppointmentsDashboardView
         templates()->render("pages.dashboard.appointments.appointments-calendar", $this->getAppointmentViewData());
     }
 
-    public function renderAppointmentsList(): void
+    public function renderAppointmentsListPage(): void
     {
         $appointmentsTableFilter = Main::initModule(new AppointmentsDashboardListFilterComponent("f_1"));
         $appointmentsTable = Main::initModule(new AppointmentsDashboardListTableComponent(id: "t", filter: $appointmentsTableFilter));
-        $appointmentsTableFilter->setConnectedComponents($appointmentsTable);
+        $metrics = $this->metrics($appointmentsTableFilter);
 
-        echo $appointmentsTable->generate();
+        templates()->render("pages.dashboard.appointments.appointments-list", [
+            'table' => $appointmentsTable,
+            'metrics' => $metrics,
+            'filter' => $appointmentsTableFilter
+        ]);
     }
 
     private function getAppointmentViewData(): array
@@ -158,5 +165,34 @@ class AppointmentsDashboardView
         }
 
         return $employeesFinal;
+    }
+
+    private function metrics(IFilterComponent $filter): array
+    {
+        $metrics = [];
+
+        $metrics[] = Main::initModule(new MetricCard(
+            id: "reservations_count_metric",
+            heading: "Počet termínov",
+            query: Appointment::query(),
+            icon: 'dashicons-groups',
+            operator: "count",
+            filter: $filter,
+        ));
+
+        $metrics[] = Main::initModule(new MetricCard(
+            id: "income_metric",
+            heading: "Príjem celkom",
+            query: Appointment::query(),
+            targetAttribute: "total",
+            icon: 'dashicons-arrow-up-alt',
+            operator: "sum",
+            filter: $filter,
+            formatter: function($value) {
+                return $value . " €";
+            }
+        ));
+
+        return $metrics;
     }
 }

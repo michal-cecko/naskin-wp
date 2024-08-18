@@ -12,5 +12,8 @@
             "name": "michalcecko",
             "email": "ceckomichal@gmail.com"
         }
-    ]
+    ],
+    "require": {
+        "bulkgate/php-sdk": "^1.0"
+    }
 }
