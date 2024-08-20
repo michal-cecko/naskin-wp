@@ -6,7 +6,9 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Theme\Enum\AppointmentEmailType;
+use Symfony\Component\Mime\Email;
+use Theme\Enum\AppointmentCustomerNotificationType;
+use Theme\Enum\AppointmentEmployeeNotificationType;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
@@ -28,6 +30,8 @@ use Theme\PostTypes\Customer;
 use Theme\PostTypes\Service;
 use Theme\Services\Customers\CustomerService;
 use Theme\Services\Employees\EmployeeService;
+use Theme\Services\Notifications\EmailService;
+use Theme\Services\Notifications\Sms\SmsService;
 use Theme\Users\Employee;
 
 class AppointmentService
@@ -76,13 +80,13 @@ class AppointmentService
         self::syncPaymentsWithAppointment($appointment, $payments);
 
         if ($notifyCustomer) {
-            if (!self::notifyCustomer($appointment, AppointmentEmailType::CREATED)) {
+            if (!EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::CREATED)) {
                 main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer]);
             }
         }
 
         if ($notifyEmployee) {
-            if (!self::notifyEmployee($appointment, AppointmentEmailType::CREATED)) {
+            if (!EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::CREATED)) {
                 main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie na pracovníkov email: {$appointment->employee->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->employee]);
             }
         }
@@ -143,7 +147,7 @@ class AppointmentService
         self::syncPaymentsWithAppointment($appointment, $payments);
 
         if ($notifyCustomer) {
-            if(!self::notifyCustomer($appointment, AppointmentEmailType::UPDATED)) {
+            if(!EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::UPDATED)) {
                 main()->log()->errorDB("Nepodarilo sa odoslať email o upravení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer]);
             }
         }
@@ -220,57 +224,6 @@ class AppointmentService
         } while(Appointment::where("cancel_token", $token)->first());
 
         return $token;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public static function notifyCustomer(Appointment $appointment, AppointmentEmailType $type, array $additionalData = []): bool
-    {
-        $mailable = match ($type) {
-            AppointmentEmailType::CREATED => new AppointmentCreatedCustomer($appointment, $additionalData),
-            AppointmentEmailType::UPDATED => new AppointmentUpdatedCustomer($appointment, $additionalData),
-            AppointmentEmailType::CANCELLED => new AppointmentCancelledCustomer($appointment, $additionalData),
-            AppointmentEmailType::REMIND => new AppointmentRemindCustomer($appointment, $additionalData),
-            default => throw new AppointmentEmailNotificationNotImplementedException($type->value)
-        };
-
-        $email = CustomerService::checkCustomerEmail($appointment->customer);
-
-        if(!main()->mail()->send($mailable, $email)) {
-            throw new EmailFailedToSendException($email);
-        }
-
-        return true;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public static function notifyEmployee(Appointment $appointment, AppointmentEmailType $type, array $additionalData = []): bool
-    {
-        try {
-            $mailable = match ($type) {
-                AppointmentEmailType::CREATED => new AppointmentCreatedEmployee($appointment, $additionalData),
-                AppointmentEmailType::CANCELLED => new AppointmentCancelledEmployee($appointment, $additionalData),
-                default => throw new Exception('Unsupported email type for employee notification: ' . $type->value)
-            };
-        } catch (Exception $th) {
-            main()->log()->error($th->getMessage());
-            return false;
-        }
-
-        $email = $appointment->employee?->email;
-        if (empty($email)) {
-            return false;
-        }
-
-        $adminEmail = get_field('reservations_email', 'option');
-
-        $adminSent = empty($adminEmail) || main()->mail()->send($mailable, $adminEmail);
-        $employeeSent = main()->mail()->send($mailable, $email);
-
-        return $adminSent && $employeeSent;
     }
 
     public static function getAvailableDates(Collection $services, string|Employee $employee = "ANY"): Collection
@@ -498,11 +451,11 @@ class AppointmentService
         $appointment->update(['status' => AppointmentStatus::CANCELLED]);
 
         if($notifyEmployee) {
-            self::notifyEmployee($appointment, AppointmentEmailType::CANCELLED, ['isCancelledByEmployee' => $isCancelledByEmployee]);
+            EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::CANCELLED, ['isCancelledByEmployee' => $isCancelledByEmployee]);
         }
 
         if($notifyCustomer) {
-            self::notifyCustomer($appointment, AppointmentEmailType::CANCELLED, ['isCancelledByEmployee' => $isCancelledByEmployee]);
+            EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::CANCELLED, ['isCancelledByEmployee' => $isCancelledByEmployee]);
         }
     }
 
@@ -523,7 +476,10 @@ class AppointmentService
 
         $notified = 0;
         foreach ($appointments as $appointment) {
-            if(self::notifyCustomer($appointment, AppointmentEmailType::REMIND)) {
+            $emailReminder = EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::REMIND);
+            $smsReminder = SmsService::notifyCustomer($appointment, AppointmentCustomerNotificationType::REMIND);
+
+            if($emailReminder || $smsReminder) {
                 $appointment->update(['has_been_reminded' => true]);
                 $notified++;
             }

@@ -1,0 +1,1 @@
+Dobrý deň, pripomíname Vám, že sa blíži dátum Vašej rezervácie.

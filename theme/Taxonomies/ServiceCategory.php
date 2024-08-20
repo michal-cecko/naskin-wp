@@ -34,6 +34,12 @@ class ServiceCategory extends TaxonomyType
         return !empty($color) ? $color : self::DEFAULT_COLOR;
     }
 
+    public function getIsHiddenFromWebsiteAttribute(): string
+    {
+        $isHidden = get_field("is_hidden_from_website", $this->acf_id);
+        return !empty($isHidden);
+    }
+
     public function posts() : BelongsToMany
     {
         return $this->belongsToMany(

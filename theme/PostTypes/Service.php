@@ -35,6 +35,12 @@ class Service extends PostType
         return ServiceCategory::find($this->taxonomies->firstWhere("taxonomy", ServiceCategory::getTaxonomySlug())?->term_id);
     }
 
+    public function getIsHiddenFromWebsiteAttribute(): string
+    {
+        $isHidden = get_field("is_hidden_from_website", $this->acf_id);
+        return !empty($isHidden);
+    }
+
     public function getServiceCategoryIdAttribute() {
         return $this->service_category?->term?->term_id;
     }

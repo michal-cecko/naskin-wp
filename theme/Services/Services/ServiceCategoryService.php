@@ -15,7 +15,7 @@ class ServiceCategoryService {
         $categories = get_transient($transient_key);
 
         if ($categories === false) {
-            $categories = ServiceCategory::with(['publishedPostsPluginOrdered', 'term'])->get();
+            $categories = ServiceCategory::with(['publishedPostsPluginOrdered', 'term'])->get()->filter(fn($category) => !$category->is_hidden_from_website);
             $categories = ServiceCategoryMapper::collection($categories);
             set_transient($transient_key, $categories, $expiration_time);
         }

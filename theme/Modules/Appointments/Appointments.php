@@ -102,17 +102,6 @@ class Appointments
         exit();
     }
 
-    public function sendNotifications(AppointmentSendNotificationsRequest $request): void
-    {
-        $countSent = AppointmentService::notifyAllAppointments();
-
-        if($countSent > 0) {
-            wp_send_json_success("Notifikácie boli odoslané. Počet odoslaných: $countSent");
-        }
-
-        wp_send_json_success("Neboli odoslané žiadne notifikácie.");
-    }
-
     public function generateAppointmentICS(AppointmentICSRequest $request): void
     {
         $data = $request->validated();

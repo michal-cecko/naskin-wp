@@ -4,7 +4,7 @@ namespace Theme\Enum;
 
 use Saurus\App\Traits\Helpers\EnumHelper;
 
-enum AppointmentEmailType: string {
+enum AppointmentCustomerNotificationType: string {
 
     use EnumHelper;
 

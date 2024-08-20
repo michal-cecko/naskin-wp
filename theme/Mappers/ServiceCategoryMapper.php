@@ -14,7 +14,7 @@ class ServiceCategoryMapper extends Mapper {
         $data['slug'] = $model->term->slug;
         $data['image'] = $model->image;
         $data['shortDesc'] = $model->shortDesc;
-        $data['services'] = ServiceMapper::collection($model->publishedPostsPluginOrdered);
+        $data['services'] = ServiceMapper::collection($model->publishedPostsPluginOrdered->filter(fn($category) => !$category->is_hidden_from_website));
 
         return $data;
     }
