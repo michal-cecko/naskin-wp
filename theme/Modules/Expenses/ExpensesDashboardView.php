@@ -33,7 +33,7 @@ class ExpensesDashboardView
         add_menu_page(
             page_title: __('Výdavky', THEME_DOMAIN),
             menu_title: __('Výdavky', THEME_DOMAIN),
-            capability: 'read',
+            capability: 'view_expenses',
             menu_slug: 'expenses',
             callback: [$this, 'renderExpensesListPage'],
             icon_url: 'dashicons-money-alt',
@@ -44,7 +44,7 @@ class ExpensesDashboardView
             'expenses',
             __('Kategorie výdavkov', THEME_DOMAIN),
             __('Kategorie výdavkov', THEME_DOMAIN),
-            'read',
+            'view_expense_categories',
             'edit-tags.php?taxonomy=' . ExpenseCategory::getTaxonomySlug(),
         );
     }
@@ -66,27 +66,31 @@ class ExpensesDashboardView
     {
         $metrics = [];
 
-        $metrics[] = Main::initModule(new MetricCard(
-            id: "expense_count_metric",
-            heading: "Počet výdavkov",
-            query: Expense::query(),
-            icon: 'dashicons-screenoptions',
-            operator: "count",
-            filter: $filter,
-        ));
+        if(current_user_can("view_expenses")) {
+            $metrics[] = Main::initModule(new MetricCard(
+                id: "expense_count_metric",
+                heading: "Počet výdavkov",
+                query: Expense::query(),
+                icon: 'dashicons-screenoptions',
+                operator: "count",
+                filter: $filter,
+            ));
+        }
 
-        $metrics[] = Main::initModule(new MetricCard(
-            id: "expense_sum_metric",
-            heading: "Výdaj celkom",
-            query: Expense::query(),
-            targetAttribute: "total",
-            icon: 'dashicons-money-alt',
-            operator: "sum",
-            filter: $filter,
-            formatter: function($value) {
-                return $value . " €";
-            }
-        ));
+        if(current_user_can("view_expense_money_statistics")) {
+            $metrics[] = Main::initModule(new MetricCard(
+                id: "expense_sum_metric",
+                heading: "Výdaj celkom",
+                query: Expense::query(),
+                targetAttribute: "total",
+                icon: 'dashicons-money-alt',
+                operator: "sum",
+                filter: $filter,
+                formatter: function($value) {
+                    return $value . " €";
+                }
+            ));
+        }
 
         return $metrics;
     }

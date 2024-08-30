@@ -5,14 +5,13 @@ namespace Theme\Modules\Appointments;
 use Saurus\App\Interfaces\IFilterComponent;
 use Saurus\App\Main;
 use Saurus\App\Modules\Templates\Card\MetricCard;
+use Theme\Enum\User\Role;
 use Theme\Models\Appointment\Appointment;
 use Theme\Modules\Appointments\Table\AppointmentsDashboardListFilterComponent;
 use Theme\Modules\Appointments\Table\AppointmentsDashboardListTableComponent;
-use Theme\Modules\Customers\Table\CustomerDetailAppointmentsFilterComponent;
-use Theme\Modules\Customers\Table\CustomerDetailAppointmentsTableComponent;
+use Theme\PostTypes\Product;
 use Theme\PostTypes\Service;
 use Theme\Services\Appointments\AppointmentService;
-use Theme\Taxonomies\ServiceCategory;
 use Theme\Users\Employee;
 use Theme\Users\User;
 
@@ -34,10 +33,10 @@ class AppointmentsDashboardView
      */
     public function redirect_to_appointments(): void
     {
-        if( in_array($this->currentUser?->role, ['together-employee', 'employee']) ) {
+        if ($this->currentUser?->role !== Role::ADMIN) {
             global $pagenow;
-            if ( $pagenow === 'index.php' ) {
-                wp_redirect( admin_url( 'admin.php?page=appointments' ) );
+            if ($pagenow === 'index.php') {
+                wp_redirect(admin_url('admin.php?page=appointments'));
                 exit();
             }
         }
@@ -54,7 +53,7 @@ class AppointmentsDashboardView
         add_menu_page(
             page_title: __('Kalendár termínov', THEME_DOMAIN),
             menu_title: __('Kalendár termínov', THEME_DOMAIN),
-            capability: 'read',
+            capability: 'view_appointments_calendar',
             menu_slug: 'appointments',
             callback: [$this, 'renderAppointmentsCalendar'],
             icon_url: 'dashicons-calendar-alt',
@@ -65,7 +64,7 @@ class AppointmentsDashboardView
             parent_slug: 'appointments',
             page_title: __('Zoznam termínov', THEME_DOMAIN),
             menu_title: __('Zoznam termínov', THEME_DOMAIN),
-            capability: 'read',
+            capability: 'view_appointments_list',
             menu_slug: 'appointments-list',
             callback: [$this, 'renderAppointmentsListPage']
         );
@@ -94,6 +93,7 @@ class AppointmentsDashboardView
     {
         $data = [];
 
+        $data['products'] = $this->getProducts();
         $data['services'] = $this->getServices();
         $data['employees'] = $this->getEmployees();
         $data['currentUser'] = $this->currentUser;
@@ -102,7 +102,8 @@ class AppointmentsDashboardView
         return $data;
     }
 
-    private function getCurrentUser() : ?User {
+    private function getCurrentUser(): ?User
+    {
         return User::where("ID", get_current_user_id())->first();
     }
 
@@ -117,7 +118,7 @@ class AppointmentsDashboardView
         foreach ($servicesArr as $service) {
             $cat = $service->service_category;
             $catID = $cat?->term_id ?? "uncategorized";
-            if(!isset($serviceCategories[$catID])) $serviceCategories[$catID] = [
+            if (!isset($serviceCategories[$catID])) $serviceCategories[$catID] = [
                 'name' => $cat?->term?->name ?? "Bez kategórie",
                 'static_break' => $cat?->static_break,
                 'services' => []
@@ -143,9 +144,25 @@ class AppointmentsDashboardView
         ];
     }
 
+
+    private function getProducts() : iterable
+    {
+        $productsFinal = collect();
+
+        foreach (Product::published()->get() as $product) {
+            $productsFinal->put($product->id, [
+                'id' => $product->id,
+                'title' => $product->title,
+                'price' => $product->price,
+            ]);
+        }
+
+        return $productsFinal;
+    }
+
     private function getEmployees(): iterable
     {
-        if( $this->currentUser?->role !== 'employee') {
+        if ($this->currentUser?->role !== 'employee') {
             $arr = Employee::all();
         } else {
             $this->currentUser = Employee::where("ID", $this->currentUser->id)->first();
@@ -171,27 +188,31 @@ class AppointmentsDashboardView
     {
         $metrics = [];
 
-        $metrics[] = Main::initModule(new MetricCard(
-            id: "reservations_count_metric",
-            heading: "Počet termínov",
-            query: Appointment::query(),
-            icon: 'dashicons-groups',
-            operator: "count",
-            filter: $filter,
-        ));
+        if(current_user_can("view_appointments_list")) {
+            $metrics[] = Main::initModule(new MetricCard(
+                id: "reservations_count_metric",
+                heading: "Počet termínov",
+                query: Appointment::query(),
+                icon: 'dashicons-groups',
+                operator: "count",
+                filter: $filter,
+            ));
+        }
 
-        $metrics[] = Main::initModule(new MetricCard(
-            id: "income_metric",
-            heading: "Príjem celkom",
-            query: Appointment::query(),
-            targetAttribute: "total",
-            icon: 'dashicons-arrow-up-alt',
-            operator: "sum",
-            filter: $filter,
-            formatter: function($value) {
-                return $value . " €";
-            }
-        ));
+        if(current_user_can("view_appointments_money_statistics")) {
+            $metrics[] = Main::initModule(new MetricCard(
+                id: "income_metric",
+                heading: "Príjem celkom",
+                query: Appointment::query(),
+                targetAttribute: "total",
+                icon: 'dashicons-arrow-up-alt',
+                operator: "sum",
+                filter: $filter,
+                formatter: function ($value) {
+                    return $value . " €";
+                },
+            ));
+        }
 
         return $metrics;
     }

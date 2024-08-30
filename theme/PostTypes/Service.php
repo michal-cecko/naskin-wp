@@ -11,24 +11,27 @@ class Service extends PostType
 {
     public function getDurationAttribute(): int
     {
-        return (int) get_field("serv-duration", $this->id);
+        return (int)get_field("serv-duration", $this->id);
     }
 
     public function getPriceAttribute(): float
     {
-        return (float) get_field("serv-price", $this->id);
+        return (float)get_field("serv-price", $this->id);
     }
 
-    public function getDescriptionAttribute() {
+    public function getDescriptionAttribute()
+    {
         return get_field("serv-description", $this->id);
     }
 
-    public function getImageAttribute() {
+    public function getImageAttribute()
+    {
         return get_field("serv-image", $this->id);
     }
 
-    public function getServiceCategoryAttribute() {
-        if(!$this->relationLoaded("taxonomies.term")) {
+    public function getServiceCategoryAttribute()
+    {
+        if (!$this->relationLoaded("taxonomies.term")) {
             $this->load("taxonomies.term");
         }
 
@@ -41,7 +44,8 @@ class Service extends PostType
         return !empty($isHidden);
     }
 
-    public function getServiceCategoryIdAttribute() {
+    public function getServiceCategoryIdAttribute()
+    {
         return $this->service_category?->term?->term_id;
     }
 
@@ -51,7 +55,7 @@ class Service extends PostType
             return $this->employeesArr;
         }
 
-        $this->employeesArr = Employee::whereHas('meta', function($query) {
+        $this->employeesArr = Employee::whereHas('meta', function ($query) {
             $query->where('meta_key', 'services')->where('meta_value', 'LIKE', "%:\"{$this->id}\";%");
         })->get();
 
@@ -65,6 +69,7 @@ class Service extends PostType
 
     public static function registerCustomPostType(): ?array
     {
+        $slug = self::getPostTypeSlug();
 
         $labels = array(
             'name' => __('Služby', 'naskin'),
@@ -87,15 +92,36 @@ class Service extends PostType
             'labels' => $labels,
             'supports' => $supports,
             'public' => TRUE,
+            'publicly_queryable' => FALSE,
             'has_archive' => FALSE,
             'show_in_rest' => FALSE,
             'taxonomy' => [],
+
+            'capability_type' => ['service', 'services'],
+            'capabilities' => [
+                'edit_post'                 => 'edit_service',
+                'read_post'                 => 'read_service',
+                'delete_post'               => 'delete_service',
+                'create_posts'              => 'create_services',
+                'delete_posts'              => 'delete_services',
+                'delete_others_posts'       => 'delete_others_services',
+                'delete_private_posts'      => 'delete_private_services',
+                'delete_published_posts'    => 'delete_published_services',
+                'edit_posts'                => 'edit_services',
+                'edit_others_posts'         => 'edit_others_services',
+                'edit_private_posts'        => 'edit_private_services',
+                'edit_published_posts'      => 'edit_published_services',
+                'publish_posts'             => 'publish_services',
+                'read_private_posts'        => 'read_private_services'
+            ],
+            'map_meta_cap' => true,
+
             'menu_icon' => 'dashicons-admin-tools',
-            'rewrite' => ['slug' => self::getPostTypeSlug()],
+            'rewrite' => ['slug' => $slug],
         );
 
         return [
-            'slug' => self::getPostTypeSlug(),
+            'slug' => $slug,
             'args' => $args,
         ];
     }

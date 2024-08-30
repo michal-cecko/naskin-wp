@@ -8,6 +8,7 @@ use Saurus\App\Rules\Exists;
 use Saurus\App\Rules\PostExists;
 use Saurus\App\Rules\RecaptchaPasses;
 use Theme\Enum\AppointmentType;
+use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Customer;
 use Theme\PostTypes\Service;
 
@@ -26,7 +27,7 @@ class AppointmentICSRequest extends Request {
     public function rules(): array {
 
         return [
-            'id' => ['required', new Exists("appointments", "id")],
+            'id' => ['required', new Exists(Appointment::getTableName(), "id")],
             't' => ['required'],
         ];
 

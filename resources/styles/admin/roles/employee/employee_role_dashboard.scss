@@ -1,0 +1,16 @@
+@import "../../../imports/scss-necessary";
+
+.post-type-service .page-title-action,
+#menu-posts-service li a[href*="post-new.php?post_type=service"],
+.acf-field[data-name="blocking-calendar"],
+.acf-field[data-name="vacation_color"],
+.acf-field[data-name="services"]
+{
+  display: none !important;
+}
+
+.acf-field[data-name="start"] .input,
+.acf-field[data-name="end"] .input {
+  background: #ececec;
+  pointer-events: none;
+}

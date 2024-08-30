@@ -10,7 +10,7 @@ use Theme\PostTypes\Customer;
 
 class CustomerDetailAppointmentsTableComponent extends TableComponent
 {
-    public string $pageView = 'parts.dashboard.appointments.tables.customer-appointments-table';
+    public string $view = 'parts.dashboard.appointments.tables.customer-appointments-table';
 
     public function __construct(protected $customer, string $id, ?IFilterComponent $filter = null){
         parent::__construct(id: $id, filter: $filter);

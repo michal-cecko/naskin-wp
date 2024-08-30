@@ -17,7 +17,7 @@ class Acf
             'page_title' => 'Nastavenia stránky',
             'menu_title' => 'Nastavenia stránky',
             'menu_slug' => 'theme-general-settings',
-            'capability' => 'edit_posts',
+            'capability' => 'view_acf_web_options',
             'redirect' => FALSE
         ]);
 

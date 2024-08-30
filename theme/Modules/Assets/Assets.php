@@ -2,8 +2,10 @@
 namespace Theme\Modules\Assets;
 
 use Saurus\App\Modules\Assets\Assets as SaurusAssets;
+use Theme\Enum\User\Role;
 use Theme\Modules\Views\TaxonomyServiceCategory;
 use Theme\Taxonomies\ServiceCategory;
+use Theme\Users\Admin;
 use Theme\Users\User;
 
 class Assets extends SaurusAssets
@@ -56,8 +58,8 @@ class Assets extends SaurusAssets
         wp_enqueue_script(handle: 'header-js', src: $this->dynamic('scripts/components/header.js'), ver: $this->ver);
         wp_enqueue_script(handle: 'dialogs-js', src: $this->dynamic('scripts/components/dialogs.js'), ver: $this->ver);
 
-        if( in_array($this->user?->role, ['together-employee', 'employee']) ){
-            wp_enqueue_style(handle: 'employee_role_web-scss', src: $this->dynamic('styles/admin/employee_role_web.scss'), ver: $this->ver);
+        if( in_array($this->user?->role, [Role::EMPLOYEE, Role::TOGETHER_EMPLOYEE]) ){
+            wp_enqueue_style(handle: 'employee_role_web-scss', src: $this->dynamic('styles/admin/employee/employee_role_web.scss'), ver: $this->ver);
         }
 
         if(is_tax( ServiceCategory::getTaxonomySlug() )) {
@@ -83,12 +85,16 @@ class Assets extends SaurusAssets
         $this->enqueuePrimevue();
 
         wp_enqueue_script(handle: 'admin-js', src: $this->dynamic('scripts/admin.js'), ver: $this->ver);
-        wp_enqueue_style(handle: 'admin-scss', src: $this->dynamic('styles/admin/admin.scss'), ver: $this->ver);
+        wp_enqueue_style(handle: 'dashboard-scss', src: $this->dynamic('styles/admin/dashboard.scss'), ver: $this->ver);
 
         $this->enqueueCalendarAssets();
 
-        if( in_array($this->user?->role, ['together-employee', 'employee']) ){
-            wp_enqueue_style(handle: 'employee_role_dashboard-scss', src: $this->dynamic('styles/admin/employee_role_dashboard.scss'), ver: $this->ver);
+        if( in_array($this->user?->role, [Role::EMPLOYEE, Role::TOGETHER_EMPLOYEE]) ){
+            wp_enqueue_style(handle: 'employee_role_dashboard-scss', src: $this->dynamic('styles/admin/roles/employee/employee_role_dashboard.scss'), ver: $this->ver);
+        }
+
+        if( $this->user?->role !== Role::ADMIN) {
+            wp_enqueue_style(handle: 'non_admin_role-scss', src: $this->dynamic('styles/admin/roles/non_admin/non_admin_role.scss'), ver: $this->ver);
         }
     }
 

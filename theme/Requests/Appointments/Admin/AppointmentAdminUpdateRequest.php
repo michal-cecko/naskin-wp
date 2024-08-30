@@ -2,24 +2,28 @@
 
 namespace Theme\Requests\Appointments\Admin;
 
-use Illuminate\Validation\Rule;
 use Saurus\App\Rules\Exists;
 use Saurus\App\Rules\PostExists;
 use Theme\Enum\AppointmentPaymentType;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentType;
-use Theme\PostTypes\Customer;
+use Theme\Models\Appointment\Appointment;
+use Theme\Models\Appointment\AppointmentPayment;
+use Theme\Models\Product\ProductSale;
+use Theme\PostTypes\Product;
 use Theme\PostTypes\Service;
 use Theme\Requests\AuthenticatedAdminRequest;
 
-class AppointmentAdminUpdateRequest extends AuthenticatedAdminRequest {
+class AppointmentAdminUpdateRequest extends AuthenticatedAdminRequest
+{
 
-    public function rules(): array {
+    public function rules(): array
+    {
 
         $reservation = AppointmentType::RESERVATION->value;
 
         return [
-            'id' => ['required', 'integer', new Exists(table: "appointments")],
+            'id' => ['required', 'integer', new Exists(table: Appointment::getTableName())],
 
             'employeeID' => ['required', 'integer', new Exists(table: "users", column: "ID")],
 
@@ -35,10 +39,17 @@ class AppointmentAdminUpdateRequest extends AuthenticatedAdminRequest {
             'services.*' => ['required_if:services,array', 'integer', new PostExists(postModel: Service::class)],
 
             'payments' => ['sometimes', 'array', "min:0", "nullable"],
-            'payments.*.id' => ['sometimes', 'integer', new Exists(table: "appointment_payments")],
+            'payments.*.id' => ['sometimes', 'integer', new Exists(table: AppointmentPayment::getTableName())],
             'payments.*.amount' => ['required_if:type,' . $reservation, 'decimal:0,2'],
             'payments.*.type' => ['required_if:type,' . $reservation, 'in:' . implode(",", AppointmentPaymentType::stringCases())],
             'payments.*.note' => ['sometimes', 'nullable', 'string', 'max:255'],
+
+            'productSales' => ['sometimes', 'array', "min:0", "nullable"],
+            'productSales.*.id' => ['sometimes', 'integer', new Exists(table: ProductSale::getTableName())],
+            'productSales.*.product_id' => ['required_if:type,' . $reservation, 'integer', new PostExists(postModel: Product::class)],
+            'productSales.*.price' => ['required_if:type,' . $reservation, 'decimal:0,2'],
+            'productSales.*.quantity' => ['required_if:type,' . $reservation, 'integer', 'min:1'],
+            'productSales.*.note' => ['sometimes', 'nullable', 'string', 'max:255'],
 
             'note' => 'sometimes|nullable|string|max:1000',
 

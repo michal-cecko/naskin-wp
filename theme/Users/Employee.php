@@ -2,6 +2,7 @@
 
 namespace Theme\Users;
 
+use Theme\Enum\User\Role;
 use Theme\PostTypes\Service;
 
 class Employee extends User
@@ -39,8 +40,8 @@ class Employee extends User
         return get_field("lunchtime", $this->acf_id);
     }
 
-    public static function getRole(): ?string
+    public static function getRole(): ?Role
     {
-        return "employee";
+        return Role::EMPLOYEE;
     }
 }

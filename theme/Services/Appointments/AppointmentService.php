@@ -39,7 +39,7 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
+    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], iterable $productSales = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
     {
         if (empty($customer['id'])) {
             $customer = CustomerService::createCustomer($customer['name'], $customer['email'], $customer['phone'] ?? null);
@@ -79,6 +79,8 @@ class AppointmentService
 
         self::syncPaymentsWithAppointment($appointment, $payments);
 
+        self::syncProductSalesWithAppointment($appointment, $productSales);
+
         if ($notifyCustomer) {
             if (!EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::CREATED)) {
                 main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer]);
@@ -98,9 +100,9 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false): array
+    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], iterable $productSales = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false): array
     {
-        $eager = ["services", "customer", "payments", "employee"];
+        $eager = ["services", "customer", "payments", "productSales", "employee"];
 
         if(is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->with($eager)->first();
@@ -145,6 +147,8 @@ class AppointmentService
         $appointment->services()->whereNotIn("appointment_services.service_id", $submittedServiceIds->toArray())->delete();
 
         self::syncPaymentsWithAppointment($appointment, $payments);
+
+        self::syncProductSalesWithAppointment($appointment, $productSales);
 
         if ($notifyCustomer) {
             if(!EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::UPDATED)) {
@@ -565,7 +569,7 @@ class AppointmentService
         return AppointmentService::getBreakForDuration($duration);
     }
 
-    public static function syncPaymentsWithAppointment($appointment, iterable $payments = []) : void
+    public static function syncPaymentsWithAppointment(Appointment $appointment, iterable $payments = []) : void
     {
         $submittedPaymentIDs = collect($payments)->pluck("id")->filter();
 
@@ -592,5 +596,30 @@ class AppointmentService
 
     public static function calculateTotal(iterable $appointmentServices): int {
         return collect($appointmentServices)->sum("price");
+    }
+
+    public static function syncProductSalesWithAppointment(Appointment $appointment, iterable $productSales): void
+    {
+        $submittedSalesIDs = collect($productSales)->pluck("id")->filter();
+
+        $appointment->loadMissing("productSales");
+
+        if (!empty($productSales)) {
+            foreach ($productSales as $saleData) {
+                if (isset($saleData['id'])) {
+                    if ($currentPayment = $appointment->productSales->where("id", $saleData['id'])->first()) {
+                        $currentPayment->update($saleData);
+                    }
+                } else {
+                    $currentPayment = $appointment->productSales()->create($saleData);
+                    $submittedSalesIDs->push($currentPayment->id);
+                }
+            }
+        }
+
+        $appointment->touch();
+
+        // Delete any options that were not present in the submitted data -- they have been deleted on FE
+        ModelRelationsHelper::deleteNotSubmittedRelatedRecords($appointment, 'productSales', $submittedSalesIDs);
     }
 }

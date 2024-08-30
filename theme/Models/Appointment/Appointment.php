@@ -10,6 +10,7 @@ use Saurus\App\Modules\Wordpress\Models\Model;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
+use Theme\Models\Product\ProductSale;
 use Theme\PostTypes\Customer;
 use Theme\Users\Employee;
 use Saurus\App\Modules\Log\ILoggable;
@@ -86,6 +87,11 @@ class Appointment extends Model implements ILoggable
     public function services(): HasMany
     {
         return $this->hasMany(AppointmentService::class);
+    }
+
+    public function productSales(): HasMany
+    {
+        return $this->hasMany(ProductSale::class);
     }
 
     public function payments(): HasMany

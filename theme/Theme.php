@@ -10,9 +10,9 @@ use Theme\Modules\Appointments\AppointmentsDashboardView;
 use Theme\Modules\Assets\Assets;
 use Theme\Modules\Customers\Customers;
 use Theme\Modules\Customers\CustomersDashboardTable;
-use Theme\Modules\EmployeeRole\EmployeeRole;
 use Theme\Modules\Expenses\ExpensesDashboardView;
 use Theme\Modules\Plugins\Acf;
+use Theme\Modules\Role\Roles;
 use Theme\Modules\Services\Services;
 use Theme\Modules\Services\ServicesDashboardTable;
 use Theme\Modules\Services\ServicesTransient;
@@ -33,7 +33,7 @@ class Theme extends Singleton
     private BladeDirectives $bladeDirectives;
     private Customers $customers;
     private CustomersDashboardTable $customersDashboardTable;
-    private EmployeeRole $employeeRole;
+    private Roles $roles;
 
     protected function __construct()
     {
@@ -41,6 +41,7 @@ class Theme extends Singleton
         $this->assets = Main::initModule(new Assets());
         $this->themeSetup = Main::initModule(new ThemeSetup());
         $this->acf = Main::initModule(new Acf());
+        $this->roles = Main::initModule(new Roles());
         $this->servicesTransient = Main::initModule(new ServicesTransient());
         $this->services = Main::initModule(new Services());
         $this->appointments = Main::initModule(new Appointments());
@@ -49,7 +50,6 @@ class Theme extends Singleton
         $this->bladeDirectives = Main::initModule(new BladeDirectives());
         $this->customers = Main::initModule(new Customers());
         $this->customersDashboardTable = Main::initModule(new CustomersDashboardTable());
-        $this->employeeRole = Main::initModule(new EmployeeRole());
         $this->adminAppointments = Main::initModule(new AdminAppointments());
         $this->expensesDashboardView = Main::initModule(new ExpensesDashboardView());
     }
@@ -60,5 +60,10 @@ class Theme extends Singleton
     public function acf(): Acf
     {
         return $this->acf;
+    }
+
+    public function roles(): Roles
+    {
+        return $this->roles;
     }
 }

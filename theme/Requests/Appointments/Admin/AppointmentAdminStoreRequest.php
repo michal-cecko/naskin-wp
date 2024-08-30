@@ -9,6 +9,7 @@ use Theme\Enum\AppointmentPaymentType;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentType;
 use Theme\PostTypes\Customer;
+use Theme\PostTypes\Product;
 use Theme\PostTypes\Service;
 use Theme\Requests\AuthenticatedAdminRequest;
 
@@ -36,6 +37,12 @@ class AppointmentAdminStoreRequest extends AuthenticatedAdminRequest {
             'payments.*.amount' => ['required_if:type,' . $reservation, 'decimal:0,2'],
             'payments.*.type' => ['required_if:type,' . $reservation, 'in:' . implode(",", AppointmentPaymentType::stringCases())],
             'payments.*.note' => ['sometimes', 'nullable', 'string', 'max:255'],
+
+            'productSales' => ['sometimes', 'array', "min:0", "nullable"],
+            'productSales.*.product_id' => ['required_if:type,' . $reservation, 'integer', new PostExists(postModel: Product::class)],
+            'productSales.*.price' => ['required_if:type,' . $reservation, 'decimal:0,2'],
+            'productSales.*.quantity' => ['required_if:type,' . $reservation, 'integer', 'min:1'],
+            'productSales.*.note' => ['sometimes', 'nullable', 'string', 'max:255'],
 
             'customer' => ['required_if:type,' . $reservation, 'array'],
             'customer.id' => ['sometimes', 'nullable', 'integer', new PostExists(postModel: Customer::class)],

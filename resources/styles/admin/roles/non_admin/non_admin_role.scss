@@ -1,5 +1,3 @@
-@import "../imports/scss-necessary";
-
 .user-profile-picture,
 .user-rich-editing-wrap,
 .user-syntax-highlighting-wrap,
@@ -36,7 +34,6 @@
 .yoast-settings.yoast,
 #wp-admin-bar-wpseo-menu,
 #screen-meta-links,
-#toplevel_page_theme-general-settings,
 #toplevel_page_wpseo_dashboard,
 #wpseo-score,
 #wpseo-score-readability,
@@ -45,7 +42,7 @@
 .wpseo-score.column-wpseo-score,
 .wpseo-score-readability.column-wpseo-score-readability,
 .wpseo-links.column-wpseo-links,
-#footer-upgrade
+#footer-upgrade,
 {
   display: none !important;
 }

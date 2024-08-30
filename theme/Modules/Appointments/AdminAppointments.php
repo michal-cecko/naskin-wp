@@ -55,6 +55,7 @@ class AdminAppointments
                 note: $data['note'],
                 services: $services,
                 payments: $data['payments'] ?? [],
+                productSales: $data['productSales'] ?? [],
                 source: AppointmentSource::getCaseFromValue($data['source']),
                 notifyCustomer: $data['notify'],
                 notifyEmployee: false,
@@ -96,6 +97,7 @@ class AdminAppointments
                 note: $data['note'],
                 services: $services,
                 payments: $data['payments'] ?? [],
+                productSales: $data['productSales'] ?? [],
                 source: AppointmentSource::getCaseFromValue($data['source']),
                 notifyCustomer: $data['notify'],
             );

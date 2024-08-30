@@ -73,6 +73,8 @@ class ReservationCalendar extends Commons {
                     debounceTimer: null,
                     ignoreInputWatchers: false,
 
+                    products: null,
+
                     notify: false,
 
                     hasInit: false,
@@ -96,12 +98,13 @@ class ReservationCalendar extends Commons {
                 this.loggedInEmployee = document.getElementById('logged-user')?.dataset ?? {}
 
                 let employees = JSON.parse(pageData?.employees)
-                this.employees = Object.assign({}, employees);
+                this.employees = Object.assign({}, employees)
+
+                let products = JSON.parse(pageData?.products)
+                this.products = Object.assign({}, products)
 
                 let services = JSON.parse(pageData?.services)
-                this.services = Object.assign({}, services);
-
-                console.log(this.services)
+                this.services = Object.assign({}, services)
 
                 this.breaks = JSON.parse(pageData?.breaks)
 
@@ -318,7 +321,7 @@ class ReservationCalendar extends Commons {
                         eventClick: function (info) {
                             if (info.jsEvent.target.classList.contains('delete-button')) return false;
 
-                            if(!_thisVue.onlyLoggedInEmployeeCondition(info.event)) return false;
+                            if (!_thisVue.onlyLoggedInEmployeeCondition(info.event)) return false;
 
                             _thisVue.editingAppointment = info.event;
                             _thisVue.loadEditModal(info.event);
@@ -378,6 +381,7 @@ class ReservationCalendar extends Commons {
                         body.source = this.appointment.source
                         body.services = this.appointment.services
                         body.payments = this.appointment.payments
+                        body.productSales = this.appointment.productSales
                         body.customer = this.appointment.customer
                     }
 
@@ -408,6 +412,7 @@ class ReservationCalendar extends Commons {
                                     note: this.appointment.note ?? null,
                                     services: this.appointment.services.map(id => this.services[id]),
                                     payments: this.appointment.payments,
+                                    productSales: this.appointment.productSales,
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
                                     employeeID: this.chosenEmployeeInForms,
                                     customer: this.appointment.customer,
@@ -426,8 +431,8 @@ class ReservationCalendar extends Commons {
                     return true;
                 },
 
-                onlyLoggedInEmployeeCondition(event){
-                    return +event.extendedProps.employeeID === +this.loggedInEmployee.id || this.loggedInEmployee.role === "administrator";
+                onlyLoggedInEmployeeCondition(event) {
+                    return +event.extendedProps.employeeID === +this.loggedInEmployee.id || ['administrator', 'together_employee', 'manager'].includes(this.loggedInEmployee.role);
                 },
 
                 checkErrors() {
@@ -450,31 +455,54 @@ class ReservationCalendar extends Commons {
                         return false;
                     }
 
-                    if (this.appointment.type !== "free" && this.appointment.services.length === 0) {
-                        _thisClass.notify("Vyberte aspoň jednu službu.", "error")
-                        return false;
-                    }
+                    if (this.appointment.type !== "free") {
+                        if (this.appointment.services.length === 0) {
+                            _thisClass.notify("Vyberte aspoň jednu službu.", "error")
+                            return false;
+                        }
 
-                    if(this.appointment.type !== "free" && this.appointment.payments.length !== 0) {
-                        let err = false;
+                        if (this.appointment.payments.length !== 0) {
+                            let err = false;
 
-                        this.appointment.payments.forEach(payment => {
-                            if(!payment.amount) {
-                                _thisClass.notify("Nezadali ste sumu platby.", "error")
-                                err = true;
-                            }
-                            if(!payment.type) {
-                                _thisClass.notify("Nezadali ste typ platby.", "error")
-                                err = true;
-                            }
-                        })
+                            this.appointment.payments.forEach(payment => {
+                                if (!payment.amount) {
+                                    _thisClass.notify("Nezadali ste sumu platby.", "error")
+                                    err = true;
+                                }
+                                if (!payment.type) {
+                                    _thisClass.notify("Nezadali ste typ platby.", "error")
+                                    err = true;
+                                }
+                            })
 
-                        if(err) return false;
-                    }
+                            if (err) return false;
+                        }
 
-                    if (this.appointment.type !== "free" && !this.appointment.customer?.id && !this.appointment.customer?.name) {
-                        _thisClass.notify("Vyberte zákazníka alebo zadajte údaje nového.", "error")
-                        return false;
+                        if (this.appointment.productSales.length !== 0) {
+                            let err = false;
+
+                            this.appointment.productSales.forEach(sale => {
+                                if (sale.price.toString().length === 0) {
+                                    _thisClass.notify("Nezadali ste sumu produktu.", "error")
+                                    err = true;
+                                }
+                                if (!sale.product_id) {
+                                    _thisClass.notify("Nevybrali ste produkt.", "error")
+                                    err = true;
+                                }
+                                if (!sale.quantity) {
+                                    _thisClass.notify("Zadajte množstvo produktu viac ako 0.", "error")
+                                    err = true;
+                                }
+                            })
+
+                            if (err) return false;
+                        }
+
+                        if (!this.appointment.customer?.id && !this.appointment.customer?.name) {
+                            _thisClass.notify("Vyberte zákazníka alebo zadajte údaje nového.", "error")
+                            return false;
+                        }
                     }
 
                     return true;
@@ -501,6 +529,7 @@ class ReservationCalendar extends Commons {
                         data.source = this.appointment.source
                         data.services = this.appointment.services
                         data.payments = this.appointment.payments
+                        data.productSales = this.appointment.productSales
                     }
 
                     this.buttonLoader = true;
@@ -533,6 +562,7 @@ class ReservationCalendar extends Commons {
                                     note: this.appointment.note ?? null,
                                     services: this.appointment.services.map(id => this.services[id]),
                                     payments: this.appointment.payments,
+                                    productSales: this.appointment.productSales,
                                     employee: this.employees?.[this.chosenEmployeeInForms]?.name,
                                     employeeID: this.chosenEmployeeInForms,
                                     customer: this.appointment.customer,
@@ -616,6 +646,7 @@ class ReservationCalendar extends Commons {
                                         end_with_break: appointment.break ? moment(appointment.datetime.to_with_break, this.dateFormat.payload) : null,
                                         services: appointment.services?.map((appService => this.services[appService.service_id])) ?? {},
                                         payments: appointment.payments ?? [],
+                                        productSales: appointment.productSales ?? [],
                                         employee: appointment.employee,
                                         employeeID: appointment.employeeID,
                                         customer: appointment.customer ?? null,
@@ -724,6 +755,7 @@ class ReservationCalendar extends Commons {
                         this.appointment.customer = appToEdit.extendedProps.customer
                         this.appointment.services = appToEdit.extendedProps.services.map((service) => service.id)
                         this.appointment.payments = appToEdit.extendedProps.payments
+                        this.appointment.productSales = appToEdit.extendedProps.productSales
                         this.appointment.source = appToEdit.extendedProps.source
                     }
 
@@ -746,6 +778,7 @@ class ReservationCalendar extends Commons {
                         break: null,
                         services: [],
                         payments: [],
+                        productSales: [],
                     }
                 },
 
@@ -859,9 +892,26 @@ class ReservationCalendar extends Commons {
                     })
                 },
                 removePayment(index) {
-                    console.log(this.appointment.payments, index, this.appointment.payments[index])
                     this.appointment.payments.splice(index, 1)
                 },
+                addSale() {
+                    if (!this.appointment.productSales) this.appointment.productSales = []
+
+                    this.appointment.productSales.push({
+                        product_id: null,
+                        price: null,
+                        quantity: 1,
+                        note: null,
+                    })
+                },
+                removeSale(index) {
+                    this.appointment.productSales.splice(index, 1)
+                },
+                setPriceIfEmpty(sale) {
+                    if (!sale.price) {
+                        sale.price = this.products[sale.product_id].price
+                    }
+                }
             },
             computed: {
                 canChangeEmployeeOnView() {
@@ -905,7 +955,7 @@ class ReservationCalendar extends Commons {
                         this.appointment.services.forEach(serviceID => {
                             console.log(this.services[serviceID])
                             let currentBreakVal = +(this.services[serviceID]?.static_break ?? -1);
-                            if ( currentBreakVal > -1) {
+                            if (currentBreakVal > -1) {
                                 console.log("currentBreakVal", currentBreakVal)
                                 breakVal = currentBreakVal;
                                 return;

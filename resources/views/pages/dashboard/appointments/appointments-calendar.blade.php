@@ -1,17 +1,21 @@
 @extends('layouts.dashboard-layout')
 
+@php
+    use Theme\Enum\User\Role;
+@endphp
+
 @section('content')
     <div id="customNotifications" class="custom-notifications"></div>
 
     <div id="calendarContainer">
         <input type="hidden" id="page-data" data-colors='@json($services['colors'])' data-services='@json($services['services'])'
-               data-durations='@json($services['durations'])' data-breaks='@json($breaks)' data-employees='@json($employees)'>
+               data-durations='@json($services['durations'])' data-breaks='@json($breaks)' data-employees='@json($employees)' data-products='@json($products)'>
 
         <input type="hidden" id="logged-user" data-id="{{$currentUser->id}}"
-               data-name="{{$currentUser->first_name}}" data-role="{{$currentUser->role}}">
+               data-name="{{$currentUser->first_name}}" data-role="{{$currentUser->role->value}}">
 
         <div class="header-wrapper">
-            @if($currentUser->role !== "employee")
+            @if($currentUser->role !== Role::EMPLOYEE)
                 <div class="employees-toggler">
                     <div class="employee" @click="changeCurrentEmployeeView(-1)"
                          :class="chosenEmployeeOnView === -1 ? 'active' : ''">

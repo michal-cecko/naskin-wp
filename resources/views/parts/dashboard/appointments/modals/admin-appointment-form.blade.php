@@ -1,6 +1,6 @@
 @php
     use Theme\Enum\AppointmentPaymentType;use Theme\Enum\AppointmentSource;
-    use Theme\Enum\AppointmentType;
+    use Theme\Enum\AppointmentType;use Theme\PostTypes\Product;
 @endphp
 
 <div class="divided-row">
@@ -124,7 +124,8 @@
         <div class="quarter">
             <div class="field-container">
                 <label for="amount">Suma (€)</label>
-                <p-number v-model="payment.amount" :inputId="`payment-amount-${key}`" mode="currency" currency="EUR" placeholder="Suma (€)"
+                <p-number v-model="payment.amount" :inputId="`payment-amount-${key}`" mode="currency" currency="EUR"
+                          placeholder="Suma (€)"
                           locale="sk-SK"></p-number>
             </div>
         </div>
@@ -141,13 +142,57 @@
         <div class="half payment-note-container">
             <div class="field-container">
                 <label for="amount">Poznámka</label>
-                <input class="custom-text-input" type="text" v-model="payment.note" placeholder="Poznámka..." :id="`payment-note-${key}`">
+                <input class="custom-text-input" type="text" v-model="payment.note" placeholder="Poznámka..."
+                       :id="`payment-note-${key}`">
             </div>
             <div class="dashicons-before dashicons-trash remove-payment" @click="removePayment(key)"></div>
         </div>
     </div>
     <div class="full">
-        <button type="button" class="button button-primary button-small" @click="addPayment" style="margin-top: 0.4rem">Pridať platbu</button>
+        <button type="button" class="button button-primary button-small" @click="addPayment" style="margin-top: 0.4rem">
+            Pridať platbu
+        </button>
+    </div>
+</div>
+<div class="divided-row" v-if="appointment.type === 'reservation'">
+    <div class="heading-part">
+        <h3>Predané produkty</h3>
+    </div>
+    <div class="row sale-row" v-for="(sale, key) in (appointment.productSales ?? [])" :key="key">
+        <div class="sixty">
+            <div class="field-container">
+                <label for="amount">Produkt</label>
+                <select class="custom-select" v-model="sale.product_id" :id="`sale-product-${key}`" @change="setPriceIfEmpty(sale)">
+                    <option v-for="(product, key) in products" :value="product.id">@{{ product.title }} (@{{ product.price }} €)</option>
+                </select>
+            </div>
+        </div>
+        <div class="fifth">
+            <div class="field-container">
+                <label for="price">Suma (€)</label>
+                <p-number v-model="sale.price" :inputId="`sale-price-${key}`" mode="currency" currency="EUR"
+                          placeholder="Suma (€)" locale="sk-SK"></p-number>
+            </div>
+        </div>
+        <div class="fifth">
+            <div class="field-container">
+                <label for="quantity">Množstvo</label>
+                <p-number v-model="sale.quantity" :inputId="`sale-quantity-${key}`" :min="0.01" placeholder="Množstvo"></p-number>
+            </div>
+        </div>
+        <div class="full payment-note-container">
+            <div class="field-container">
+                <label for="note">Poznámka</label>
+                <input class="custom-text-input" type="text" v-model="sale.note" placeholder="Poznámka..."
+                       :id="`payment-note-${key}`">
+            </div>
+            <div class="dashicons-before dashicons-trash remove-payment" @click="removeSale(key)"></div>
+        </div>
+    </div>
+    <div class="full">
+        <button type="button" class="button button-primary button-small" @click="addSale" style="margin-top: 0.4rem">
+            Pridať produkt
+        </button>
     </div>
 </div>
 <div class="divided-row">

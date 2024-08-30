@@ -68,9 +68,30 @@ class Customer extends PostType implements ILoggable
             'labels' => $labels,
             'supports' => $supports,
             'public' => TRUE,
+            'publicly_queryable' => FALSE,
             'has_archive' => FALSE,
             'show_in_rest' => FALSE,
             'taxonomy' => [],
+
+            'capability_type' => ['customer', 'customers'],
+            'capabilities' => [
+                'edit_post'                 => 'edit_customer',
+                'read_post'                 => 'read_customer',
+                'delete_post'               => 'delete_customer',
+                'create_posts'              => 'create_customers',
+                'delete_posts'              => 'delete_customers',
+                'delete_others_posts'       => 'delete_others_customers',
+                'delete_private_posts'      => 'delete_private_customers',
+                'delete_published_posts'    => 'delete_published_customers',
+                'edit_posts'                => 'edit_customers',
+                'edit_others_posts'         => 'edit_others_customers',
+                'edit_private_posts'        => 'edit_private_customers',
+                'edit_published_posts'      => 'edit_published_customers',
+                'publish_posts'             => 'publish_customers',
+                'read_private_posts'        => 'read_private_customers'
+            ],
+            'map_meta_cap' => true,
+
             'menu_icon' => 'dashicons-admin-users',
             'rewrite' => ['slug' => self::getPostTypeSlug()],
         );
