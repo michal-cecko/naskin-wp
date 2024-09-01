@@ -18,20 +18,32 @@ class ExpensesDashboardListTableComponent extends TableComponent
             'id' => [
                 'label' => __('ID', THEME_DOMAIN),
             ],
-            'category' => [
-                'label' => __('Kategória', THEME_DOMAIN),
-                'sortable' => true,
-            ],
             'description' => [
                 'label' => __('Popis', THEME_DOMAIN),
+                'sortable' => true,
+            ],
+            'category' => [
+                'label' => __('Kategória', THEME_DOMAIN),
                 'sortable' => true,
             ],
             'price' => [
                 'label' => __('Suma', THEME_DOMAIN),
                 'sortable' => true,
             ],
+            'product' => [
+                'label' => __('Produkt', THEME_DOMAIN),
+                'sortable' => true,
+            ],
+            'supplier' => [
+                'label' => __('Dodávateľ', THEME_DOMAIN),
+                'sortable' => true,
+            ],
             'note' => [
                 'label' => __('Poznámka', THEME_DOMAIN),
+                'sortable' => true,
+            ],
+            'bought_at' => [
+                'label' => __('Z dňa', THEME_DOMAIN),
                 'sortable' => true,
             ],
             'created_at' => [
@@ -47,16 +59,16 @@ class ExpensesDashboardListTableComponent extends TableComponent
 
     public function recordsQuery(): Builder
     {
-        return Expense::with(["category.term"])->orderBy("id", "DESC");
+        return Expense::with(["category.term", "product"])->orderBy("id", "DESC");
     }
 
     public function rowActions(mixed $rowData): array
     {
         $actions = [];
 
-        //TODO: add edit and delete actions
-        $actions['edit'] = get_edit_post_link($rowData->id);
-        $actions['delete'] = get_edit_post_link($rowData->id);
+        if(current_user_can('edit_expenses')) {
+            $actions['edit'] = ['url' => admin_url("admin.php?page=expense_detail&id=" . ($rowData['id'] ?? 0)), 'label' => __('Upraviť', THEME_DOMAIN)];
+        }
 
         return $actions;
     }
@@ -68,10 +80,12 @@ class ExpensesDashboardListTableComponent extends TableComponent
 
         $rowDataToReturn['id'] = $expense->id;
         $rowDataToReturn['category'] = self::anchor($expense->category->term->name, $expense->category->edit_link);
+        $rowDataToReturn['product'] = $expense->product ? self::anchor($expense->product->title, $expense->product->edit_link) : "<i>Nepriradené</i>";
         $rowDataToReturn['description'] = $expense->description;
-        $rowDataToReturn['supplier'] = $expense->supplier;
+        $rowDataToReturn['supplier'] = $expense->supplier ?? "<i>Nezadané</i>";
         $rowDataToReturn['price'] = $expense->price . " €";
-        $rowDataToReturn['note'] = $expense->note;
+        $rowDataToReturn['note'] = $expense->note ?? "<i>Bez poznámky</i>";
+        $rowDataToReturn['bought_at'] = $expense->bought_at?->format("d.m.y") ?? "<i>Nezadané</i>";
         $rowDataToReturn['created_at'] = $expense->created_at->format("d.m.y H:i");
         $rowDataToReturn['updated_at'] = $expense->updated_at->format("d.m.y H:i");
 

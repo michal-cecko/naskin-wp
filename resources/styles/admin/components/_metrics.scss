@@ -1,4 +1,5 @@
-#income_metric {
+#income_metric ,
+#product_sale_sum_metric{
   .dashicons-before {
     &::before {
       color: green;
@@ -6,7 +7,8 @@
   }
 }
 
-#reservations_count_metric {
+#reservations_count_metric,
+#product_sale_count_metric {
   .dashicons-before {
     &::before {
       color: cornflowerblue;

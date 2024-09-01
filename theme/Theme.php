@@ -10,8 +10,13 @@ use Theme\Modules\Appointments\AppointmentsDashboardView;
 use Theme\Modules\Assets\Assets;
 use Theme\Modules\Customers\Customers;
 use Theme\Modules\Customers\CustomersDashboardTable;
+use Theme\Modules\Expenses\Expenses;
 use Theme\Modules\Expenses\ExpensesDashboardView;
+use Theme\Modules\Notifications\Notifications;
 use Theme\Modules\Plugins\Acf;
+use Theme\Modules\Products\Products;
+use Theme\Modules\ProductSales\ProductSales;
+use Theme\Modules\ProductSales\ProductSalesDashboardView;
 use Theme\Modules\Role\Roles;
 use Theme\Modules\Services\Services;
 use Theme\Modules\Services\ServicesDashboardTable;
@@ -34,6 +39,11 @@ class Theme extends Singleton
     private Customers $customers;
     private CustomersDashboardTable $customersDashboardTable;
     private Roles $roles;
+    private Expenses $expenses;
+    private Products $products;
+    private ProductSalesDashboardView $productSalesDashboardView;
+    private ProductSales $productSales;
+    private Notifications $notifications;
 
     protected function __construct()
     {
@@ -52,6 +62,11 @@ class Theme extends Singleton
         $this->customersDashboardTable = Main::initModule(new CustomersDashboardTable());
         $this->adminAppointments = Main::initModule(new AdminAppointments());
         $this->expensesDashboardView = Main::initModule(new ExpensesDashboardView());
+        $this->expenses = Main::initModule(new Expenses());
+        $this->products = Main::initModule(new Products());
+        $this->productSalesDashboardView = Main::initModule(new ProductSalesDashboardView());
+        $this->productSales = Main::initModule(new ProductSales());
+        $this->notifications = Main::initModule(new Notifications());
     }
 
 

@@ -1,8 +1,7 @@
 <?php
 
-namespace Theme\Services\Sms;
+namespace Theme\Services\Notifications\Sms;
 
-use BulkGate\Sdk\ApiException;
 use BulkGate\Sdk\Configurator\SmsConfigurator;
 use BulkGate\Sdk\Connection\ConnectionStream;
 use BulkGate\Sdk\InvalidStateException;
@@ -13,7 +12,8 @@ use BulkGate\Sdk\SenderException;
 use BulkGate\Sdk\TypeError;
 use Exception;
 
-class SmsSender {
+class SmsSender
+{
 
     private MessageSender $gateway;
     private SmsConfigurator $configurator;
@@ -25,7 +25,7 @@ class SmsSender {
     {
         $connection = new ConnectionStream(
             application_id: config('sms.app_id'),
-            application_token:  config('sms.app_token'),
+            application_token: config('sms.app_token'),
         );
 
         $this->gateway = new MessageSender($connection);
@@ -40,16 +40,16 @@ class SmsSender {
      * @throws TypeError
      * @throws Exception
      */
-    public function send(string $message, array|string $phoneNumbers) : bool
+    public function send(string $messageContent, array|string $phoneNumbers): bool
     {
         $message = new Bulk();
 
-        if(!is_array($phoneNumbers)) {
+        if (!is_array($phoneNumbers)) {
             $phoneNumbers = [$phoneNumbers];
         }
 
         foreach ($phoneNumbers as $phoneNumber) {
-            $currentMessage = new Sms($phoneNumber, $message);
+            $currentMessage = new Sms($phoneNumber, $messageContent);
             $this->configurator->configure($currentMessage);
             $message[] = $currentMessage;
         }
@@ -58,6 +58,7 @@ class SmsSender {
             $this->gateway->send($message);
             return true;
         } catch (SenderException $e) {
+            dd($e);
             main()->log()->error("SMS Brana | Chyba: " . json_encode($e));
             return false;
         }

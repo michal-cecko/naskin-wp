@@ -1,6 +1,6 @@
 <?php
 
-namespace Theme\Services\Notifications;
+namespace Theme\Services\Notifications\Email;
 
 use Exception;
 use Theme\Enum\AppointmentCustomerNotificationType;

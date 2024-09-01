@@ -24,12 +24,10 @@ class AppointmentsDashboardListTableComponent extends TableComponent
             'customer' => [
                 'label' => __('Zákazník', THEME_DOMAIN),
                 'sortable' => true,
-                'has_row_actions' => true,
             ],
             'employee' => [
                 'label' => __('Pracovník', THEME_DOMAIN),
                 'sortable' => true,
-                'has_row_actions' => true,
             ],
             'start_at' => [
                 'label' => __('Začiatok', THEME_DOMAIN),
@@ -66,7 +64,7 @@ class AppointmentsDashboardListTableComponent extends TableComponent
         ];
     }
 
-    public function recordsQuery(): Builder
+    public function recordsQuery() : Builder
     {
         return Appointment::with(["services", "employee", "customer"])->orderBy("id", "DESC");
     }

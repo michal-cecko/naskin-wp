@@ -14,4 +14,17 @@ $red: #d23f40;
       box-shadow: 0 0 0 1px #fff, 0 0 0 3px $red !important;
     }
   }
+
+  &.button-loading {
+    pointer-events: none;
+    cursor: wait;
+  }
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }

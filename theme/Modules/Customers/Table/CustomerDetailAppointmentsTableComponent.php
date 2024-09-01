@@ -16,7 +16,7 @@ class CustomerDetailAppointmentsTableComponent extends TableComponent
         parent::__construct(id: $id, filter: $filter);
     }
 
-    public function recordsQuery() {
+    public function recordsQuery() : mixed {
         return $this->customer->latestAppointments();
     }
 
@@ -29,7 +29,6 @@ class CustomerDetailAppointmentsTableComponent extends TableComponent
             'start_at' => [
                 'label' => __('Začiatok', THEME_DOMAIN),
                 'sortable' => true,
-                'has_row_actions' => true,
             ],
             'end_at' => [
                 'label' => __('Koniec', THEME_DOMAIN),

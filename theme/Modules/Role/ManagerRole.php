@@ -109,6 +109,10 @@ class ManagerRole extends UserRole
             // Expenses
             'view_expense_categories' => true,
             'view_expenses' => true,
+            'view_expenses_detail_page' => true,
+            'create_expenses' => true,
+            'edit_expenses' => true,
+            'delete_expenses' => true,
 
             // ACF Options
             'view_acf_web_options' => true,

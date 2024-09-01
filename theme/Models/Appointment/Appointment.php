@@ -116,10 +116,10 @@ class Appointment extends Model implements ILoggable
     public function getShortLogStringAttribute(): string
     {
         if ($this->type === AppointmentType::VACATION) {
-            return "Voľno od {$this->start_at->format('d.m.y H:i')} do {$this->end_at->format('d.m.y H:i')}";
+            return "Voľno dňa {$this->start_at->format('d.m.y H:i')}";
         }
 
-        return "Rezervácia od {$this->start_at->format('d.m.y H:i')} do {$this->end_at->format('d.m.y H:i')}";
+        return "Rezervácia dňa {$this->start_at->format('d.m.y H:i')} - {$this->customer?->title}";
     }
 
     public function getLogServicesStringAttribute(): string

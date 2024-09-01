@@ -66,6 +66,18 @@ class AdminRole extends UserRole
             'view_expense_categories' => true,
             'view_expenses' => true,
             'view_expense_money_statistics' => true,
+            'view_expenses_detail_page' => true,
+            'create_expenses' => true,
+            'edit_expenses' => true,
+            'delete_expenses' => true,
+
+            // Product Sales
+            'view_product_sales' => true,
+            'view_product_sale_detail_page' => true,
+            'view_product_sale_money_statistics' => true,
+            'create_product_sales' => true,
+            'edit_product_sales' => true,
+            'delete_product_sales' => true,
 
             // ACF Options
             'view_acf_web_options' => true,

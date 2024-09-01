@@ -3,11 +3,12 @@
 namespace Theme\Taxonomies;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Saurus\App\Modules\Log\ILoggable;
 use Saurus\App\Modules\Wordpress\Taxonomies\TaxonomyType;
 use Theme\Models\Expense\Expense;
 use Theme\PostTypes\Service;
 
-class ExpenseCategory extends TaxonomyType
+class ExpenseCategory extends TaxonomyType implements ILoggable
 {
     public function expenses() : BelongsToMany
     {
@@ -69,5 +70,15 @@ class ExpenseCategory extends TaxonomyType
             'slug' => self::getTaxonomySlug(),
             'args' => $args,
         ];
+    }
+
+    public function getLogLinkAttribute(): ?string
+    {
+        return get_edit_term_link($this->term_id, self::getTaxonomySlug());
+    }
+
+    public function getLogTitleAttribute(): string
+    {
+        return "{$this->term->name}";
     }
 }

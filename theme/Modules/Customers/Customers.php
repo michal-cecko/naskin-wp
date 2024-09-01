@@ -4,7 +4,7 @@ namespace Theme\Modules\Customers;
 
 use Saurus\App\Enums\ApiMethod;
 use Saurus\App\Traits\Validation;
-use Theme\Modules\Customers\Table\CustomerDetailAppointmentsTableComponent;
+use Theme\Modules\Customers\Table\ProductDetailAppointmentsTableComponent;
 use Theme\PostTypes\Customer;
 use Theme\Requests\Customers\CustomerSearchRequest;
 

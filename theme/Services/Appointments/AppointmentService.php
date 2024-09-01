@@ -30,7 +30,7 @@ use Theme\PostTypes\Customer;
 use Theme\PostTypes\Service;
 use Theme\Services\Customers\CustomerService;
 use Theme\Services\Employees\EmployeeService;
-use Theme\Services\Notifications\EmailService;
+use Theme\Services\Notifications\Email\EmailService;
 use Theme\Services\Notifications\Sms\SmsService;
 use Theme\Users\Employee;
 
@@ -468,6 +468,7 @@ class AppointmentService
      */
     public static function notifyAllAppointments() : int {
         $appointments = Appointment::where("has_been_reminded", false)
+            ->with(["services", "employee", "customer"])
             ->where("status", AppointmentStatus::OK)
             ->where("type", AppointmentType::RESERVATION)
             ->whereDate('start_at', '<=', Carbon::now()->addDay()->toDateString())
@@ -606,6 +607,7 @@ class AppointmentService
 
         if (!empty($productSales)) {
             foreach ($productSales as $saleData) {
+                $saleData['sold_at'] = $appointment->start_at;
                 if (isset($saleData['id'])) {
                     if ($currentPayment = $appointment->productSales->where("id", $saleData['id'])->first()) {
                         $currentPayment->update($saleData);

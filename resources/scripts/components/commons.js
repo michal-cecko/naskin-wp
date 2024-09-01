@@ -171,6 +171,18 @@ export default class Commons {
             (!Array.isArray(variable) && typeof variable === "object" && !Object.keys(variable).length)
     }
 
+    getDateFormats() {
+        return {
+            'input': 'DD/MM/YYYY HH:mm',
+            'input_no_time': 'DD/MM/YYYY',
+            'payload': 'YYYY-MM-DD HH:mm:ss',
+            'payload_no_time': 'YYYY-MM-DD',
+            'table': 'YYYY-MM-DDTHH:mm:ss',
+            'table_select': 'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ (z)',
+            'url_date': 'YYYY-MM-DD',
+        }
+    }
+
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }

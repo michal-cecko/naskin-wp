@@ -79,16 +79,11 @@ class ReservationCalendar extends Commons {
 
                     hasInit: false,
 
-                    dateFormat: {
-                        'input': 'DD/MM/YYYY HH:mm',
-                        'payload': 'YYYY-MM-DD HH:mm:ss',
-                        'table': 'YYYY-MM-DDTHH:mm:ss',
-                        'table_select': 'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ (z)',
-                        'url_date': 'YYYY-MM-DD',
-                    }
+                    dateFormat: {}
                 };
             },
             created() {
+                this.dateFormat = _thisClass.getDateFormats();
                 console.log(`Calendar Vue component has been created.`)
                 this.resetAppointmentVariable()
                 this.resetAppointmentToDeleteVariable()
@@ -482,7 +477,7 @@ class ReservationCalendar extends Commons {
                             let err = false;
 
                             this.appointment.productSales.forEach(sale => {
-                                if (sale.price.toString().length === 0) {
+                                if (!sale.price?.toString()?.length) {
                                     _thisClass.notify("Nezadali ste sumu produktu.", "error")
                                     err = true;
                                 }
@@ -914,6 +909,16 @@ class ReservationCalendar extends Commons {
                 }
             },
             computed: {
+                productOptions() {
+                    let opts = Object.keys(this.products).map(id => {
+                        return {
+                            value: parseInt(id),
+                            label: this.products[id].title + " (" + this.products[id].price + " €)"
+                        }
+                    })
+
+                    return opts
+                },
                 canChangeEmployeeOnView() {
                     return this.chosenEmployeeOnView === -1 || this.loggedInEmployee.role === 'administrator'
                 },

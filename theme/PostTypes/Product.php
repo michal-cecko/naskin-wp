@@ -2,11 +2,17 @@
 
 namespace Theme\PostTypes;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Saurus\App\Modules\Wordpress\Posts\PostType;
 use Saurus\App\Modules\Log\ILoggable;
+use Theme\Models\Appointment\Appointment;
+use Theme\Models\Product\ProductSale;
 
 class Product extends PostType implements ILoggable
 {
+    protected $appends = ['price'];
+
     public function getPriceAttribute() : ?float {
         return get_field("prod_price", $this->id);
     }
@@ -26,9 +32,25 @@ class Product extends PostType implements ILoggable
         return "product";
     }
 
+    public function productSales(): HasMany
+    {
+        return $this->hasMany(ProductSale::class, "product_id");
+    }
+
+    public function appointments(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Appointment::class,
+            ProductSale::class,
+            "product_id",
+            'id',
+            'id',
+            "appointment_id"
+        )->orderBy("id", "DESC");
+    }
+
     public static function registerCustomPostType(): ?array
     {
-
         $labels = array(
             'name' => __('Produkty', 'naskin'),
             'singular_name' => __('Produkt', 'naskin'),

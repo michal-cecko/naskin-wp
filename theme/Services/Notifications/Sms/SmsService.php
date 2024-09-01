@@ -17,7 +17,6 @@ use Theme\Mail\Appointments\Employee\AppointmentCancelledEmployee;
 use Theme\Mail\Appointments\Employee\AppointmentCreatedEmployee;
 use Theme\Models\Appointment\Appointment;
 use Theme\Services\Customers\CustomerService;
-use Theme\Services\Sms\SmsSender;
 
 class SmsService implements INotificationService
 {
@@ -28,7 +27,7 @@ class SmsService implements INotificationService
     {
         $view = "sms.appointments.customer." . strtolower($type->value) . "-appointment-customer";
 
-        $content = templates()->generate($view, [$appointment, $additionalData]);
+        $content = templates()->generate($view, array_merge($additionalData, ['appointment' => $appointment]));
 
         $sender = new SmsSender();
 
@@ -48,7 +47,7 @@ class SmsService implements INotificationService
     {
         $view = "sms.appointments.employee." . strtolower($type->value) . "-appointment-employee";
 
-        $content = templates()->generate($view, [$appointment, $additionalData]);
+        $content = templates()->generate($view, array_merge($additionalData, ['appointment' => $appointment]));
 
         $sender = new SmsSender();
 

@@ -162,9 +162,7 @@
         <div class="sixty">
             <div class="field-container">
                 <label for="amount">Produkt</label>
-                <select class="custom-select" v-model="sale.product_id" :id="`sale-product-${key}`" @change="setPriceIfEmpty(sale)">
-                    <option v-for="(product, key) in products" :value="product.id">@{{ product.title }} (@{{ product.price }} €)</option>
-                </select>
+                <p-select v-model="sale.product_id" :id="`sale-product-${key}`" :options="productOptions" option-label="label" option-value="value" filter @change="setPriceIfEmpty(sale)" placeholder="Vyberte produkt"></p-select>
             </div>
         </div>
         <div class="fifth">
@@ -177,7 +175,7 @@
         <div class="fifth">
             <div class="field-container">
                 <label for="quantity">Množstvo</label>
-                <p-number v-model="sale.quantity" :inputId="`sale-quantity-${key}`" :min="0.01" placeholder="Množstvo"></p-number>
+                <p-number v-model="sale.quantity" :inputId="`sale-quantity-${key}`" show-buttons:min="0.01" :maxFractionDigits="2"  :step="0.01" placeholder="Množstvo"></p-number>
             </div>
         </div>
         <div class="full payment-note-container">

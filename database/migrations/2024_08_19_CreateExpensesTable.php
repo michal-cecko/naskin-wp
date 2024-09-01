@@ -14,10 +14,13 @@ class CreateExpensesTable extends AbstractMigration
             $table->id();
             $table->foreignId('category_id')->nullable()->default(null);
             $table->foreign('category_id')->references('term_id')->on('terms')->nullOnDelete();
+            $table->foreignId('product_id')->nullable()->default(null);
+            $table->foreign('product_id')->references('ID')->on('posts')->nullOnDelete();
             $table->text("description")->nullable();
             $table->string("note")->nullable();
             $table->string("supplier")->nullable();
             $table->double("price");
+            $table->date("bought_at")->nullable();
             $table->timestamps();
         });
     }

@@ -209,7 +209,7 @@ class AppointmentsDashboardView
                 operator: "sum",
                 filter: $filter,
                 formatter: function ($value) {
-                    return $value . " €";
+                    return $value . "€";
                 },
             ));
         }

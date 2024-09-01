@@ -15,7 +15,6 @@ use Theme\Requests\Appointments\Admin\AppointmentAdminStoreRequest;
 use Theme\Requests\Appointments\AppointmentCancelRequest;
 use Theme\Requests\Appointments\AppointmentICSRequest;
 use Theme\Requests\Appointments\AppointmentListAvailableDates;
-use Theme\Requests\Appointments\AppointmentSendNotificationsRequest;
 use Theme\Requests\Appointments\AppointmentStoreRequest;
 use Theme\Services\Appointments\AppointmentService;
 use Theme\Users\Employee;
@@ -32,7 +31,6 @@ class Appointments
     private function initRest(): void
     {
         main()->api()->addApiEndpoint(ApiMethod::GET, "/appointment/ics", "appointment.ics", [$this, 'generateAppointmentICS']);
-        main()->api()->addApiEndpoint(ApiMethod::GET, "/appointment/send-notifications", "appointment.send-notifications", [$this, 'sendNotifications']);
         main()->api()->addApiEndpoint(ApiMethod::GET, "/appointment/cancel", "appointment.customer-cancel", [$this, 'cancelAppointment']);
         main()->api()->addApiEndpoint(ApiMethod::POST, "/appointment/available-dates", "appointment.available_dates", [$this, 'getAvailableDates']);
         main()->api()->addApiEndpoint(ApiMethod::POST, "/appointment/store", "appointment.store", [$this, 'store']);

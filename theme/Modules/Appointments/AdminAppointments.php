@@ -165,7 +165,7 @@ class AdminAppointments
                 ->orWhereBetween("end_at", [$dateToFetchFrom, $dateToFetchTo]);
         })->where("status", AppointmentStatus::OK)->when($employee, function ($query) use ($employee) {
             $query->whereIn("employee_id", [$employee->id, ...$employee->mutual_calendar_blocking_employees]);
-        })->with(["employee", 'services.service', 'customer', "payments"])->get();
+        })->with(["employee", 'services.service', 'customer', "payments", "productSales"])->get();
 
         $return = [];
 
@@ -200,6 +200,7 @@ class AdminAppointments
                     'employeeID' => $appointment->employee->ID,
                     'services' => $appointment->services->append("service_category_id"),
                     'payments' => $appointment->payments,
+                    'productSales' => $appointment->productSales,
                     'break' => $appointment->break,
                     'datetime' => [
                         'from' => $appointment->start_at->format("Y-m-d H:i:s"),
