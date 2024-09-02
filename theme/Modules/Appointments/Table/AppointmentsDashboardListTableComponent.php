@@ -74,8 +74,8 @@ class AppointmentsDashboardListTableComponent extends TableComponent
         $actions = [];
 
         //TODO: add edit and delete actions
-        $actions['edit'] = get_edit_post_link($rowData->id);
-        $actions['delete'] = get_edit_post_link($rowData->id);
+        //$actions['edit'] = get_edit_post_link($rowData->id);
+        //$actions['delete'] = get_edit_post_link($rowData->id);
 
         return $actions;
     }

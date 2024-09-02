@@ -7,7 +7,7 @@
 return [
     //Naskin
     'app_token' => '***REMOVED***',
-    'android_app_key' => '985BID9BGQ',
+    'android_app_key' => '985J4K5XJ3',
     'app_id' => 33177, //PHP SDK App ID
 
     //Mišove test

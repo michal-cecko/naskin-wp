@@ -57,5 +57,6 @@ class TogetherEmployeeRole extends UserRole
         remove_menu_page('themes.php');          // Appearance
         remove_menu_page('admin.php?page=wpseo_dashboard'); // Yoast SEO
         remove_menu_page('admin.php?page=theme-general-settings'); // Theme settings
+        remove_menu_page('admin.php?page=filebird-settings'); // Filebird
     }
 }

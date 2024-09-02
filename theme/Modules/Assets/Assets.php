@@ -100,12 +100,13 @@ class Assets extends SaurusAssets
             wp_enqueue_style(handle: 'non_admin_role-scss', src: $this->dynamic('styles/admin/roles/non_admin/non_admin_role.scss'), ver: $this->ver);
         }
 
-        if($pagenow === "admin.php" && $page === "expense_detail") {
-            wp_enqueue_script(handle: 'single-expense-js', src: $this->dynamic('scripts/components/admin/single-expense.js'), ver: $this->ver);
-        }
-
-        if($pagenow === "admin.php" && $page === "product_sale_detail") {
-            wp_enqueue_script(handle: 'single-product-sale-js', src: $this->dynamic('scripts/components/admin/single-product-sale.js'), ver: $this->ver);
+        if(in_array($pagenow, ['admin.php', 'edit.php'])) {
+            if($page === "expense_detail") {
+                wp_enqueue_script(handle: 'single-expense-js', src: $this->dynamic('scripts/components/admin/single-expense.js'), ver: $this->ver);
+            }
+            if($page === "product_sale_detail") {
+                wp_enqueue_script(handle: 'single-product-sale-js', src: $this->dynamic('scripts/components/admin/single-product-sale.js'), ver: $this->ver);
+            }
         }
     }
 

@@ -131,5 +131,6 @@ class OwnerRole extends UserRole
         remove_menu_page('tools.php'); // Site Health
         remove_menu_page('themes.php');          // Appearance
         remove_menu_page('admin.php?page=wpseo_dashboard'); // Yoast SEO
+        remove_menu_page('admin.php?page=filebird-settings'); // Filebird
     }
 }
