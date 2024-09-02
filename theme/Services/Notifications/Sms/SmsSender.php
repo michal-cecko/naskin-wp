@@ -58,7 +58,6 @@ class SmsSender
             $this->gateway->send($message);
             return true;
         } catch (SenderException $e) {
-            dd($e);
             main()->log()->error("SMS Brana | Chyba: " . json_encode($e));
             return false;
         }
