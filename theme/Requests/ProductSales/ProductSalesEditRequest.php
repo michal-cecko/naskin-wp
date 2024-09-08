@@ -4,6 +4,7 @@ namespace Theme\Requests\ProductSales;
 
 use Saurus\App\Rules\Exists;
 use Saurus\App\Rules\PostExists;
+use Theme\Enum\ProductSale\ProductSalePaymentType;
 use Theme\Models\Appointment\Appointment;
 use Theme\Models\Expense\Expense;
 use Theme\PostTypes\Product;
@@ -29,6 +30,8 @@ class ProductSalesEditRequest extends AuthenticatedAdminRequest
 
             'quantity' => 'required|decimal:0,2|min:0.01',
             'note' => 'sometimes|nullable|string',
+
+            'payment_type' => 'sometimes|nullable|in:' . implode(",", ProductSalePaymentType::stringCases()),
 
             'price' => 'required|decimal:0,2',
         ];

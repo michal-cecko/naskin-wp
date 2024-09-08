@@ -2,6 +2,7 @@
 
 namespace Theme\Modules\Customers\Table;
 
+use Saurus\App\Enums\FilterOperator;
 use Saurus\App\Enums\FilterType;
 use Saurus\App\Modules\Templates\Filter\FilterComponent;
 use Theme\Enum\AppointmentSource;
@@ -15,21 +16,16 @@ class CustomerDetailAppointmentsFilterComponent extends FilterComponent
         $fields = [];
 
         $fields['start_at'] = [
-            'label' => __('Začiatok termínu od', THEME_DOMAIN),
-            'type' => FilterType::DATETIME,
-            'operator' => ">="
-        ];
-
-        $fields['end_at'] = [
-            'label' => __('Koniec termínu do', THEME_DOMAIN),
-            'type' => FilterType::DATETIME,
-            'operator' => "<="
+            'label' => __('Začiatok termínu', THEME_DOMAIN),
+            'type' => FilterType::DATETIME_RANGE,
+            'operator' => FilterOperator::RANGE,
         ];
 
         $fields['employee_id'] = [
             'label' => __('Pracovníčka', THEME_DOMAIN),
-            'type' => FilterType::SELECT,
+            'type' => FilterType::MULTISELECT,
             'datatype' => "int",
+            'operator' => FilterOperator::IN,
             'show_options_filter' => true,
             'options' => Employee::all()->map(fn($employee) => ['key' => $employee->id, 'value' => $employee->first_name])->toArray(),
         ];
@@ -38,7 +34,7 @@ class CustomerDetailAppointmentsFilterComponent extends FilterComponent
             'label' => __('Služby', THEME_DOMAIN),
             'type' => FilterType::MULTISELECT,
             'datatype' => "int",
-            'multiple' => true,
+            'operator' => FilterOperator::IN,
             'show_options_filter' => true,
             'options' => Service::all()->map(fn($service) => ['key' => $service->id, 'value' => "{$service->title} ({$service->price}€)"])->toArray(),
         ];
@@ -46,6 +42,7 @@ class CustomerDetailAppointmentsFilterComponent extends FilterComponent
         $fields["status"] = [
             'label' => __('Status', THEME_DOMAIN),
             'datatype' => "string",
+            'operator' => FilterOperator::EQUAL,
             'type' => FilterType::SELECT,
             'options' => collect(AppointmentStatus::translatedCases())->map(fn($value, $key) => ['key' => $key, 'value' => $value])->values()->toArray(),
         ];
@@ -53,7 +50,8 @@ class CustomerDetailAppointmentsFilterComponent extends FilterComponent
         $fields["source"] = [
             'label' => __('Zdroj', THEME_DOMAIN),
             'datatype' => "string",
-            'type' => FilterType::SELECT,
+            'operator' => FilterOperator::IN,
+            'type' => FilterType::MULTISELECT,
             'options' => collect(AppointmentSource::translatedCases())->map(fn($value, $key) => ['key' => $key, 'value' => $value])->values()->toArray(),
         ];
 

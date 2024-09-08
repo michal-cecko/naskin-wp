@@ -4,6 +4,7 @@ use Theme\Enum\AppointmentPaymentType;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
+use Theme\Enum\ProductSale\ProductSalePaymentType;
 
 return [
     'translations' => [
@@ -24,6 +25,10 @@ return [
             AppointmentPaymentType::CASH->value => 'Hotovosť',
             AppointmentPaymentType::GIFTCARD->value => 'Darčeková karta',
             AppointmentPaymentType::BANK_CARD->value => 'Banková karta',
+        ],
+        ProductSalePaymentType::class => [
+            ProductSalePaymentType::CASH->value => 'Hotovosť',
+            ProductSalePaymentType::BANK_CARD->value => 'Banková karta',
         ],
     ]
 ];

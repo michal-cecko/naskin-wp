@@ -4,6 +4,7 @@ namespace Theme\Modules\Appointments\Table;
 
 use Illuminate\Database\Eloquent\Builder;
 use Saurus\App\Modules\Templates\Table\TableComponent;
+use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
 use Theme\Models\Appointment\Appointment;
 
@@ -53,6 +54,10 @@ class AppointmentsDashboardListTableComponent extends TableComponent
                 'label' => __('Zdroj', THEME_DOMAIN),
                 'sortable' => true,
             ],
+            'note' => [
+                'label' => __('Poznámka', THEME_DOMAIN),
+                'sortable' => true,
+            ],
             'created_at' => [
                 'label' => __('Vytvorené', THEME_DOMAIN),
                 'sortable' => true,
@@ -66,7 +71,12 @@ class AppointmentsDashboardListTableComponent extends TableComponent
 
     public function recordsQuery() : Builder
     {
-        return Appointment::with(["services", "employee", "customer"])->orderBy("id", "DESC");
+        return Appointment::with(["services", "employee", "customer", "payments", "productSales.product"])->orderBy("id", "DESC");
+    }
+
+    public function hasDetailRow(): bool
+    {
+        return true;
     }
 
     public function rowActions(mixed $rowData): array
@@ -92,12 +102,21 @@ class AppointmentsDashboardListTableComponent extends TableComponent
         $rowDataToReturn['start_at'] = $appointment->start_at->format("d.m.y H:i");
         $rowDataToReturn['end_at'] = $appointment->end_at->format("d.m.y H:i");
         $rowDataToReturn['services'] = $appointment->type === AppointmentType::VACATION ? "<i>---</i>" : $appointment->formatted_services;
-        $rowDataToReturn['total'] = $appointment->total . " €";
+        $rowDataToReturn['total'] = $appointment->type === AppointmentType::VACATION || $appointment->status === AppointmentStatus::CANCELLED ? "<i>---</i>" : $appointment->formatted_total;
+        $rowDataToReturn['note'] = !empty($appointment->note) ? $appointment->note : "<i>Bez poznámky</i>";
         $rowDataToReturn['status'] = $appointment->status?->translated();
         $rowDataToReturn['source'] = $appointment->type === AppointmentType::VACATION ? "<i>---</i>" : $appointment->source?->translated();
         $rowDataToReturn['created_at'] = $appointment->created_at->format("d.m.y H:i");
         $rowDataToReturn['updated_at'] = $appointment->updated_at->format("d.m.y H:i");
+        $rowDataToReturn['detail_row'] = $appointment->type === AppointmentType::VACATION ? false : $this->detailRowContent($appointment);
 
         return ['id' => $appointment->id, 'data' => $rowDataToReturn];
+    }
+
+    private function detailRowContent(mixed $appointment) : string
+    {
+        return templates()->generate('parts.dashboard.appointments.tables.dashboard-appointments-list-table-detail-row', [
+            'appointment' => $appointment,
+        ]);
     }
 }

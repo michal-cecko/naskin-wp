@@ -5,6 +5,7 @@ namespace Theme\Models\Product;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Saurus\App\Modules\Log\ILoggable;
 use Saurus\App\Modules\Wordpress\Models\Model;
+use Theme\Enum\ProductSale\ProductSalePaymentType;
 use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Product;
 
@@ -19,10 +20,12 @@ class ProductSale extends Model implements ILoggable
         'sold_at',
         'quantity',
         'note',
+        'payment_type',
     ];
 
     protected $casts = [
         'sold_at' => "datetime",
+        'payment_type' => ProductSalePaymentType::class,
     ];
 
     public function product(): BelongsTo
@@ -46,6 +49,11 @@ class ProductSale extends Model implements ILoggable
     }
 
     public function getLogTitleAttribute(): string
+    {
+        return "Predaný {$this->product->title} ({$this->quantity}, {$this->total_price}€)";
+    }
+
+    public function getLogStringAttribute(): string
     {
         return "{$this->product?->title} ({$this->quantity} x {$this->price}€ = {$this->total_price}€) / {$this->sold_at?->format("d.m.y")}";
     }

@@ -3,6 +3,7 @@
 namespace Theme\Modules\Appointments\Table;
 
 use Illuminate\Support\Collection;
+use Saurus\App\Enums\FilterOperator;
 use Saurus\App\Enums\FilterType;
 use Saurus\App\Modules\Templates\Filter\FilterComponent;
 use Theme\Enum\AppointmentSource;
@@ -18,29 +19,25 @@ class AppointmentsDashboardListFilterComponent extends FilterComponent
         $fields = [];
 
         $fields['start_at'] = [
-            'label' => __('Začiatok termínu od', THEME_DOMAIN),
-            'type' => FilterType::DATETIME,
-            'operator' => ">="
-        ];
-
-        $fields['end_at'] = [
-            'label' => __('Koniec termínu do', THEME_DOMAIN),
-            'type' => FilterType::DATETIME,
-            'operator' => "<="
+            'label' => __('Začiatok termínu', THEME_DOMAIN),
+            'type' => FilterType::DATETIME_RANGE,
+            'operator' => FilterOperator::RANGE,
         ];
 
         $fields['customer_id'] = [
             'label' => __('Zákazník', THEME_DOMAIN),
-            'type' => FilterType::SELECT,
+            'type' => FilterType::MULTISELECT,
             'datatype' => "int",
+            'operator' => FilterOperator::IN,
             'show_options_filter' => true,
             'options' => $this->getSelectOptionsFromModels(Customer::all(),valueFn: fn($customer) => $customer->title),
         ];
 
         $fields['employee_id'] = [
             'label' => __('Pracovníčka', THEME_DOMAIN),
-            'type' => FilterType::SELECT,
+            'type' => FilterType::MULTISELECT,
             'datatype' => "int",
+            'operator' => FilterOperator::IN,
             'show_options_filter' => true,
             'options' => $this->getSelectOptionsFromModels(Employee::all(), valueFn: fn($employee) => $employee->first_name),
         ];
@@ -49,7 +46,7 @@ class AppointmentsDashboardListFilterComponent extends FilterComponent
             'label' => __('Služby', THEME_DOMAIN),
             'type' => FilterType::MULTISELECT,
             'datatype' => "int",
-            'multiple' => true,
+            'operator' => FilterOperator::IN,
             'show_options_filter' => true,
             'options' => $this->getSelectOptionsFromModels(Service::all(), valueFn: fn ($service) => "{$service->title} ({$service->price}€)"),
         ];
@@ -58,6 +55,7 @@ class AppointmentsDashboardListFilterComponent extends FilterComponent
             'label' => __('Typ termínu', THEME_DOMAIN),
             'datatype' => "string",
             'type' => FilterType::SELECT,
+            'operator' => FilterOperator::EQUAL,
             'options' => $this->getSelectOptionsFromEnum(AppointmentType::class),
         ];
 
@@ -65,13 +63,15 @@ class AppointmentsDashboardListFilterComponent extends FilterComponent
             'label' => __('Status', THEME_DOMAIN),
             'datatype' => "string",
             'type' => FilterType::SELECT,
+            'operator' => FilterOperator::EQUAL,
             'options' => $this->getSelectOptionsFromEnum(AppointmentStatus::class),
         ];
 
         $fields["source"] = [
             'label' => __('Zdroj', THEME_DOMAIN),
             'datatype' => "string",
-            'type' => FilterType::SELECT,
+            'type' => FilterType::MULTISELECT,
+            'operator' => FilterOperator::IN,
             'options' => $this->getSelectOptionsFromEnum(AppointmentSource::class),
         ];
 
@@ -79,7 +79,7 @@ class AppointmentsDashboardListFilterComponent extends FilterComponent
             'label' => __('Poznámka', THEME_DOMAIN),
             'datatype' => "string",
             'type' => FilterType::TEXT,
-            'operator' => "LIKE",
+            'operator' => FilterOperator::LIKE,
             'value_prefix' => "%",
             'value_suffix' => "%",
         ];

@@ -5,6 +5,8 @@ namespace Theme\Modules\Appointments;
 use Saurus\App\Interfaces\IFilterComponent;
 use Saurus\App\Main;
 use Saurus\App\Modules\Templates\Card\MetricCard;
+use Theme\Enum\AppointmentStatus;
+use Theme\Enum\AppointmentType;
 use Theme\Enum\User\Role;
 use Theme\Models\Appointment\Appointment;
 use Theme\Modules\Appointments\Table\AppointmentsDashboardListFilterComponent;
@@ -203,8 +205,8 @@ class AppointmentsDashboardView
             $metrics[] = Main::initModule(new MetricCard(
                 id: "income_metric",
                 heading: "Príjem celkom",
-                query: Appointment::query(),
-                targetAttribute: "total",
+                query: Appointment::query()->with(['payments'])->where("status", AppointmentStatus::OK)->where("type", AppointmentType::RESERVATION),
+                targetAttribute: "payments.amount",
                 icon: 'dashicons-arrow-up-alt',
                 operator: "sum",
                 filter: $filter,

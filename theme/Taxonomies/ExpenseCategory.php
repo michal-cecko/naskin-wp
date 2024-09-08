@@ -2,14 +2,38 @@
 
 namespace Theme\Taxonomies;
 
+use Corcel\Model\Builder\TaxonomyBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Saurus\App\Modules\Log\ILoggable;
 use Saurus\App\Modules\Wordpress\Taxonomies\TaxonomyType;
+use Theme\Enum\User\Role;
 use Theme\Models\Expense\Expense;
-use Theme\PostTypes\Service;
 
 class ExpenseCategory extends TaxonomyType implements ILoggable
 {
+    public function newQuery() : TaxonomyBuilder
+    {
+        $q = parent::newQuery();
+
+        $user = main()->wpHelper()->getCurrentUser();
+        if(!in_array($user->roles[0], [Role::OWNER->value, Role::ADMIN->value])) {
+            $q->whereHas('term', function($sq) {
+                $sq->whereHas('meta', function($ssq) {
+                    $ssq->where('meta_key', "owner_only")->where('meta_value', 0);
+                })->orWhereDoesntHave('meta', function($ssq) {
+                    $ssq->where('meta_key', "owner_only");
+                });
+            });
+        }
+
+        return $q;
+    }
+
+    public function getOwnerOnlyAttribute(): bool
+    {
+        return get_field('owner_only', $this->acf_id) ?? false;
+    }
+
     public function expenses() : BelongsToMany
     {
         return $this->belongsToMany(

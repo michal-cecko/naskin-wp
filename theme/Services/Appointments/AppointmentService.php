@@ -19,12 +19,6 @@ use Theme\Exceptions\Appointment\AppointmentNotFoundException;
 use Theme\Exceptions\Email\EmailFailedToSendException;
 use Theme\Exceptions\Employee\EmployeeNotFoundException;
 use Theme\Helpers\ModelRelationsHelper;
-use Theme\Mail\Appointments\Customer\AppointmentCancelledCustomer;
-use Theme\Mail\Appointments\Customer\AppointmentCreatedCustomer;
-use Theme\Mail\Appointments\Customer\AppointmentRemindCustomer;
-use Theme\Mail\Appointments\Customer\AppointmentUpdatedCustomer;
-use Theme\Mail\Appointments\Employee\AppointmentCancelledEmployee;
-use Theme\Mail\Appointments\Employee\AppointmentCreatedEmployee;
 use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Customer;
 use Theme\PostTypes\Service;
@@ -39,7 +33,7 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], iterable $productSales = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false): Appointment
+    public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], iterable $productSales = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false, string $createdBy = "employee"): Appointment
     {
         if (empty($customer['id'])) {
             $customer = CustomerService::createCustomer($customer['name'], $customer['email'], $customer['phone'] ?? null);
@@ -82,13 +76,13 @@ class AppointmentService
         self::syncProductSalesWithAppointment($appointment, $productSales);
 
         if ($notifyCustomer) {
-            if (!EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::CREATED)) {
+            if (!EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::CREATED, ['isCreatedByEmployee' => $createdBy === 'employee'])) {
                 main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer]);
             }
         }
 
         if ($notifyEmployee) {
-            if (!EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::CREATED)) {
+            if (!EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::CREATED, ['isCreatedByEmployee' => $createdBy === 'employee'])) {
                 main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení rezervácie na pracovníkov email: {$appointment->employee->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->employee]);
             }
         }
@@ -100,7 +94,7 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], iterable $productSales = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false): array
+    public static function updateReservation(Appointment|int $appointment, Employee|int $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], iterable $productSales = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false): array
     {
         $eager = ["services", "customer", "payments", "productSales", "employee"];
 
@@ -155,6 +149,12 @@ class AppointmentService
                 main()->log()->errorDB("Nepodarilo sa odoslať email o upravení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer]);
             }
         }
+        
+        if ($notifyEmployee) {
+            if (!EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::UPDATED)) {
+                main()->log()->errorDB("Nepodarilo sa odoslať email o upravení rezervácie na pracovníkov email: {$appointment->employee->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer, $appointment->employee]);
+            }
+        }
 
         return ['appointment' => $appointment, 'changes' => $changes];
 
@@ -174,7 +174,7 @@ class AppointmentService
     /**
      * @throws AppointmentInvalidDatetimeDifferenceException
      */
-    public static function createVacation(int $employeeID, Carbon $startAt, Carbon $endAt, ?string $note = null): Appointment
+    public static function createVacation(int $employeeID, Carbon $startAt, Carbon $endAt, ?string $note = null, bool $notifyEmployee = false): Appointment
     {
         self::checkAppointmentTimeDifference($startAt, $endAt);
 
@@ -187,13 +187,19 @@ class AppointmentService
             'type' => AppointmentType::VACATION,
         ]);
 
+        if ($notifyEmployee) {
+            if (!EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::CREATED)) {
+                main()->log()->errorDB("Nepodarilo sa odoslať email o vytvorení voľna na pracovníkov email: {$appointment->employee->email}, Voľno: {$appointment->log_string}", resources: [$appointment, $appointment->employee]);
+            }
+        }
+
         return $appointment;
     }
 
     /**
      * @throws Exception
      */
-    public static function updateVacation(Appointment|int $appointment, int|Employee $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null): array
+    public static function updateVacation(Appointment|int $appointment, int|Employee $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, bool $notifyEmployee = false): array
     {
         if(is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->first();
@@ -217,6 +223,12 @@ class AppointmentService
         ]);
         $changes = $appointment->getChangedColumns();
         $appointment->save();
+        
+        if ($notifyEmployee) {
+            if (!EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::UPDATED)) {
+                main()->log()->errorDB("Nepodarilo sa odoslať email o upravení voľna na pracovníkov email: {$appointment->employee->email}, Voľno: {$appointment->log_string}", resources: [$appointment, $appointment->employee]);
+            }
+        }
 
         return ['appointment' => $appointment, 'changes' => $changes];
     }
@@ -448,6 +460,10 @@ class AppointmentService
     public static function cancelAppointment(Appointment $appointment, bool $notifyCustomer = false, bool $notifyEmployee = false, $isCancelledByEmployee = false): void
     {
         if($appointment->type === AppointmentType::VACATION) {
+            if($notifyEmployee) {
+                EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::CANCELLED);
+            }
+
             $appointment->delete();
             return;
         }

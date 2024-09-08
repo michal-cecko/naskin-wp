@@ -114,6 +114,13 @@ class ManagerRole extends UserRole
             'edit_expenses' => true,
             'delete_expenses' => true,
 
+            // Product Sales
+            'view_product_sales' => true,
+            'view_product_sale_detail_page' => true,
+            'create_product_sales' => true,
+            'edit_product_sales' => true,
+            'delete_product_sales' => true,
+
             // ACF Options
             'view_acf_web_options' => true,
         ];

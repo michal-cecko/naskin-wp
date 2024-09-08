@@ -9,20 +9,26 @@
     <div id="singleProductSale">
 
         <div id="single-data" data-form_type="{{$resource ? "edit" : "create"}}" data-delete_redirect="{{admin_url("admin.php?page=product_sales")}}"
-             data-resource='@json($resource?->toArray())' data-reservations='@json($reservations)' data-products='@json($products)'></div>
+             data-resource='@json($resource?->toArray())' data-reservations='@json($reservations)' data-products='@json($products)' data-payment_types='@json($paymentTypes)'></div>
 
         <div class="single-form">
             <div class="divided-row">
-                <div class="half">
+                <div class="third">
                     <div class="field-container">
                         <label for="product_id">Produkt</label>
                         <p-select v-model="form.product_id" :options="products" option-label="title" option-value="id" filter @change="setPriceIfEmpty()" placeholder="Vyberte produkt"></p-select>
                     </div>
                 </div>
-                <div class="half">
+                <div class="third">
                     <div class="field-container">
                         <label for="appointment_id">Rezervácia</label>
                         <p-select v-model="form.appointment_id" :options="reservations" option-label="title" option-value="id" filter placeholder="Vyberte rezerváciu" show-clear></p-select>
+                    </div>
+                </div>
+                <div class="third">
+                    <div class="field-container">
+                        <label for="payment_type">Spôsob platby</label>
+                        <p-select v-model="form.payment_type" :options="payment_types" option-label="title" option-value="id" filter placeholder="Vyberte spôsob platby" show-clear></p-select>
                     </div>
                 </div>
                 <div class="third">

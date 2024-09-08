@@ -53,7 +53,8 @@ class AppointmentAdminUpdateRequest extends AuthenticatedAdminRequest
 
             'note' => 'sometimes|nullable|string|max:1000',
 
-            'notify' => ['required', 'boolean']
+            'notify_customer' => ['required', 'boolean'],
+            'notify_employee' => ['required', 'boolean'],
         ];
 
     }

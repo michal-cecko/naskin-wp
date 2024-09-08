@@ -8,6 +8,7 @@ use Saurus\App\Main;
 use Saurus\App\Modules\Templates\Card\MetricCard;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
+use Theme\Enum\ProductSale\ProductSalePaymentType;
 use Theme\Models\Appointment\Appointment;
 use Theme\Models\Product\ProductSale;
 use Theme\Modules\ProductSales\Table\ProductSalesDashboardListFilterComponent;
@@ -67,13 +68,18 @@ class ProductSalesDashboardView
             'title' => $prod->title . ' (' . $prod->price . ' €)',
         ]);
 
+        $paymentTypes = collect(ProductSalePaymentType::translatedCases())->map(fn($type, $key) => [
+            'id' => $key,
+            'title' => $type,
+        ])->values();
+
         $reservations = Appointment::where("type", AppointmentType::RESERVATION)->where("status", AppointmentStatus::OK)
             ->where("start_at", "<", Carbon::now()->addDay())->orderBy("id", "DESC")->get()->map(fn($app) => [
                 'id' => $app->id,
                 'title' => $app->short_log_string,
             ]);
 
-        templates()->render("pages.dashboard.product-sales.product-sales-single", compact('resource', 'reservations', 'products'));
+        templates()->render("pages.dashboard.product-sales.product-sales-single", compact('resource', 'reservations', 'products', 'paymentTypes'));
     }
 
     private function metrics(IFilterComponent $filter): array

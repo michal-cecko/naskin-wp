@@ -151,4 +151,23 @@ class Appointment extends Model implements ILoggable
         }
         return implode("<br>", $formattedServices);
     }
+
+    public function getPaymentsTotalAttribute() : ?float {
+        return $this->payments?->sum('amount') ?? null;
+    }
+
+    public function getFormattedTotalAttribute(): string
+    {
+        $formattedTotal = $this->total . " €";
+
+        $paymentsTotal = $this->payments_total;
+
+        if($this->total > $paymentsTotal) {
+            $formattedTotal .= " <span class='text-danger'><b>ale zaplatené: " . $paymentsTotal . "€</b></span>";
+        } else if($this->total < $paymentsTotal) {
+            $formattedTotal .= " <span class='text-success'><b>ale zaplatené: " . $paymentsTotal . "€</b></span>";
+        }
+
+        return $formattedTotal;
+    }
 }

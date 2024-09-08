@@ -2,9 +2,11 @@
 
 namespace Theme\Models\Expense;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Saurus\App\Modules\Log\ILoggable;
 use Saurus\App\Modules\Wordpress\Models\Model;
+use Theme\Enum\User\Role;
 use Theme\PostTypes\Product;
 use Theme\Taxonomies\ExpenseCategory;
 
@@ -24,6 +26,26 @@ class Expense extends Model implements ILoggable {
     protected $casts = [
         'bought_at' => 'date',
     ];
+
+    public function newQuery() : Builder
+    {
+        $q = parent::newQuery();
+
+        $user = main()->wpHelper()->getCurrentUser();
+        if(!in_array($user->roles[0], [Role::OWNER->value, Role::ADMIN->value])) {
+            $q->whereHas('category', function($sq) {
+                $sq->whereHas('term', function($ssq) {
+                    $ssq->whereHas('meta', function($sssq) {
+                        $sssq->where('meta_key', "owner_only")->where('meta_value', 0);
+                    })->orWhereDoesntHave('meta', function($sssq) {
+                        $sssq->where('meta_key', "owner_only");
+                    });
+                });
+            });
+        }
+
+        return $q;
+    }
 
     public function category(): BelongsTo {
         return $this->belongsTo(ExpenseCategory::class, "category_id", "term_id");

@@ -69,7 +69,8 @@ class Appointments
             services: $services,
             source: AppointmentSource::WEB,
             notifyCustomer: true,
-            notifyEmployee: true
+            notifyEmployee: true,
+            createdBy: "customer"
         );
 
         main()->log()->infoDB("Vytvorená rezervácia online, {$appointment->log_string}. Služby: {$appointment->log_services_string}. Zákazník: {$appointment->customer_string}", resources: [$appointment, $appointment->customer]);

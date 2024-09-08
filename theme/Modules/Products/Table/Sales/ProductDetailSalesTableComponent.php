@@ -54,6 +54,10 @@ class ProductDetailSalesTableComponent extends TableComponent
                 'label' => __('Poznámka', THEME_DOMAIN),
                 'sortable' => true,
             ],
+            'payment_type' => [
+                'label' => __('Spôsob platby', THEME_DOMAIN),
+                'sortable' => true,
+            ],
             'created_at' => [
                 'label' => __('Vytvorené', THEME_DOMAIN),
                 'sortable' => true,
@@ -88,6 +92,7 @@ class ProductDetailSalesTableComponent extends TableComponent
         $rowDataToReturn['total_price'] = $sale->total_price . " €";
         $rowDataToReturn['quantity'] = $sale->quantity;
         $rowDataToReturn['note'] = $sale->note ?? "<i>Bez poznámky</i>";
+        $rowDataToReturn['payment_type'] = $sale->paymentType?->value ?? "<i>Nezadané</i>";
         $rowDataToReturn['created_at'] = $sale->created_at->format("d.m.y H:i");
         $rowDataToReturn['updated_at'] = $sale->updated_at->format("d.m.y H:i");
 

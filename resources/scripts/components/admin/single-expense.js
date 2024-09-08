@@ -163,7 +163,7 @@ class SingleExpense extends Commons {
                     return this.createEditLoader ? "Ukladám..." : "Uložiť";
                 },
                 buttonRemoveText() {
-                    return this.createEditLoader ? "Odstraňujem..." : "Odstrániť";
+                    return this.deleteLoader ? "Odstraňujem..." : "Odstrániť";
                 }
             },
         });

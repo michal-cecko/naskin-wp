@@ -22,6 +22,7 @@ class SingleProductSale extends Commons {
                     createEditLoader: false,
                     deleteLoader: false,
                     products: {},
+                    payment_types: {},
                     dateFormat: {}
                 }
             },
@@ -34,6 +35,7 @@ class SingleProductSale extends Commons {
                 this.resource = JSON.parse(singleData.resource)
                 this.resetForm()
                 this.reservations = JSON.parse(singleData.reservations)
+                this.payment_types = JSON.parse(singleData.payment_types)
                 this.products = JSON.parse(singleData.products)
                 this.delete_redirect = singleData.delete_redirect
             },
@@ -45,6 +47,7 @@ class SingleProductSale extends Commons {
                         appointment_id: isEdit ? this.resource.appointment_id : null,
                         price: isEdit ? this.resource.price : null,
                         quantity: isEdit ? this.resource.quantity : null,
+                        payment_type: isEdit ? this.resource.payment_type : null,
                         note: isEdit ? this.resource.note : null,
                         sold_at: isEdit && !!this.resource.sold_at ? moment(this.resource.sold_at, this.dateFormat.payload).format(this.dateFormat.input_no_time) : null,
                     }
@@ -171,7 +174,7 @@ class SingleProductSale extends Commons {
                     return this.createEditLoader ? "Ukladám..." : "Uložiť";
                 },
                 buttonRemoveText() {
-                    return this.createEditLoader ? "Odstraňujem..." : "Odstrániť";
+                    return this.deleteLoader ? "Odstraňujem..." : "Odstrániť";
                 }
             },
         });

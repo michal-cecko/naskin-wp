@@ -75,7 +75,8 @@ class ReservationCalendar extends Commons {
 
                     products: null,
 
-                    notify: false,
+                    notify_customer: false,
+                    notify_employee: false,
 
                     hasInit: false,
 
@@ -362,7 +363,8 @@ class ReservationCalendar extends Commons {
                     if (!this.checkErrors()) return;
 
                     let body = {
-                        notify: !!this.notify,
+                        notify_customer: !!this.notify_customer,
+                        notify_employee: !!this.notify_employee,
                         employeeID: parseInt(this.chosenEmployeeInForms),
                         date: {
                             start: moment(this.appointment.datetime.start, this.dateFormat.input).format(this.dateFormat.payload),
@@ -389,7 +391,7 @@ class ReservationCalendar extends Commons {
                             this.buttonLoader = false;
 
                             if (!response.success) {
-                                _thisClass.notify(response.data.message, "error")
+                                _thisClass.notifyResponseErrors(response)
                                 console.error(response);
                                 return false;
                             }
@@ -427,7 +429,7 @@ class ReservationCalendar extends Commons {
                 },
 
                 onlyLoggedInEmployeeCondition(event) {
-                    return +event.extendedProps.employeeID === +this.loggedInEmployee.id || ['administrator', 'together_employee', 'manager'].includes(this.loggedInEmployee.role);
+                    return +event.extendedProps.employeeID === +this.loggedInEmployee.id || ['administrator', 'together_employee', 'manager', 'owner'].includes(this.loggedInEmployee.role);
                 },
 
                 checkErrors() {
@@ -511,7 +513,8 @@ class ReservationCalendar extends Commons {
                     let data = {
                         employeeID: parseInt(this.chosenEmployeeInForms),
                         id: this.editingAppointment.extendedProps.id,
-                        notify: !!this.notify,
+                        notify_customer: !!this.notify_customer,
+                        notify_employee: !!this.notify_employee,
                         type: this.appointment.type,
                         date: {
                             start: moment(this.appointment.datetime.start, this.dateFormat.input).format(this.dateFormat.payload),
@@ -536,7 +539,7 @@ class ReservationCalendar extends Commons {
                             this.buttonLoader = false;
 
                             if (!response.success) {
-                                _thisClass.notify(response.data.message, "error")
+                                _thisClass.notifyResponseErrors(response)
                                 console.error(response);
                                 return false;
                             }
@@ -580,7 +583,8 @@ class ReservationCalendar extends Commons {
                 async removeAppointment() {
                     let data = {
                         id: this.appointmentToDelete.extendedProps.id,
-                        notify: !!this.notify,
+                        notify_customer: !!this.notify_customer,
+                        notify_employee: !!this.notify_employee,
                     }
 
                     this.buttonLoader = true;
@@ -591,14 +595,16 @@ class ReservationCalendar extends Commons {
                             this.buttonLoader = false;
 
                             if (!response.success) {
-                                _thisClass.notify(response.data.message, "error")
+                                _thisClass.notifyResponseErrors(response)
                                 console.error(response);
                                 return false;
                             }
 
                             this.appointmentToDelete.remove()
                             this.visibleDeleteModal = false;
-                            this.notify = false;
+
+                            this.notify_customer = false
+                            this.notify_employee = false
                         })
                 },
 
@@ -614,7 +620,7 @@ class ReservationCalendar extends Commons {
                         .then(response => {
 
                             if (!response.success) {
-                                _thisClass.notify(response.data.message, "error")
+                                _thisClass.notifyResponseErrors(response)
                                 console.error(response);
                                 return false;
                             }
@@ -678,7 +684,7 @@ class ReservationCalendar extends Commons {
                         .then(response => {
 
                             if (!response.success) {
-                                _thisClass.notify(response.data.message, "error")
+                                _thisClass.notifyResponseErrors(response)
                                 console.error(response);
                                 return false;
                             }
@@ -783,7 +789,8 @@ class ReservationCalendar extends Commons {
                     this.customerSearchQuery = ""
                     this.chosenEmployeeInForms = null
                     this.customers = {}
-                    this.notify = false;
+                    this.notify_customer = false
+                    this.notify_employee = false
                 },
 
                 resetAppointmentToDeleteVariable() {

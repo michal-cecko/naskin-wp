@@ -1,6 +1,6 @@
 <?php
 
-namespace Theme\Mail\Appointments\Employee;
+namespace Theme\Mail\Appointments\Employee\Reservation;
 
 use Saurus\App\Modules\Mail\Mailable;
 use Theme\Mail\Appointments\AppointmentEmail;
@@ -15,6 +15,6 @@ class AppointmentCreatedEmployee extends AppointmentEmail
 
     public function html(): string
     {
-        return templates()->generate('emails.appointments.employee.created-appointment-employee', $this->data());
+        return templates()->generate('emails.appointments.employee.reservation.created-appointment-employee', $this->data());
     }
 }

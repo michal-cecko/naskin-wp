@@ -12,7 +12,11 @@
 
     {{-- START BODY --}}
     @include('parts.emails.email-paragraph.email-paragraph-opening-tag')
-    Dobrý deň, ďakujeme za Vašu novú rezerváciu.
+    @if($isCreatedByEmployee ?? false)
+        Dobrý deň, bola Vám vytvorená nová rezervácia.
+    @else
+        Dobrý deň, ďakujeme za Vašu novú rezerváciu.
+    @endif
     <br><br>
     @include('parts.emails.appointments.email-appointment-details', ['appointment' => $appointment, 'address' => $address])
     <br>

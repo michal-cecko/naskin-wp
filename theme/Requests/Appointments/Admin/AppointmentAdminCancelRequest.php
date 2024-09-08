@@ -14,7 +14,8 @@ class AppointmentAdminCancelRequest extends AuthenticatedAdminRequest {
         return [
             'id' => ['required', 'integer', new Exists(Appointment::getTableName(), "id")],
 
-            'notify' => ['required', 'boolean']
+            'notify_customer' => ['required', 'boolean'],
+            'notify_employee' => ['required', 'boolean'],
         ];
 
     }

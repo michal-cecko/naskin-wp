@@ -2,21 +2,11 @@
 
 namespace Theme\Services\Notifications\Sms;
 
-use BulkGate\Sdk\Message\Sms;
 use Exception;
 use Theme\Enum\AppointmentCustomerNotificationType;
 use Theme\Enum\AppointmentEmployeeNotificationType;
-use Theme\Exceptions\Appointment\AppointmentEmailNotificationNotImplementedException;
-use Theme\Exceptions\Email\EmailFailedToSendException;
 use Theme\Interfaces\INotificationService;
-use Theme\Mail\Appointments\Customer\AppointmentCancelledCustomer;
-use Theme\Mail\Appointments\Customer\AppointmentCreatedCustomer;
-use Theme\Mail\Appointments\Customer\AppointmentRemindCustomer;
-use Theme\Mail\Appointments\Customer\AppointmentUpdatedCustomer;
-use Theme\Mail\Appointments\Employee\AppointmentCancelledEmployee;
-use Theme\Mail\Appointments\Employee\AppointmentCreatedEmployee;
 use Theme\Models\Appointment\Appointment;
-use Theme\Services\Customers\CustomerService;
 
 class SmsService implements INotificationService
 {

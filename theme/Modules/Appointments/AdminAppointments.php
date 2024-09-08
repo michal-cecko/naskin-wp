@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Exception;
 use Saurus\App\Enums\ApiMethod;
+use Saurus\App\Exceptions\Request\ValidationFailedException;
 use Saurus\App\Traits\Validation;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
@@ -57,8 +58,9 @@ class AdminAppointments
                 payments: $data['payments'] ?? [],
                 productSales: $data['productSales'] ?? [],
                 source: AppointmentSource::getCaseFromValue($data['source']),
-                notifyCustomer: $data['notify'],
-                notifyEmployee: false,
+                notifyCustomer: $data['notify_customer'],
+                notifyEmployee: $data['notify_employee'],
+                createdBy: "employee"
             );
 
             main()->log()->infoDB("Vytvorená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services_string}", resources: [$appointment, $appointment->customer]);
@@ -70,6 +72,7 @@ class AdminAppointments
                 startAt: Carbon::parse($data['date']['start']),
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
+                notifyEmployee: $data['notify_employee'],
             );
 
             main()->log()->infoDB("Vytvorené voľno pracovníka {$appointment->log_string}", resources: [$appointment, $appointment->employee]);
@@ -99,7 +102,8 @@ class AdminAppointments
                 payments: $data['payments'] ?? [],
                 productSales: $data['productSales'] ?? [],
                 source: AppointmentSource::getCaseFromValue($data['source']),
-                notifyCustomer: $data['notify'],
+                notifyCustomer: $data['notify_customer'],
+                notifyEmployee: $data['notify_employee'],
             );
 
             main()->log()->infoDB("Upravená rezervácia pracovníkom {$appointment->log_string}", changes: $changes, resources: [$appointment, $appointment->customer]);
@@ -112,6 +116,7 @@ class AdminAppointments
                 startAt: Carbon::parse($data['date']['start']),
                 endAt: Carbon::parse($data['date']['end']),
                 note: $data['note'],
+                notifyEmployee: $data['notify_employee'],
             );
 
             main()->log()->infoDB("Upravené voľno {$appointment->log_string}", changes: $changes, resources: [$appointment, $appointment->employee]);
@@ -122,15 +127,20 @@ class AdminAppointments
     }
 
 
+    /**
+     * @throws ValidationFailedException
+     * @throws Exception
+     */
     public function cancelAdmin(AppointmentAdminCancelRequest $request): void
     {
         $data = $request->validated();
 
-        $notify = !empty((int)$data['notify']);
+        $notifyCustomer = !empty((int)$data['notify_customer']);
+        $notifyEmployee = !empty((int)$data['notify_employee']);
 
         $appointment = Appointment::find($data['id']);
 
-        AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: $notify, isCancelledByEmployee: true);
+        AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: $notifyCustomer, notifyEmployee: $notifyEmployee, isCancelledByEmployee: true);
 
         if($appointment->type === AppointmentType::VACATION) {
             main()->log()->warningDB("Zrušené voľno pracovníka {$appointment->log_string}", resources: [$appointment, $appointment->employee]);

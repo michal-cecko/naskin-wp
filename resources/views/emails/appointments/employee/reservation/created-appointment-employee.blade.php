@@ -3,25 +3,26 @@
 @section('content')
 
 
+
     {{-- START TITLE --}}
-    @include('parts.emails.email-title', ['title' => "Zrušenie rezervácie"])
+    @include('parts.emails.email-title', ['title' => "Nová rezervácia zákazníka"])
     {{-- END TITLE --}}
 
 
 
-    {{-- START BODY --}}
+    {{-- START BODY TEXT --}}
     @include('parts.emails.email-paragraph.email-paragraph-opening-tag')
-    @if($isCancelledByEmployee ?? false)
-        Dobrý deň, toto je potvrdenie zrušeného termínu rezervácie pracovníkom:
+    @if($isCreatedByEmployee ?? false)
+        Pracovník vytvoril zákazníkovi novú nasledovnú rezerváciu:
     @else
-        Dobrý deň. Upozorňujeme, že zákazník zrušil rezerváciu nasledovného termínu
+        Zákazník  {{ $customer['name'] }} si vytvoril novú rezerváciu:
     @endif
     <br><br>
     @include('parts.emails.appointments.email-appointment-details', ['appointment' => $appointment, 'address' => $address])
     <br>
     @include('parts.emails.appointments.email-customer-details', ['appointment' => $appointment])
     @include('parts.emails.email-paragraph.email-paragraph-closing-tag')
-    {{-- END BODY --}}
+    {{-- END BODY TEXT --}}
 
 
 

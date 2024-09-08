@@ -10,6 +10,7 @@ use Saurus\App\Exceptions\Request\ValidationFailedException;
 use Saurus\App\Exceptions\Route\ApiEndpointAlreadyExistException;
 use Saurus\App\Traits\Validation;
 use Theme\Enum\AppointmentSource;
+use Theme\Enum\ProductSale\ProductSalePaymentType;
 use Theme\Models\Appointment\Appointment;
 use Theme\Models\Expense\Expense;
 use Theme\Models\Product\ProductSale;
@@ -60,6 +61,7 @@ class ProductSales
             quantity: $data['quantity'],
             note: $data['note'] ?? null,
             sold_at: !empty($data['sold_at']) ? Carbon::parse($data['sold_at']) : null,
+            paymentType: ProductSalePaymentType::tryFrom($data['payment_type'] ?? ""),
         );
 
         main()->log()->infoDB("Nový predaj produktu: {$productSale->log_title}.", resources: [$productSale, $product, $appointment]);
@@ -85,6 +87,7 @@ class ProductSales
             quantity: $data['quantity'],
             note: $data['note'] ?? null,
             sold_at: !empty($data['sold_at']) ? Carbon::parse($data['sold_at']) : null,
+            paymentType: ProductSalePaymentType::tryFrom($data['payment_type'] ?? ""),
         );
 
         main()->log()->infoDB("Upravený predaj produktu: {$productSale->log_string}", changes: $changes, resources: [$productSale, $product, $appointment]);

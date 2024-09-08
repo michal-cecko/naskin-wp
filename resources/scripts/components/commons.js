@@ -42,6 +42,18 @@ export default class Commons {
         }, timeout);
     }
 
+    notifyResponseErrors(response) {
+        let message = response.data?.message ?? null;
+
+        console.log(message, response.data?.errors)
+
+        if(!message && response.data?.errors) {
+            message = Object.values(response.data.errors).map(error => error.map(message => message).join("<br>")).join("<br>");
+        }
+
+        this.notify(message, "error")
+    }
+
     getCurrentTimestamp() {
         return this.utc(moment());
     }
