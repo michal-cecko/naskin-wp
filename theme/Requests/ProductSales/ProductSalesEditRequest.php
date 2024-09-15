@@ -7,6 +7,7 @@ use Saurus\App\Rules\PostExists;
 use Theme\Enum\ProductSale\ProductSalePaymentType;
 use Theme\Models\Appointment\Appointment;
 use Theme\Models\Expense\Expense;
+use Theme\Models\Product\ProductSale;
 use Theme\PostTypes\Product;
 use Theme\Requests\AuthenticatedAdminRequest;
 
@@ -21,7 +22,7 @@ class ProductSalesEditRequest extends AuthenticatedAdminRequest
     public function rules(): array
     {
         return [
-            'id' => ['required', 'integer', new Exists(Expense::getTableName(), "id")],
+            'id' => ['required', 'integer', new Exists(ProductSale::getTableName(), "id")],
 
             'product_id' => ['required', 'integer', new PostExists(postModel: Product::class)],
             'appointment_id' => ['sometimes', 'nullable', 'integer', new PostExists(postModel: Appointment::class)],

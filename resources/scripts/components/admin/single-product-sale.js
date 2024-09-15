@@ -96,7 +96,7 @@ class SingleProductSale extends Commons {
 
                             if (!response.success) {
                                 this.createEditLoader = false;
-                                _thisClass.notify(response.data.message, "error")
+                                _thisClass.notifyResponseErrors(response)
                                 console.error(response);
                                 return false;
                             }
@@ -128,7 +128,7 @@ class SingleProductSale extends Commons {
 
                             if (!response.success) {
                                 this.deleteLoader = false;
-                                _thisClass.notify(response.data.message, "error")
+                                _thisClass.notifyResponseErrors(response)
                                 return false;
                             }
 
