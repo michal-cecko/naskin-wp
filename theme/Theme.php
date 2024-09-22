@@ -44,6 +44,8 @@ class Theme extends Singleton
     private ProductSalesDashboardView $productSalesDashboardView;
     private ProductSales $productSales;
     private Notifications $notifications;
+    private AdminAppointments $adminAppointments;
+    private ExpensesDashboardView $expensesDashboardView;
 
     protected function __construct()
     {

@@ -49,7 +49,7 @@ export default defineConfig({
         {
             name: 'php',
             handleHotUpdate({ file, server }) {
-                if (file.endsWith('.php') || file.endsWith('.scss') || file.endsWith('.js') || file.endsWith('.ts')) {
+                if (file.endsWith('.blade.php') || file.endsWith('.scss') || file.endsWith('.js') || file.endsWith('.ts')) {
                     server.ws.send({ type: 'full-reload' });
                 }
             },

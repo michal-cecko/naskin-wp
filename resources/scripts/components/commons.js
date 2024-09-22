@@ -42,16 +42,25 @@ export default class Commons {
         }, timeout);
     }
 
-    notifyResponseErrors(response) {
+    getResponseError(response) {
         let message = response.data?.message ?? null;
 
         console.log(message, response.data?.errors)
 
         if(!message && response.data?.errors) {
             message = Object.values(response.data.errors).map(error => error.map(message => message).join("<br>")).join("<br>");
+        } else {
+            message = message ?? response.data ?? null;
         }
 
-        this.notify(message, "error")
+        return message;
+    }
+
+    notifyResponseErrors(response, timeout = 4000) {
+        let message = this.getResponseError(response);
+        if(message) {
+            this.notify(message, "error", timeout)
+        }
     }
 
     getCurrentTimestamp() {

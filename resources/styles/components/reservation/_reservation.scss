@@ -850,30 +850,28 @@ $contentWidthDualGap: 2rem;
     height: 100%;
     top: 0;
     z-index: 6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background: rgba($white, 0.9);
     transition: all 0.3s ease;
     opacity: 0;
     pointer-events: none;
 
-    lord-icon {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-    }
-
     .loader,
-    .check {
-      transform: translate(-50%, -50%) scale(0);
+    .check,
+    .errorCross {
+      transform: translate(0, -50%) scale(0);
       transition: all 0.4s ease;
       width: 4rem;
       height: 4rem;
     }
 
-    .success-message {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%) scale(0);
+    .response-message {
+      margin-top: 0.3rem;
+      padding: 1.5rem;
+      transform: scale(0);
       text-align: center;
       font-size: 1.4rem;
       font-weight: 600;
@@ -882,26 +880,59 @@ $contentWidthDualGap: 2rem;
       color: $brownish_yellow;
     }
 
+    .icon-wrapper {
+      position: relative;
+      width: 4rem;
+      height: 4rem;
+      lord-icon {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0);
+      }
+    }
+
     &.sending {
       opacity: 1;
       pointer-events: all;
 
       .loader {
+        display: block !important;
         transform: translate(-50%, -50%) scale(1);
       }
 
       &.sent {
+
         .loader {
           transform: translate(-50%, -50%) scale(0);
         }
 
-        .check {
-          transform: translate(-50%, calc(-50% - 3rem)) scale(1);
+        &.errored {
+          .check {
+            display: none !important;
+          }
         }
 
-        .success-message {
+        &:not(.errored) {
+          .errorCross {
+            display: none !important;
+          }
+        }
+
+        .check,
+        .errorCross {
+          transform: translate(-50%, -50%) scale(1);
+        }
+
+        .response-message {
           opacity: 1;
-          transform: translate(-50%, calc(-50% + 3rem)) scale(1);
+          transform: scale(1);
+        }
+
+        &.errored {
+          .response-message {
+            color: $error !important;
+          }
         }
       }
     }

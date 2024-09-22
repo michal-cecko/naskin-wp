@@ -14,7 +14,7 @@ class General extends Commons {
 
 
     _prepareParametersRemoval() {
-        const hasAppointmentActionParam = /c=[012]/.test(window.location.search);
+        const hasAppointmentActionParam = /c=[0123456789]/.test(window.location.search);
         if (!hasAppointmentActionParam) return;
 
         const url = new URL(window.location.href);
@@ -26,7 +26,6 @@ class General extends Commons {
         history.replaceState(null, '', `${url.pathname}?${params.toString()}`);
 
         if (value === "0") {
-            console.log("Showing dynamic notifi")
             this.notify("Nebolo možné nájsť rezerváciu na zrušenie.", "error", 5000)
         }
 
@@ -36,6 +35,14 @@ class General extends Commons {
 
         if (value === "2") {
             this.notify("Táto rezervácia už bola v minulosti zrušená.", "warning", 5000)
+        }
+
+        if (value === "3") {
+            this.notify("Rezerváciu už nieje možné zrušiť.", "warning", 5000)
+        }
+
+        if (value === "4") {
+            this.notify("Rezervácie nieje možné zrušiť.", "warning", 5000)
         }
     }
 

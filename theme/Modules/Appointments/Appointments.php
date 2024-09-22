@@ -9,9 +9,9 @@ use Saurus\App\Traits\Validation;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
+use Theme\Exceptions\Email\EmailFailedToSendException;
 use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Service;
-use Theme\Requests\Appointments\Admin\AppointmentAdminStoreRequest;
 use Theme\Requests\Appointments\AppointmentCancelRequest;
 use Theme\Requests\Appointments\AppointmentICSRequest;
 use Theme\Requests\Appointments\AppointmentListAvailableDates;
@@ -36,13 +36,14 @@ class Appointments
         main()->api()->addApiEndpoint(ApiMethod::POST, "/appointment/store", "appointment.store", [$this, 'store']);
     }
 
-    public function getAvailableDates(AppointmentListAvailableDates $request) : void {
+    public function getAvailableDates(AppointmentListAvailableDates $request): void
+    {
         $data = $request->validated();
 
         $employee = $data['employee_id'] === -1 ? "ANY" : Employee::where("ID", $data['employee_id'])->first();
         $services = Service::whereIn("id", $data['services'])->get();
 
-        if(!$employee || empty($services)) {
+        if (!$employee || empty($services)) {
             wp_send_json_error(__('Nebol nájdený pracovník alebo služby.', THEME_DOMAIN), 404);
         }
 
@@ -61,43 +62,64 @@ class Appointments
         //Pick one employee if random
         $employeeID = $data['employees'][array_rand($data['employees'])];
 
-        $appointment = AppointmentService::createReservation(
-            employeeID: $employeeID,
-            startAt: $startAt,
-            customer: $data['customer'],
-            note: $data['note'] ?? null,
-            services: $services,
-            source: AppointmentSource::WEB,
-            notifyCustomer: true,
-            notifyEmployee: true,
-            createdBy: "customer"
-        );
+        try {
+            $appointment = AppointmentService::createReservation(
+                employeeID: $employeeID,
+                startAt: $startAt,
+                customer: $data['customer'],
+                note: $data['note'] ?? null,
+                services: $services,
+                source: AppointmentSource::WEB,
+                notifyCustomer: true,
+                notifyEmployee: true,
+                createdBy: "customer"
+            );
 
-        main()->log()->infoDB("Vytvorená rezervácia online, {$appointment->log_string}. Služby: {$appointment->log_services_string}. Zákazník: {$appointment->customer_string}", resources: [$appointment, $appointment->customer]);
+            main()->log()->infoDB("Vytvorená rezervácia online, {$appointment->log_string}. Služby: {$appointment->log_services_string}. Zákazník: {$appointment->customer_string}", resources: [$appointment, $appointment->customer]);
 
-        wp_send_json_success("Rezervácia bola úspešne vytvorená. Ďakujeme.");
+            wp_send_json_success("Rezervácia bola úspešne vytvorená. Ďakujeme.");
+
+        } catch (EmailFailedToSendException $e) {
+            wp_send_json_error("Rezervácia bola vytvorená, no nepodarilo sa Vám odoslať email o potvrdení.");
+        } catch (Exception $e) {
+            main()->log()->error("Nastala chyba pri vytváraní rezervácie. Error: " . json_encode($e));
+            wp_send_json_error("Nastala chyba pri vytváraní rezervácie. Skúste znova alebo nás kontaktujte.");
+        }
     }
 
     public function cancelAppointment(AppointmentCancelRequest $request): void
     {
         $data = $request->validated();
 
-        $appointment = Appointment::where("type", AppointmentType::RESERVATION)->find($data['i']);
-
-        if(!$appointment ||!AppointmentService::checkCancelToken($appointment, $data['t'])) {
-            wp_redirect(home_url(). "?c=0");
+        $canCustomerCancel = get_field("can_customer_cancel_appointment", "options");
+        if (!$canCustomerCancel) {
+            wp_redirect(home_url() . "?c=4");
             exit();
         }
 
-        if($appointment->status === AppointmentStatus::CANCELLED) {
-            wp_redirect(home_url(). "?c=2");
+        $appointment = Appointment::where("type", AppointmentType::RESERVATION)->find($data['i']);
+
+        if (!$appointment || !AppointmentService::checkCancelToken($appointment, $data['t'])) {
+            wp_redirect(home_url() . "?c=0");
+            exit();
+        }
+
+        $hoursBeforeCancel = floatval(get_field("cancel_hour_gap", "options"));
+        $isAvailable = !empty($hoursBeforeCancel) ? $appointment->start_at->subHours($hoursBeforeCancel)->isAfter(Carbon::now()) : true;
+        if (!$isAvailable) {
+            wp_redirect(home_url() . "?c=3");
+            exit();
+        }
+
+        if ($appointment->status === AppointmentStatus::CANCELLED) {
+            wp_redirect(home_url() . "?c=2");
             exit();
         }
 
         AppointmentService::cancelAppointment(appointment: $appointment, notifyCustomer: true, notifyEmployee: true, isCancelledByEmployee: false);
 
         main()->log()->warningDB("Zrušená online rezervácia zákazníkom, {$appointment->log_string}, služby: {$appointment->log_services_string}. Zákazník: {$appointment->customer_string}", resources: [$appointment, $appointment->customer]);
-        wp_redirect(home_url(). "?c=1");
+        wp_redirect(home_url() . "?c=1");
         exit();
     }
 
@@ -107,7 +129,7 @@ class Appointments
 
         $appointment = Appointment::find($data['id']);
 
-        if(!$appointment) {
+        if (!$appointment) {
             wp_send_json_error("Termín nebol nájdený.");
         }
 
@@ -116,7 +138,7 @@ class Appointments
 
     /**
      * @action acf/save_post 20
-    */
+     */
     function update_breaks_on_future_appointments_on_break_settings_acf_update($post_id): void
     {
         if ($post_id !== 'options') return;

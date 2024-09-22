@@ -337,32 +337,39 @@ class ReservationForm extends Commons {
                         });
 
                         this.sending = true;
+                        this.sent = false;
+                        this.responseError = false;
 
                         let _this = this
 
                         await _thisClass.postFetch("/appointment/store", body)
                             .then(response => response.json())
                             .then(async (response) => {
-                                if (!response.success) {
-                                    console.error(response)
-                                    return false;
+                                _this.responseError = !response.success;
+
+                                let icon = document.querySelector(_this.responseError ? ".errorCross" : ".check")
+                                if (icon) {
+                                    icon.click()
+                                }
+
+                                let responseMessageNode = document.querySelector(".response-message")
+                                if (responseMessageNode) {
+                                    if (!_this.responseError) {
+                                        responseMessageNode.innerHTML = "Vaša rezervácia je potvrdená. Ďakujeme."
+                                    } else {
+                                        responseMessageNode.innerHTML = _thisClass.getResponseError(response)
+                                    }
                                 }
 
                                 _this.sent = true;
 
-                                let clickIcon = document.querySelector(".check")
-                                if (clickIcon) {
-                                    clickIcon.click()
-                                    console.log("clicked on ", clickIcon)
-                                } else {
-                                    console.log("click not fo")
-                                }
-
-                                await _thisClass.delay(1500);
+                                await _thisClass.delay(_this.responseError ? 6000 : 1500);
                                 _this.sending = false;
+
 
                                 _thisClass.toggleModal()
                                 await _thisClass.delay(500);
+
                                 if (_this.saveCustomerToCookies) {
                                     _this.saveContactInfoToCookie()
                                 }
@@ -370,7 +377,7 @@ class ReservationForm extends Commons {
                             })
                             .catch(error => {
                                 _this.sending = false;
-                                _thisClass.notify("Nastala chyba pri odosielaní rezervácie. Skúste to prosím znova, alebo nás kontaktujte.")
+                                _thisClass.notify("Nastala chyba pri odosielaní rezervácie. Skúste to prosím znova, alebo nás kontaktujte.", "error")
                                 console.error(error)
                             });
                     },

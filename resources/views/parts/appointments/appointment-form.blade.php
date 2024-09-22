@@ -61,7 +61,8 @@
                              v-for="employee in availableEmployees" @click="chooseEmployee(employee.id)"
                              :key="employee.id">
                             <div class="img-container">
-                                <img v-if="!!employee.profile_picture" :src="employee.profile_picture" :alt="employee.first_name">
+                                <img v-if="!!employee.profile_picture" :src="employee.profile_picture"
+                                     :alt="employee.first_name">
                                 <template v-else>
                                     {!! main()->assets()->svg("icons/reservation/icon-question_mark.svg") !!}
                                 </template>
@@ -79,7 +80,8 @@
                                              :class="[availableDate === date ? 'chosen' : '', isWeekend(availableDate) || appointments['isAvailable'] === 0 ? 'notAvailable' : '']"
                                              @click="chooseDate(availableDate)">
                                             <div class="number" v-html="getMomentDate(availableDate, 'D')"></div>
-                                            <div class="name" v-html="getDayName(getMomentDate(availableDate, 'd'))"></div>
+                                            <div class="name"
+                                                 v-html="getDayName(getMomentDate(availableDate, 'd'))"></div>
                                         </div>
                                     </template>
                                 </div>
@@ -105,15 +107,18 @@
                         </div>
                     </div>
                     <div class="content choose-contact position-relative">
-                        <div class="input--text input--light_beige input--normal" :class="hasError('name') ? 'error' : ''">
+                        <div class="input--text input--light_beige input--normal"
+                             :class="hasError('name') ? 'error' : ''">
                             <label>Meno a priezvisko</label>
                             <input type="text" v-model="customer.name">
                         </div>
-                        <div class="input--text input--light_beige input--normal" :class="hasError('email') ? 'error' : ''">
+                        <div class="input--text input--light_beige input--normal"
+                             :class="hasError('email') ? 'error' : ''">
                             <label>Email</label>
                             <input type="text" v-model="customer.email">
                         </div>
-                        <div class="input--text input--light_beige input--normal" :class="hasError('phone') ? 'error' : ''">
+                        <div class="input--text input--light_beige input--normal"
+                             :class="hasError('phone') ? 'error' : ''">
                             <label>Telefón</label>
                             <input type="text" v-model="customer.phone">
                         </div>
@@ -163,7 +168,8 @@
                                 </div>
                             </div>
                             <div class="services">
-                                <div v-show="service.id !== null" class="service" v-for="service in chosenServices" :key="service.id">
+                                <div v-show="service.id !== null" class="service" v-for="service in chosenServices"
+                                     :key="service.id">
                                     @{{ service.title }}
                                     <div class="service-duration-price">
                                         <span class="duration">
@@ -208,24 +214,32 @@
                         </button>
                     </div>
                 </div>
-                <div class="sending-overlay" :class="[(sending ? 'sending' : ''), (sent ? 'sent' : '')]">
-                    <lord-icon
-                            src="{{main()->assets()->static("icons/reservation/icon-loader.json")}}"
-                            trigger="loop"
-                            stroke="60"
-                            class="loader"
-                            colors="primary:#D3932A,secondary:#D3932A">
-                    </lord-icon>
-                    <lord-icon
-                            src="{{main()->assets()->static("icons/reservation/icon-check.json")}}"
-                            trigger="click"
-                            stroke="100"
-                            class="check"
-                            colors="primary:#D3932A,secondary:#D3932A">
-                    </lord-icon>
-                    <span class="success-message">
-                        Vaša rezervácia je potvrdená. Ďakujeme.
-                    </span>
+                <div class="sending-overlay"
+                     :class="[(sending ? 'sending' : ''), (sent ? 'sent' : ''), (responseError ? 'errored' : '')]">
+                    <div class="icon-wrapper">
+                        <lord-icon
+                                src="{{main()->assets()->static("icons/reservation/icon-loader.json")}}"
+                                trigger="loop"
+                                stroke="60"
+                                class="loader"
+                                colors="primary:#D3932A,secondary:#D3932A">
+                        </lord-icon>
+                        <lord-icon
+                                src="{{main()->assets()->static("icons/reservation/icon-check.json")}}"
+                                trigger="click"
+                                stroke="100"
+                                class="check"
+                                colors="primary:#D3932A,secondary:#D3932A">
+                        </lord-icon>
+                        <lord-icon
+                                src="{{main()->assets()->static("icons/reservation/icon-error.json")}}"
+                                trigger="click"
+                                stroke="100"
+                                class="errorCross"
+                                colors="primary:#c92727,secondary:#c92727">
+                        </lord-icon>
+                    </div>
+                    <span class="response-message"></span>
                 </div>
             </div>
         </div>

@@ -10,30 +10,36 @@ class CustomerService {
 
     use Validation;
 
-    public static function createCustomer(string $name, ?string $email = null, ?string $phone = null) {
+    public static function findOrCreateCustomer(string $name, string $email, ?string $phone = null) {
 
-        $id = wp_insert_post([
-            'post_title' => $name,
-            'post_type' => Customer::getPostTypeSlug(),
-            'post_status' => 'publish',
-        ]);
+        $customer = Customer::whereHas("meta", function ($q) use ($email) {
+            $q->where("meta_key", "cust_email")->where("meta_value", $email);
+        })->first();
 
-        if(is_wp_error($id)) {
-            wp_send_json_error([
-                'message' => __("Failed to create a customer.", THEME_DOMAIN),
-            ], 500);
-        }
+        if(!$customer) {
 
-        $customer = Customer::where("ID", $id)->first();
+            $id = wp_insert_post([
+                'post_title' => $name,
+                'post_type' => Customer::getPostTypeSlug(),
+                'post_status' => 'publish',
+            ]);
 
-        update_field('cust_name', $name, $id);
+            if (is_wp_error($id)) {
+                wp_send_json_error([
+                    'message' => __("Failed to create a customer.", THEME_DOMAIN),
+                ], 500);
+            }
 
-        if (!empty($phone)) {
-            update_field('cust_email', $email, $id);
-        }
+            update_field('cust_name', $name, $id);
 
-        if (!empty($phone)) {
-            update_field('cust_phone', $phone, $id);
+            if (!empty($phone)) {
+                update_field('cust_email', $email, $id);
+            }
+
+            if (!empty($phone)) {
+                update_field('cust_phone', $phone, $id);
+            }
+
         }
 
         return $customer;
