@@ -77,7 +77,7 @@
                                 <div class="date-grid">
                                     <template v-for="(appointments, availableDate, index) in dates">
                                         <div class="date"
-                                             :class="[availableDate === date ? 'chosen' : '', isWeekend(availableDate) || appointments['isAvailable'] === 0 ? 'notAvailable' : '']"
+                                             :class="[availableDate === date ? 'chosen' : '', appointments['isAvailable'] === 0 ? 'notAvailable' : '']"
                                              @click="chooseDate(availableDate)">
                                             <div class="number" v-html="getMomentDate(availableDate, 'D')"></div>
                                             <div class="name"

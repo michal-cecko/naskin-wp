@@ -246,7 +246,7 @@ class AppointmentService
     {
         $serviceDuration = $services->sum("duration");
         $employees = EmployeeService::getEmployeesWithServices($services);
-        $weekenedWork = get_field('weekend_work', 'option') ?? ['saturday' => false, 'sunday' => false];
+        $weekendWork = get_field('weekend_work', 'option') ?? ['saturday' => false, 'sunday' => false];
         $daysAvailableToReserve = get_field('days_available_to_reserve', 'option') ?? 60;
         $breaks = self::getBreaks();
         $finalDates = [];
@@ -320,14 +320,14 @@ class AppointmentService
                 //echo "day" . $date->format("d.m.Y") . "\n";
 
                 //Saturday work
-                if (!($weekenedWork['saturday'] ?? false) && (int)$date->format("N") === 6) {
-                    $finalDates[$currentDate->format("n")][$dateFormat] = [];
+                if (!($weekendWork['saturday'] ?? false) && (int)$date->format("N") === 6) {
+                    $finalDates[$currentDate->format("n")][$dateFormat] = ['apps' => [], 'isAvailable' => 0];
                     continue;
                 };
 
                 //Sunday work
-                if (!($weekenedWork['sunday'] ?? false) && (int)$date->format("N") === 7) {
-                    $finalDates[$currentDate->format("n")][$dateFormat] = [];
+                if (!($weekendWork['sunday'] ?? false) && (int)$date->format("N") === 7) {
+                    $finalDates[$currentDate->format("n")][$dateFormat] = ['apps' => [], 'isAvailable' => 0];
                     continue;
                 };
 
@@ -359,10 +359,8 @@ class AppointmentService
                         continue;
                     }
 
-                    //echo "termin: from" . $currentStart . " to $currentEnd\n";
                     if ($lunchStart && $lunchEnd) {
                         $canEnd = $currentEnd <= $lunchStart || $currentStart >= $lunchEnd;
-                        //echo !$canEnd ? "lunch broke this. \n" : "";
                         if (!$canEnd) {
                             continue;
                         }

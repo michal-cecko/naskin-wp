@@ -251,8 +251,8 @@ class ReservationForm extends Commons {
                                     return;
                                 }
 
-                                this.availableDates = response.data
-                                console.log(this.availableDates)
+                                console.log(response.data)
+                                this.availableDates = response.data;
                             })
                     },
 
@@ -266,9 +266,6 @@ class ReservationForm extends Commons {
                             return false;
                         }
                         return true;
-                    },
-                    isWeekend(date) {
-                        return moment(date).day() === 6 || moment(date).day() === 0
                     },
                     hasChosenCategoryClass() {
                         return !!this.chosenCategory ? 'shown' : ''
