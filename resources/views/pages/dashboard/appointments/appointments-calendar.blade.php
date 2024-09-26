@@ -41,7 +41,7 @@
             @endif
 
             <div class="buttons-wrapper">
-                <button type="button" class="button button-primary button-large" @click="visibleCreateModal = true">Pridať termín</button>
+                <button type="button" class="button button-primary button-large" @click="openCreateModal()">Pridať termín</button>
             </div>
 
         </div>

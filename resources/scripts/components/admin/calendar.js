@@ -111,12 +111,7 @@ class ReservationCalendar extends Commons {
                 let loggedInId = parseInt(this.loggedInEmployee.id);
                 if (this.loggedInEmployee.role === "administrator" || !this.employees[loggedInId]) {
                     this.chosenEmployeeOnView = urlEmployee ? urlEmployee.id : -1;
-                    if (this.chosenEmployeeOnView === -1) {
-                        const firstKey = Object.keys(this.employees)[0];
-                        this.chosenEmployeeInForms = this.employees[firstKey].id;
-                    } else {
-                        this.chosenEmployeeInForms = this.chosenEmployeeOnView;
-                    }
+                    this.resetEmployeeInFormsBySelectedEmployeeOnView()
                 } else {
                     this.chosenEmployeeOnView = this.chosenEmployeeInForms = loggedInId;
                 }
@@ -173,6 +168,7 @@ class ReservationCalendar extends Commons {
                         nowIndicator: true,
                         select: function (info) {
                             _thisVue.resetAppointmentVariable();
+                            _thisVue.resetEmployeeInFormsBySelectedEmployeeOnView()
 
                             _thisVue.appointment.datetime = {
                                 start: moment(info.start, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.input),
@@ -356,6 +352,11 @@ class ReservationCalendar extends Commons {
                     _thisVue.dateRange.end = calendar.view.currentEnd
 
                     this.hasInit = true;
+                },
+
+                openCreateModal() {
+                    this.resetEmployeeInFormsBySelectedEmployeeOnView()
+                    this.visibleCreateModal = true;
                 },
 
                 async createAppointment() {
@@ -632,8 +633,6 @@ class ReservationCalendar extends Commons {
                                     title = appointment.customer.name
                                 }
 
-                                console.log(this.employees?.[appointment.employeeID], appointment.employeeID, appointment)
-
                                 appointments.push({
                                     title: title,
                                     start: moment(appointment.datetime.from, this.dateFormat.payload).format(this.dateFormat.table),
@@ -743,7 +742,6 @@ class ReservationCalendar extends Commons {
                 },
 
                 loadEditModal(appToEdit) {
-                    console.log("loading ed modal", appToEdit, this.employeeServices);
                     this.resetAppointmentVariable()
                     let type = appToEdit.extendedProps.type
 
@@ -913,7 +911,15 @@ class ReservationCalendar extends Commons {
                     if (!sale.price) {
                         sale.price = this.products[sale.product_id].price
                     }
-                }
+                },
+                resetEmployeeInFormsBySelectedEmployeeOnView() {
+                    if (!this.chosenEmployeeOnView || this.chosenEmployeeOnView < 1) {
+                        const firstKey = Object.keys(this.employees)[0];
+                        this.chosenEmployeeInForms = this.employees[firstKey].id;
+                    } else {
+                        this.chosenEmployeeInForms = this.chosenEmployeeOnView;
+                    }
+                },
             },
             computed: {
                 productOptions() {
@@ -1021,7 +1027,7 @@ class ReservationCalendar extends Commons {
                         this.appointment.datetime.end = moment(start, this.dateFormat.input).add(this.getTotalDuration(services), "minutes").format(this.dateFormat.input)
                     }
                 },
-            }
+            },
         });
 
         app.directive("click-outside", clickOutsideDirective);
