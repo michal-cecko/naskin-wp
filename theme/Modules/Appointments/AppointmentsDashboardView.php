@@ -11,6 +11,8 @@ use Theme\Enum\User\Role;
 use Theme\Models\Appointment\Appointment;
 use Theme\Modules\Appointments\Table\AppointmentsDashboardListFilterComponent;
 use Theme\Modules\Appointments\Table\AppointmentsDashboardListTableComponent;
+use Theme\Modules\Expenses\Table\ExpensesDashboardListFilterComponent;
+use Theme\Modules\Expenses\Table\ExpensesDashboardListTableComponent;
 use Theme\PostTypes\Product;
 use Theme\PostTypes\Service;
 use Theme\Services\Appointments\AppointmentService;
@@ -63,6 +65,15 @@ class AppointmentsDashboardView
         );
 
         add_submenu_page(
+            null,
+            __('Termín', THEME_DOMAIN),
+            null,
+            'view_appointments_calendar',
+            'appointment_detail',
+            [$this, 'renderAppointmentDetailPage']
+        );
+
+        add_submenu_page(
             parent_slug: 'appointments',
             page_title: __('Zoznam termínov', THEME_DOMAIN),
             menu_title: __('Zoznam termínov', THEME_DOMAIN),
@@ -89,6 +100,18 @@ class AppointmentsDashboardView
             'metrics' => $metrics,
             'filter' => $appointmentsTableFilter
         ]);
+    }
+
+    public function renderAppointmentDetailPage(): void
+    {
+        $hasID = $_GET['id'] ?? null;
+        $appointment = $hasID ? Appointment::find($hasID) : null;
+
+        if(!$appointment) {
+            main()->wpHelper()->throw404AdminError();
+        }
+
+        templates()->render("pages.dashboard.appointments.appointment-single", compact('appointment'));
     }
 
     private function getAppointmentViewData(): array
