@@ -98,9 +98,12 @@
     </div>
     <span style="width: 100%; display: block; font-size: 0.85rem; color: #999">alebo</span>
     <div class="third">
-        <div class="field-container">
+        <div class="field-container" style="position: relative">
             <label for="name">Meno a priezvisko</label>
             <input class="custom-text-input" type="text" v-model="appointment.customer.name">
+            <a class="customer_external_link" title="Detail zákazníka" target="_blank" v-if="appointment.customer.id && appointment.customer.edit_link" :href="appointment.customer.edit_link">
+                {!! main()->assets()->svg("icons/admin/icon-external_link.svg") !!}
+            </a>
         </div>
     </div>
     <div class="third">

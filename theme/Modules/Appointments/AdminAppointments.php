@@ -221,6 +221,7 @@ class AdminAppointments
                         'id' => $appointment->customer_id,
                         'name' => $appointment->customer->name,
                         'email' => $appointment->customer->email,
+                        'edit_link' => $appointment->customer->edit_link,
                         'phone' => $appointment->customer->phone,
                     ],
                     'note' => $appointment->note,

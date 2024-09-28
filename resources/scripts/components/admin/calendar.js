@@ -697,6 +697,7 @@ class ReservationCalendar extends Commons {
                     this.shownOptions = false
                     this.customerSearchQuery = customer.name
                     this.appointment.customer.id = customer.id
+                    this.appointment.customer.edit_link = customer.edit_link
                     this.appointment.customer.name = customer.name
                     this.appointment.customer.email = customer.email
                     this.appointment.customer.phone = customer.phone

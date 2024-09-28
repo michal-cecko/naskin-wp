@@ -68,6 +68,7 @@ class Customers {
         foreach ($customers as $customer) {
             $finalPosts[] = [
                 'id' => $customer->id,
+                'edit_link' => $customer->edit_link,
                 'name' => $customer->title,
                 'email' => $customer->email,
                 'phone' => $customer->phone,
