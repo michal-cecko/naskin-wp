@@ -19,12 +19,14 @@ export default defineConfig({
                 //Admin dashboard styles + scripts
                 'resources/scripts/admin.js',
                 'resources/scripts/components/admin/calendar.js',
+                'resources/scripts/components/admin/single-appointment.js',
                 'resources/scripts/components/admin/single-expense.js',
                 'resources/scripts/components/admin/single-product-sale.js',
 
                 'resources/styles/admin/roles/employee/employee_role_dashboard.scss',
                 'resources/styles/admin/roles/employee/employee_role_web.scss',
-                'resources/styles/admin/calendar.scss',
+                'resources/styles/admin/pages/calendar.scss',
+                'resources/styles/admin/pages/appointment-single.scss',
                 'resources/styles/admin/dashboard.scss',
 
                 // Frontend styles + scripts

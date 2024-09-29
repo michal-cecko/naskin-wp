@@ -83,9 +83,7 @@ class AppointmentsDashboardListTableComponent extends TableComponent
     {
         $actions = [];
 
-        //TODO: add edit and delete actions
-        //$actions['edit'] = get_edit_post_link($rowData->id);
-        //$actions['delete'] = get_edit_post_link($rowData->id);
+        $actions['edit'] = ['url' => $rowData['appointment']?->edit_link ?? null, 'label' => __('Detail', THEME_DOMAIN)];
 
         return $actions;
     }
@@ -95,6 +93,7 @@ class AppointmentsDashboardListTableComponent extends TableComponent
         $appointment = $rowData;
         $rowDataToReturn = [];
 
+        $rowDataToReturn['appointment'] = $appointment;
         $rowDataToReturn['id'] = $appointment->id;
         $rowDataToReturn['customer'] = $appointment->type === AppointmentType::VACATION ? "<i>---</i>" : self::anchor($appointment->customer?->title, $appointment->customer?->log_link);
         $rowDataToReturn['employee'] = self::anchor($appointment->employee->first_name, $appointment->employee->log_link);

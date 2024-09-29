@@ -127,7 +127,11 @@ export default class Commons {
 
         // Add new parameters or update existing ones
         Object.entries(params).forEach(([key, value]) => {
-            existingParams.set(key, value);
+            if(value === null) {
+                existingParams.delete(key);
+            } else {
+                existingParams.set(key, value);
+            }
         });
 
         // Update the URL's search string

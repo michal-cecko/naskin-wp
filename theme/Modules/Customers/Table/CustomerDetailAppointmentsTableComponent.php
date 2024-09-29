@@ -69,9 +69,7 @@ class CustomerDetailAppointmentsTableComponent extends TableComponent
     {
         $actions = [];
 
-        /*//TODO: add edit and delete actions
-        $actions['edit'] = get_edit_post_link($rowData->id);
-        $actions['delete'] = get_edit_post_link($rowData->id);*/
+        $actions['edit'] = ['url' => $rowData['appointment']?->edit_link ?? null, 'label' => __('Detail', THEME_DOMAIN)];
 
         return $actions;
     }
@@ -82,6 +80,7 @@ class CustomerDetailAppointmentsTableComponent extends TableComponent
         $rowDataToReturn = [];
 
         $rowDataToReturn['id'] = $appointment->id;
+        $rowDataToReturn['appointment'] = $appointment;
         $rowDataToReturn['start_at'] = $appointment->start_at->format("d.m.y H:i");
         $rowDataToReturn['end_at'] = $appointment->end_at->format("d.m.y H:i");
         $rowDataToReturn['employee'] = self::anchor($appointment->employee->first_name, $appointment->employee->log_link);

@@ -134,8 +134,17 @@ class Appointment extends Model implements ILoggable
 
     public function getLogLinkAttribute(): ?string
     {
-        // TODO: Implement getLogLinkAttribute() method.
-        return "";
+        return $this->edit_link;
+    }
+
+    public function getEditLinkAttribute(): ?string
+    {
+        return admin_url("admin.php?page=appointment_detail&id={$this->id}");
+    }
+
+    public function getCalendarLinkAttribute(): ?string
+    {
+        return admin_url("admin.php?page=appointments&appointment_id={$this->id}&employee={$this->employee_id}&date={$this->start_at->format('Y-m-d')}");
     }
 
     public function getLogTitleAttribute(): string
@@ -169,5 +178,17 @@ class Appointment extends Model implements ILoggable
         }
 
         return $formattedTotal;
+    }
+
+    public function getDateStringAttribute() : string {
+        $string = $this->start_at->format('d.m.Y H:i');
+
+        if($this->start_at->isSameDay($this->end_at)) {
+            $string .= " - " . $this->end_at->format('H:i');
+        } else {
+            $string .= " - " . $this->end_at->format('d.m.Y H:i');
+        }
+
+        return $string;
     }
 }

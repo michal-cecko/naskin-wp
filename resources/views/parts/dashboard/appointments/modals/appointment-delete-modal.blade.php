@@ -25,8 +25,7 @@
         </div>
         <div class="custom-dialog--footer">
             <div class="notify-checkbox-container">
-                <div class="field-container field-row"
-                     v-if="appointmentToDelete?.extendedProps?.type === 'reservation'">
+                <div class="field-container field-row" v-if="appointmentToDelete?.extendedProps?.type === 'reservation' || resource?.type === 'reservation'">
                     <input v-model="notify_customer" type="checkbox" class="form-control" id="notify_customer"
                            name="notify_customer">
                     <label for="notify_customer">Upozorniť zákazníka o zrušení?</label>

@@ -1,4 +1,4 @@
-@import "../imports/scss-necessary";
+@import "../../imports/scss-necessary";
 
 $todayColor: #5b6ebb;
 $activeColor: #b1bb5b;
@@ -55,6 +55,14 @@ $activeColor: #b1bb5b;
     }
 
     .fc-event {
+
+      &.highlighted {
+        animation-name: highlight;
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+      }
 
       .fc-event-main {
         overflow: hidden;
@@ -433,4 +441,15 @@ $gap: 1rem;
   position: absolute;
   top: 2rem;
   right: 1rem;
+}
+
+@keyframes highlight {
+  0% {
+  }
+  50% {
+    border-color: #000000;
+    background-color: #000000;
+  }
+  100% {
+  }
 }

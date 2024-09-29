@@ -5,7 +5,7 @@
     <div class="custom-dialog">
 
         <div class="custom-dialog--header ">
-            <h3 class="custom-dialog--header--title">Úprava rezervácie</h3>
+            <h3 class="custom-dialog--header--title">Úprava rezervácie #@{{ appointment.id }}</h3>
             <button type="button" class="close" @click="visibleEditModal = false"></button>
         </div>
 

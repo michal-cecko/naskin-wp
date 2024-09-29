@@ -101,11 +101,14 @@ class Assets extends SaurusAssets
         }
 
         if(in_array($pagenow, ['admin.php', 'edit.php'])) {
+
             if($page === "expense_detail") {
                 wp_enqueue_script(handle: 'single-expense-js', src: $this->dynamic('scripts/components/admin/single-expense.js'), ver: $this->ver);
-            }
-            if($page === "product_sale_detail") {
+            } else if($page === "product_sale_detail") {
                 wp_enqueue_script(handle: 'single-product-sale-js', src: $this->dynamic('scripts/components/admin/single-product-sale.js'), ver: $this->ver);
+            } else if($page === "appointment_detail") {
+                wp_enqueue_script(handle: 'single-appointment-js', src: $this->dynamic('scripts/components/admin/single-appointment.js'), ver: $this->ver);
+                wp_enqueue_style(handle: 'single-appointment-scss', src: $this->dynamic('styles/admin/pages/appointment-single.scss'), ver: $this->ver);
             }
         }
     }
@@ -120,12 +123,13 @@ class Assets extends SaurusAssets
     private function enqueueCalendarAssets() {
         global $pagenow;
 
+        wp_enqueue_style(handle: 'calendar-scss', src: $this->dynamic('styles/admin/pages/calendar.scss'), ver: $this->ver);
+
         if($pagenow !== "admin.php" || ($_GET['page'] ?? null) !== "appointments") {
             return;
         }
 
         wp_enqueue_script(handle: 'calendar-js', src: $this->dynamic('scripts/components/admin/calendar.js'), ver: $this->ver);
-        wp_enqueue_style(handle: 'calendar-scss', src: $this->dynamic('styles/admin/calendar.scss'), ver: $this->ver);
     }
 
     private function enqueueVue() : void {

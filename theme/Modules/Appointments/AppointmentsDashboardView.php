@@ -105,7 +105,7 @@ class AppointmentsDashboardView
     public function renderAppointmentDetailPage(): void
     {
         $hasID = $_GET['id'] ?? null;
-        $appointment = $hasID ? Appointment::find($hasID) : null;
+        $appointment = $hasID ? Appointment::with(["services", "employee", "customer", "payments", "productSales.product"])->find($hasID) : null;
 
         if(!$appointment) {
             main()->wpHelper()->throw404AdminError();
@@ -194,7 +194,7 @@ class AppointmentsDashboardView
             $arr = Employee::whereIn("ID", [$this->currentUser?->id, ...$this->currentUser->mutual_calendar_blocking_employees])->get();
         }
 
-        $employeesFinal = collect([]);
+        $employeesFinal = collect();
 
         foreach ($arr as $employee) {
             $employeesFinal->put($employee->ID, [

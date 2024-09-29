@@ -61,6 +61,8 @@ class ReservationCalendar extends Commons {
                     chosenEmployeeInForms: null,
                     employees: null,
                     employeeServices: [],
+                    urlParams: {},
+                    urlAppointmentKey: "appointment_id",
                     urlEmployeeKey: "employee",
                     urlDateKey: "date",
 
@@ -104,9 +106,9 @@ class ReservationCalendar extends Commons {
 
                 this.breaks = JSON.parse(pageData?.breaks)
 
-                let urlParams = _thisClass.getUrlParams()
-                let urlEmployee = urlParams[this.urlEmployeeKey] ? this.employees[urlParams.employee] : null
-                let urlDate = urlParams[this.urlDateKey] ?? null
+                this.urlParams = _thisClass.getUrlParams()
+                let urlEmployee = this.urlParams[this.urlEmployeeKey] ? this.employees[this.urlParams.employee] : null
+                let urlDate = this.urlParams[this.urlDateKey] ?? null
 
                 let loggedInId = parseInt(this.loggedInEmployee.id);
                 if (this.loggedInEmployee.role === "administrator" || !this.employees[loggedInId]) {
@@ -151,15 +153,11 @@ class ReservationCalendar extends Commons {
                 async initCalendar() {
                     let _thisVue = this
 
-                    let urlParams = _thisClass.getUrlParams()
-
-                    let initialDate = urlParams[_thisVue.urlDateKey] ?? moment().format(_thisVue.dateFormat.url_date);
+                    let initialDate = this.urlParams[_thisVue.urlDateKey] ?? moment().format(_thisVue.dateFormat.url_date);
                     let appointments = await this.fetchAppointments(initialDate, this.chosenEmployeeOnView, "timeGridWeek");
 
                     const calendarEl = document.getElementById('calendar')
-
                     const isTouchable = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
-
                     const longPressDelay = isTouchable ? 1000 : 100;
 
                     let calendar = new Calendar(calendarEl, {
@@ -260,7 +258,7 @@ class ReservationCalendar extends Commons {
                             let view = info.view.type;
                             let props = event.extendedProps;
 
-                            let html = '<div class="event-content-container ' + view + '">' +
+                            let html = '<div class="event-content-container ' + view + '" data-id="' + props.id + '">' +
                                 '<div class="time">' +
                                 _thisVue.formatEventTime(event) + '</div>';
                             html += '<div class="title">' + event.title + '</div>';
@@ -329,6 +327,12 @@ class ReservationCalendar extends Commons {
 
                             _thisVue.dateRange.start = start
                             _thisVue.dateRange.end = end
+
+                            if (!!_thisVue.urlParams?.appointment_id) {
+                                _thisVue.showAppointmentInCalendar(_thisVue.urlParams.appointment_id)
+                                let key = _thisVue.urlAppointmentKey;
+                                _thisClass.addParamsToUrl({ [key]: null }, null, true);
+                            }
                         }
                     })
                     calendar.on('datesSet', async function (info) {
@@ -921,6 +925,31 @@ class ReservationCalendar extends Commons {
                         this.chosenEmployeeInForms = this.chosenEmployeeOnView;
                     }
                 },
+                async showAppointmentInCalendar(appointmentID) {
+                    const scroller = document.querySelector('.fc-timegrid-body')?.closest('.fc-scroller');
+                    const event = document.querySelector('.event-content-container[data-id="' + appointmentID + '"]')
+                    const eventContainer = event?.closest('.fc-event');
+                    const eventWrapper = event?.closest('.fc-timegrid-event-harness');
+                    if (!scroller || !eventWrapper) {
+                        console.log("no scroller or event")
+                        return;
+                    }
+
+                    await _thisClass.delay(300)
+
+                    scroller.scrollTo({
+                        top: parseInt(eventWrapper.style.top),
+                        behavior: 'smooth',
+                    });
+
+                    await _thisClass.delay(1000)
+
+                    eventContainer.classList.add("highlighted");
+
+                    await _thisClass.delay(2000)
+
+                    eventContainer.classList.remove("highlighted");
+                }
             },
             computed: {
                 productOptions() {

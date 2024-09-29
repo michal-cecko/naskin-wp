@@ -187,6 +187,7 @@ class AdminAppointments
 
             if ($appointment->type === AppointmentType::VACATION) {
                 $return[$appointment->id] = [
+                    'id' => $appointment->id,
                     'type' => $appointment->type->value,
                     'employee' => $appointment->employee->first_name,
                     'employeeID' => $appointment->employee->ID,
@@ -204,6 +205,7 @@ class AdminAppointments
                 }
 
                 $return[$appointment->id] = [
+                    'id' => $appointment->id,
                     'type' => $appointment->type->value,
                     'source' => $appointment->source?->value ?? null,
                     'employee' => $appointment->employee->first_name,
