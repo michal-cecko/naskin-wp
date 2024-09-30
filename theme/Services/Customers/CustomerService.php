@@ -10,7 +10,7 @@ class CustomerService {
 
     use Validation;
 
-    public static function findOrCreateCustomer(string $name, string $email, ?string $phone = null) {
+    public static function findOrCreateCustomer(string $name, ?string $email, ?string $phone = null) {
 
         $customer = Customer::whereHas("meta", function ($q) use ($email) {
             $q->where("meta_key", "cust_email")->where("meta_value", $email);
@@ -24,6 +24,8 @@ class CustomerService {
                 'post_status' => 'publish',
             ]);
 
+            $customer = Customer::find($id);
+
             if (is_wp_error($id)) {
                 wp_send_json_error([
                     'message' => __("Failed to create a customer.", THEME_DOMAIN),
@@ -32,7 +34,7 @@ class CustomerService {
 
             update_field('cust_name', $name, $id);
 
-            if (!empty($phone)) {
+            if (!empty($email)) {
                 update_field('cust_email', $email, $id);
             }
 

@@ -36,7 +36,7 @@ class AppointmentService
     public static function createReservation(int $employeeID, Carbon $startAt, iterable $customer, Carbon $endAt = null, ?string $note = null, iterable $services = [], iterable $payments = [], iterable $productSales = [], AppointmentSource $source = AppointmentSource::IN_PERSON, bool $notifyCustomer = false, bool $notifyEmployee = false, string $createdBy = "employee"): Appointment
     {
         if (empty($customer['id'])) {
-            $customer = CustomerService::findOrCreateCustomer($customer['name'], $customer['email'], $customer['phone'] ?? null);
+            $customer = CustomerService::findOrCreateCustomer($customer['name'], $customer['email'] ?? null, $customer['phone'] ?? null);
         } else {
             $customer = Customer::where("ID", $customer['id'])->first();
         }

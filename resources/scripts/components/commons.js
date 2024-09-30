@@ -53,6 +53,10 @@ export default class Commons {
             message = message ?? response.data ?? null;
         }
 
+        if(typeof message !== "string") {
+            message = JSON.stringify(message);
+        }
+
         return message;
     }
 
