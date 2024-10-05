@@ -5,6 +5,7 @@ namespace Theme\Modules\Appointments;
 use Saurus\App\Interfaces\IFilterComponent;
 use Saurus\App\Main;
 use Saurus\App\Modules\Templates\Card\MetricCard;
+use Theme\Enum\AppointmentPaymentType;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
 use Theme\Enum\User\Role;
@@ -226,10 +227,42 @@ class AppointmentsDashboardView
 
         if(current_user_can("view_appointments_money_statistics")) {
             $metrics[] = Main::initModule(new MetricCard(
+                id: "sales_metric",
+                heading: "Tržby celkom",
+                query: Appointment::query()->with(['payments'])->where("status", AppointmentStatus::OK)->where("type", AppointmentType::RESERVATION),
+                targetAttribute: "payments.amount",
+                icon: 'dashicons-arrow-up-alt',
+                operator: "sum",
+                filter: $filter,
+                formatter: function ($value) {
+                    return $value . "€";
+                },
+            ));
+        }
+
+        if(current_user_can("view_appointments_money_statistics")) {
+            $metrics[] = Main::initModule(new MetricCard(
                 id: "income_metric",
                 heading: "Príjem celkom",
                 query: Appointment::query()->with(['payments'])->where("status", AppointmentStatus::OK)->where("type", AppointmentType::RESERVATION),
                 targetAttribute: "payments.amount",
+                targetAttributeFilter: fn($payment) => $payment->type !== AppointmentPaymentType::GIFTCARD,
+                icon: 'dashicons-arrow-up-alt',
+                operator: "sum",
+                filter: $filter,
+                formatter: function ($value) {
+                    return $value . "€";
+                },
+            ));
+        }
+
+        if(current_user_can("view_appointments_money_statistics")) {
+            $metrics[] = Main::initModule(new MetricCard(
+                id: "giftcard_metric",
+                heading: "Tržby darček. kariet",
+                query: Appointment::query()->with(['payments'])->where("status", AppointmentStatus::OK)->where("type", AppointmentType::RESERVATION),
+                targetAttribute: "payments.amount",
+                targetAttributeFilter: fn($payment) => $payment->type === AppointmentPaymentType::GIFTCARD,
                 icon: 'dashicons-arrow-up-alt',
                 operator: "sum",
                 filter: $filter,

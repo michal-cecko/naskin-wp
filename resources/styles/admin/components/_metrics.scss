@@ -1,5 +1,7 @@
-#income_metric ,
-#product_sale_sum_metric{
+#income_metric,
+#sales_metric,
+#giftcard_metric,
+#product_sale_sum_metric {
   .dashicons-before {
     &::before {
       color: green;
