@@ -21,7 +21,13 @@ class Employee extends User
 
     public function getAllowedServicesAttribute(): iterable
     {
-        return Service::whereIn("id", get_field("services", $this->acf_id) ?? [])->get()->append(['price', 'duration']);
+        $serviceIDs = get_field("services", $this->acf_id);
+        if(empty($serviceIDs)) {
+            return collect([]);
+        }
+
+        $services = Service::whereIn("id", $serviceIDs)->get()->append(['price', 'duration']);
+        return $services;
     }
 
     public function getVacationColorAttribute() {

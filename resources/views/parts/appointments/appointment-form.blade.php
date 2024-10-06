@@ -50,15 +50,13 @@
                     </div>
 
                     <div class="content choose-employee">
-                        <div class="employee" @click="chooseEmployee(-1)" :class="activeEmployeeClass(-1)"
-                             v-if="availableEmployees.length > 1">
+                        <div class="employee" @click="chooseEmployee(-1)" :class="chosenEmployee?.id == -1 ? 'chosen' : ''" v-if="availableEmployees.length > 1">
                             <div class="img-container any">
                                 {!! main()->assets()->svg("icons/reservation/icon-random.svg") !!}
                             </div>
                             <div class="name">Nezáleží</div>
                         </div>
-                        <div class="employee" :class="chosenEmployee?.id === employee.id ? 'chosen' : ''"
-                             v-for="employee in availableEmployees" @click="chooseEmployee(employee.id)"
+                        <div class="employee" :class="chosenEmployee?.id === employee.id ? 'chosen' : ''" v-for="employee in availableEmployees" @click="chooseEmployee(employee.id)"
                              :key="employee.id">
                             <div class="img-container">
                                 <img v-if="!!employee.profile_picture" :src="employee.profile_picture"
