@@ -2,6 +2,7 @@
 
 namespace Theme\Modules\Services;
 
+use Theme\PostTypes\Service;
 use Theme\Taxonomies\ServiceCategory;
 
 class ServicesDashboardTable {
