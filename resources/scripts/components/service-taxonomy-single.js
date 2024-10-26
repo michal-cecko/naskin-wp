@@ -7,6 +7,8 @@ class ServiceTaxonomySingle extends Commons {
         console.log("Service Detail JS has been loaded.")
 
         this._prepareSwiper();
+
+        this._prepareReadMore();
     }
 
     _prepareSwiper() {
@@ -19,7 +21,7 @@ class ServiceTaxonomySingle extends Commons {
             },
             loop: true,
             autoplay: {
-                delay: 3000,
+                delay: 8000,
                 disableOnInteraction: false,
             },
             breakpoints: {
@@ -36,6 +38,23 @@ class ServiceTaxonomySingle extends Commons {
                 },
             }
         })
+    }
+
+    _prepareReadMore() {
+        let readMoreBtns = document.querySelectorAll(".open-read-more");
+        readMoreBtns.forEach(btn => {
+            btn.addEventListener("click", e => {
+                e.preventDefault();
+                let readMoreDialog = document.querySelector("#readMoreDialog");
+                let readMoreTitle = document.querySelector("#readMoreTitle");
+                let readMoreContentEl = document.querySelector("#readMoreContent");
+
+                readMoreTitle.innerHTML = btn.dataset.title;
+                readMoreContentEl.innerHTML = btn.dataset.content;
+
+                readMoreDialog.classList.add("shown");
+            });
+        });
     }
 }
 

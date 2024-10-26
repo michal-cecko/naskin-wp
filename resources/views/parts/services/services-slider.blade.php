@@ -6,7 +6,8 @@
         @if(!empty($term->description))
             <p class="body-text description">{{$term->description}}</p>
         @endif
-        <a href="{{ site_url() }}/cennik/#{{$term->slug}}" class="btn btn--normal btn--brownish_yellow cennik-btn">Cenník služieb</a>
+        <a href="{{ site_url() }}/cennik/#{{$term->slug}}" class="btn btn--normal btn--brownish_yellow cennik-btn">Cenník
+            služieb</a>
 
         @if(!empty($services))
             <div class="swiper-services-container">
@@ -19,7 +20,10 @@
                                         <img src="{{get_field("serv-image", $service->id)}}" alt="{{$service->name}}">
                                     </div>
                                 </a>
-                                <span>{{$service->title}}</span>
+                                <div class="text-container">
+                                    <span>{{$service->title}}</span>
+                                    <p>{!! wp_trim_words($service->description, 15, "..." . main()->assets()->svg("icons/other/icon-read-more.svg", ['class' => ['open-read-more'], 'data-title' => [$service->title], 'data-content' => [$service->description]])) !!}</p>
+                                </div>
                             </div>
                         @endforeach
                     </div>

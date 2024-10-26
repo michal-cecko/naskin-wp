@@ -12,3 +12,21 @@
     display: none !important;
   }
 }
+
+.open-read-more {
+  display: inline-block;
+  width: 2rem;
+  height: auto;
+  transform: translate(7px, 4px);
+  cursor: pointer;
+
+  rect {
+    transition: all 0.2s ease-in-out;
+  }
+
+  &:hover {
+    rect {
+      fill: darken($brownish_yellow, 8%);
+    }
+  }
+}
