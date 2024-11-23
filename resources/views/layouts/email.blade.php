@@ -36,6 +36,11 @@
             -ms-interpolation-mode: bicubic;
         }
 
+        .container img {
+            width: 100%;
+            height: auto;
+        }
+
         #outlook a {
             padding: 0;
         }

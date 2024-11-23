@@ -200,8 +200,8 @@ class ReservationCalendar extends Commons {
                                     omitCommas: true
                                 },
                                 slotDuration: '00:05:00',
-                                slotMinTime: '03:00:00',
-                                slotMaxTime: '23:00:00',
+                                slotMinTime: '07:00:00',
+                                slotMaxTime: '22:00:00',
                             },
                         },
 

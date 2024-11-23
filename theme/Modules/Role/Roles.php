@@ -39,8 +39,6 @@ class Roles
     }
 
     /**
-     * @action admin_init 1
-     *
      * @return void
      */
     public function register(): void

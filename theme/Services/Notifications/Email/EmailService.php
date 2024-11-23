@@ -3,6 +3,7 @@
 namespace Theme\Services\Notifications\Email;
 
 use Exception;
+use Saurus\App\Modules\Mail\Mailable;
 use Theme\Enum\AppointmentCustomerNotificationType;
 use Theme\Enum\AppointmentEmployeeNotificationType;
 use Theme\Enum\AppointmentType;
@@ -20,10 +21,23 @@ use Theme\Mail\Appointments\Employee\Vacation\VacationCancelled;
 use Theme\Mail\Appointments\Employee\Vacation\VacationCreated;
 use Theme\Mail\Appointments\Employee\Vacation\VacationUpdated;
 use Theme\Models\Appointment\Appointment;
+use Theme\PostTypes\Customer;
 use Theme\Services\Customers\CustomerService;
 
 class EmailService implements INotificationService
 {
+    /**
+     * @throws Exception
+     */
+    public static function notify(Mailable $mailable, string $email, array $additionalData = []): bool
+    {
+        if(!main()->mail()->send($mailable, $email)) {
+            throw new EmailFailedToSendException($email);
+        }
+
+        return true;
+    }
+
     /**
      * @throws Exception
      */

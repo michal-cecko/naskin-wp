@@ -1,5 +1,7 @@
 $red: #d23f40;
 .button{
+  max-height: 32px !important;
+  min-height: unset !important;
   transition: all 0.3s ease;
   &.button-danger {
     background: $red !important;

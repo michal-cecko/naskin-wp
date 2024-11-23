@@ -18,28 +18,19 @@ class CustomerService {
 
         if(!$customer) {
 
-            $id = wp_insert_post([
+            $customer = Customer::create([
                 'post_title' => $name,
-                'post_type' => Customer::getPostTypeSlug(),
                 'post_status' => 'publish',
             ]);
 
-            $customer = Customer::find($id);
-
-            if (is_wp_error($id)) {
-                wp_send_json_error([
-                    'message' => __("Failed to create a customer.", THEME_DOMAIN),
-                ], 500);
-            }
-
-            update_field('cust_name', $name, $id);
+            update_field('cust_name', $name, $customer->id);
 
             if (!empty($email)) {
-                update_field('cust_email', $email, $id);
+                update_field('cust_email', $email, $customer->id);
             }
 
             if (!empty($phone)) {
-                update_field('cust_phone', $phone, $id);
+                update_field('cust_phone', $phone, $customer->id);
             }
 
         }

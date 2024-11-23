@@ -63,17 +63,19 @@ class AppointmentService
             self::addServiceToAppointment($appointment, $service);
         }
 
-        $lastAppointment = get_field('cust_last-appointment', $customer->ID);
-        $lastAppointmentC = Carbon::parse($lastAppointment);
-        if (empty($lastAppointment) || $lastAppointmentC->lt($appointment->start_at)) {
-            CustomerService::updateLastAppointmentDate($customer, $appointment->start_at->format("Y-m-d H:i"));
+        if(!$appointment->start_at->equalTo($startAt)) {
+            $lastAppointment = get_field('cust_last-appointment', $appointment->customer->ID);
+            $lastAppointmentC = Carbon::parse($lastAppointment);
+            if (empty($lastAppointment) || $lastAppointmentC->lt($appointment->start_at)) {
+                CustomerService::updateLastAppointmentDate($appointment->customer, $appointment->start_at->format("Y-m-d H:i"));
+            }
         }
 
-        $appointment->load(["employee", "services", "payments", "customer"]);
-
-        self::syncPaymentsWithAppointment($appointment, $payments);
-
-        self::syncProductSalesWithAppointment($appointment, $productSales);
+        if($createdBy === "employee") {
+            $appointment->load(["employee", "services", "payments", "customer"]);
+            self::syncPaymentsWithAppointment($appointment, $payments);
+            self::syncProductSalesWithAppointment($appointment, $productSales);
+        }
 
         if ($notifyCustomer) {
             if (!EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::CREATED, ['isCreatedByEmployee' => $createdBy === 'employee'])) {
