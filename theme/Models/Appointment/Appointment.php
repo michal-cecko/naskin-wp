@@ -191,4 +191,22 @@ class Appointment extends Model implements ILoggable
 
         return $string;
     }
+
+    public function toArray()
+    {
+        return [
+            'id' => $this->id,
+            'start_at' => $this->start_at,
+            'end_at' => $this->end_at,
+            'break' => $this->break,
+            'customer_id' => $this->customer_id,
+            'note' => $this->note,
+            'type' => $this->type,
+            'cancel_token' => $this->cancel_token,
+            'has_been_reminded' => $this->has_been_reminded,
+            'status' => $this->status,
+            'source' => $this->source,
+            'total' => $this->total,
+        ];
+    }
 }

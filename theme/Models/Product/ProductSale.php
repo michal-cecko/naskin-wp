@@ -57,5 +57,20 @@ class ProductSale extends Model implements ILoggable
     {
         return "{$this->product?->title} ({$this->quantity} x {$this->price}€ = {$this->total_price}€) / {$this->sold_at?->format("d.m.y")}";
     }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'appointment_id' => $this->appointment_id,
+            'product_id' => $this->product_id,
+            'price' => $this->price,
+            'sold_at' => $this->sold_at,
+            'quantity' => $this->quantity,
+            'note' => $this->note,
+            'payment_type' => $this->payment_type,
+            'total_price' => $this->total_price,
+        ];
+    }
 }
 

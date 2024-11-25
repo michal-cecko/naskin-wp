@@ -1,5 +1,6 @@
 @php use Theme\Enum\AppointmentType; @endphp
 @php use Theme\Enum\AppointmentStatus; @endphp
+
 @extends('layouts.dashboard-layout')
 
 @section('title')

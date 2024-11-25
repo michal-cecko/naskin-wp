@@ -74,5 +74,19 @@ class Expense extends Model implements ILoggable {
     {
         return "{$this->description} ({$this->price} €)";
     }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'category_id' => $this->category_id,
+            'product_id' => $this->product_id,
+            'description' => $this->description,
+            'note' => $this->note,
+            'supplier' => $this->supplier,
+            'price' => $this->price,
+            'bought_at' => $this->bought_at,
+        ];
+    }
 }
 
