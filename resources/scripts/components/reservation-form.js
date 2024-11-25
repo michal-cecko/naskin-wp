@@ -147,7 +147,7 @@ class ReservationForm extends Commons {
                     chooseDate(date) {
                         this.isVisibleOrder = true
                         this.date = date
-                        this.timeOptions = this.availableDates[moment(date).format("M")][date]['apps']
+                        this.timeOptions = this.availableDates[moment(date).format("YYYY")][moment(date).format("M")][date]['apps']
                     },
                     chooseTime(time) {
                         this.isVisibleOrder = true
@@ -408,8 +408,8 @@ class ReservationForm extends Commons {
                     getDayName(num) {
                         return _thisClass.getDayName(num)
                     },
-                    getMonthName(num) {
-                        return _thisClass.getMonthName(num)
+                    getMonthName(num, year = null) {
+                        return _thisClass.getMonthName(num) + (year ? " " + year : "")
                     },
                     getTimeClass(time) {
                         const now = moment(time, 'HH:mm');

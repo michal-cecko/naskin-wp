@@ -323,13 +323,13 @@ class AppointmentService
 
                 //Saturday work
                 if (!($weekendWork['saturday'] ?? false) && (int)$date->format("N") === 6) {
-                    $finalDates[$currentDate->format("n")][$dateFormat] = ['apps' => [], 'isAvailable' => 0];
+                    $finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat] = ['apps' => [], 'isAvailable' => 0];
                     continue;
                 };
 
                 //Sunday work
                 if (!($weekendWork['sunday'] ?? false) && (int)$date->format("N") === 7) {
-                    $finalDates[$currentDate->format("n")][$dateFormat] = ['apps' => [], 'isAvailable' => 0];
+                    $finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat] = ['apps' => [], 'isAvailable' => 0];
                     continue;
                 };
 
@@ -386,7 +386,7 @@ class AppointmentService
                     }
 
                     $timeToAdd = [];
-                    $termin = $finalDates[$currentDate->format("n")][$dateFormat]['apps'][$currentStart] ?? [];
+                    $termin = $finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat]['apps'][$currentStart] ?? [];
 
                     // termin is available
                     if ($ok) {
@@ -405,16 +405,16 @@ class AppointmentService
                             }
                         }
 
-                        $finalDates[$currentDate->format("n")][$dateFormat]['apps'][$currentStart] = $timeToAdd;
+                        $finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat]['apps'][$currentStart] = $timeToAdd;
                     }
 
-                    if ($finalDates[$currentDate->format("n")][$dateFormat]['isAvailable'] != 1 && $ok) {
-                        $finalDates[$currentDate->format("n")][$dateFormat]['isAvailable'] = 1;
+                    if ($finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat]['isAvailable'] != 1 && $ok) {
+                        $finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat]['isAvailable'] = 1;
                     }
                 endwhile;
 
-                if (!isset($finalDates[$currentDate->format("n")][$dateFormat]['isAvailable'])) {
-                    $finalDates[$currentDate->format("n")][$dateFormat]['isAvailable'] = 0;
+                if (!isset($finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat]['isAvailable'])) {
+                    $finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat]['isAvailable'] = 0;
                 }
             endfor;
 

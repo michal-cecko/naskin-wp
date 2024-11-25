@@ -50,13 +50,15 @@
                     </div>
 
                     <div class="content choose-employee">
-                        <div class="employee" @click="chooseEmployee(-1)" :class="chosenEmployee?.id == -1 ? 'chosen' : ''" v-if="availableEmployees.length > 1">
+                        <div class="employee" @click="chooseEmployee(-1)"
+                             :class="chosenEmployee?.id == -1 ? 'chosen' : ''" v-if="availableEmployees.length > 1">
                             <div class="img-container any">
                                 {!! main()->assets()->svg("icons/reservation/icon-random.svg") !!}
                             </div>
                             <div class="name">Nezáleží</div>
                         </div>
-                        <div class="employee" :class="chosenEmployee?.id === employee.id ? 'chosen' : ''" v-for="employee in availableEmployees" @click="chooseEmployee(employee.id)"
+                        <div class="employee" :class="chosenEmployee?.id === employee.id ? 'chosen' : ''"
+                             v-for="employee in availableEmployees" @click="chooseEmployee(employee.id)"
                              :key="employee.id">
                             <div class="img-container">
                                 <img v-if="!!employee.profile_picture" :src="employee.profile_picture"
@@ -70,20 +72,22 @@
                     </div>
                     <div class="content choose-date position-relative">
                         <div class="date-picker" :class="Object.keys(availableDates).length ? 'shown' : ''">
-                            <div v-for="(dates, month, index) in availableDates" class="dates-container">
-                                <h3 class="month-name" v-html="getMonthName(month)"></h3>
-                                <div class="date-grid">
-                                    <template v-for="(appointments, availableDate, index) in dates">
-                                        <div class="date"
-                                             :class="[availableDate === date ? 'chosen' : '', appointments['isAvailable'] === 0 ? 'notAvailable' : '']"
-                                             @click="chooseDate(availableDate)">
-                                            <div class="number" v-html="getMomentDate(availableDate, 'D')"></div>
-                                            <div class="name"
-                                                 v-html="getDayName(getMomentDate(availableDate, 'd'))"></div>
-                                        </div>
-                                    </template>
+                            <template v-for="(monthArray, year, index) in availableDates">
+                                <div v-for="(dates, month, index) in monthArray" class="dates-container">
+                                    <h3 class="month-name" v-html="getMonthName(month, year)"></h3>
+                                    <div class="date-grid">
+                                        <template v-for="(appointments, availableDate, index) in dates">
+                                            <div class="date"
+                                                 :class="[availableDate === date ? 'chosen' : '', appointments['isAvailable'] === 0 ? 'notAvailable' : '']"
+                                                 @click="chooseDate(availableDate)">
+                                                <div class="number" v-html="getMomentDate(availableDate, 'D')"></div>
+                                                <div class="name"
+                                                     v-html="getDayName(getMomentDate(availableDate, 'd'))"></div>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
-                            </div>
+                            </template>
                         </div>
                         <div class="empty-date-picker" :class="Object.keys(availableDates).length ? '' : 'shown'">
                             <lord-icon
