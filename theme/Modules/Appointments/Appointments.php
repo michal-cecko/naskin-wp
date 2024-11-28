@@ -9,6 +9,7 @@ use Saurus\App\Traits\Validation;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
+use theme\Exceptions\Appointment\AppointmentOverlapException;
 use Theme\Exceptions\Email\EmailFailedToSendException;
 use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Service;
@@ -81,6 +82,8 @@ class Appointments
 
         } catch (EmailFailedToSendException $e) {
             wp_send_json_error("Rezervácia bola vytvorená, no nepodarilo sa Vám odoslať email o potvrdení.");
+        } catch (AppointmentOverlapException $e) {
+            wp_send_json_error($e->getMessage());
         } catch (Exception $e) {
             main()->log()->error("Nastala chyba pri vytváraní rezervácie. Error: " . json_encode($e));
             wp_send_json_error("Nastala chyba pri vytváraní rezervácie. Skúste znova alebo nás kontaktujte.");

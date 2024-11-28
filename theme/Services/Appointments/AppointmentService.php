@@ -6,17 +6,14 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Symfony\Component\Mime\Email;
 use Theme\Enum\AppointmentCustomerNotificationType;
 use Theme\Enum\AppointmentEmployeeNotificationType;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
-
-use Theme\Exceptions\Appointment\AppointmentEmailNotificationNotImplementedException;
 use Theme\Exceptions\Appointment\AppointmentInvalidDatetimeDifferenceException;
 use Theme\Exceptions\Appointment\AppointmentNotFoundException;
-use Theme\Exceptions\Email\EmailFailedToSendException;
+use Theme\Exceptions\Appointment\AppointmentOverlapException;
 use Theme\Exceptions\Employee\EmployeeNotFoundException;
 use Theme\Helpers\ModelRelationsHelper;
 use Theme\Models\Appointment\Appointment;
@@ -41,11 +38,14 @@ class AppointmentService
             $customer = Customer::where("ID", $customer['id'])->first();
         }
 
+        $employee = Employee::where("ID", $employeeID)->first();
+        $allowedServiceIds = $employee->allowed_service_ids;
         self::checkAppointmentTimeDifference($startAt, $endAt);
 
         [$duration, $endAt] = self::calculateDuration($startAt, $endAt, $services);
 
-        $appointment = Appointment::create([
+        $appointment = new Appointment();
+        $appointment->fill([
             'employee_id' => $employeeID,
             'start_at' => $startAt,
             'end_at' => $endAt,
@@ -59,11 +59,24 @@ class AppointmentService
             'cancel_token' => self::generateCancelToken()
         ]);
 
+        if (self::checkIfAppointmentDoesNotOverlap($appointment, $employee)) {
+            if($createdBy == "employee") {
+                throw new AppointmentOverlapException("Termín od {$startAt->format('H:i')} do {$endAt->format('H:i')} je už obsadený. Obnovte stránku.");
+            } else {
+                throw new AppointmentOverlapException("Termín od {$startAt->format('H:i')} do {$endAt->format('H:i')} sa medzičasom stihol obsadiť. Vyberte prosím iný termín.");
+            }
+        }
+
+        $appointment->save();
+
         foreach ($services as $service) {
+            if (!in_array($service->id, $allowedServiceIds)) {
+                throw new \Exception("Tento pracovník nevykonáva vybranú službu s názvom {$service->name}. Vyberte prosím iného pracovníka alebo službu.");
+            }
             self::addServiceToAppointment($appointment, $service);
         }
 
-        if(!$appointment->start_at->equalTo($startAt)) {
+        if (!$appointment->start_at->equalTo($startAt)) {
             $lastAppointment = get_field('cust_last-appointment', $appointment->customer->ID);
             $lastAppointmentC = Carbon::parse($lastAppointment);
             if (empty($lastAppointment) || $lastAppointmentC->lt($appointment->start_at)) {
@@ -71,7 +84,7 @@ class AppointmentService
             }
         }
 
-        if($createdBy === "employee") {
+        if ($createdBy === "employee") {
             $appointment->load(["employee", "services", "payments", "customer"]);
             self::syncPaymentsWithAppointment($appointment, $payments);
             self::syncProductSalesWithAppointment($appointment, $productSales);
@@ -100,9 +113,9 @@ class AppointmentService
     {
         $eager = ["services", "customer", "payments", "productSales", "employee"];
 
-        if(is_int($appointment)) {
+        if (is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->with($eager)->first();
-            if(!$appointment) throw new AppointmentNotFoundException();
+            if (!$appointment) throw new AppointmentNotFoundException();
         } else {
             $appointment->load($eager);
         }
@@ -123,7 +136,7 @@ class AppointmentService
         $changes = $appointment->getChangedColumns();
         $appointment->save();
 
-        if(!$appointment->start_at->equalTo($startAt)) {
+        if (!$appointment->start_at->equalTo($startAt)) {
             $lastAppointment = get_field('cust_last-appointment', $appointment->customer->ID);
             $lastAppointmentC = Carbon::parse($lastAppointment);
             if (empty($lastAppointment) || $lastAppointmentC->lt($appointment->start_at)) {
@@ -134,8 +147,8 @@ class AppointmentService
         $appointmentServiceIds = $appointment->services->pluck("service_id");
         $submittedServiceIds = $services->pluck("id");
         foreach ($services as $submittedService) {
-            if(!$appointmentServiceIds->contains($submittedService->id)) {
-                if(self::addServiceToAppointment($appointment, $submittedService)) {
+            if (!$appointmentServiceIds->contains($submittedService->id)) {
+                if (self::addServiceToAppointment($appointment, $submittedService)) {
                     $appointmentServiceIds->push($submittedService->id);
                 }
             }
@@ -147,11 +160,11 @@ class AppointmentService
         self::syncProductSalesWithAppointment($appointment, $productSales);
 
         if ($notifyCustomer) {
-            if(!EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::UPDATED)) {
+            if (!EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::UPDATED)) {
                 main()->log()->errorDB("Nepodarilo sa odoslať email o upravení rezervácie zákazníkovi na email: {$appointment->customer->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer]);
             }
         }
-        
+
         if ($notifyEmployee) {
             if (!EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::UPDATED)) {
                 main()->log()->errorDB("Nepodarilo sa odoslať email o upravení rezervácie na pracovníkov email: {$appointment->employee->email}, Rezervácia: {$appointment->log_string}", resources: [$appointment, $appointment->customer, $appointment->employee]);
@@ -160,6 +173,19 @@ class AppointmentService
 
         return ['appointment' => $appointment, 'changes' => $changes];
 
+    }
+
+    public static function checkIfAppointmentDoesNotOverlap(Appointment $appointment, Employee $employee): bool
+    {
+        $mutualCalendarEmployees = array_merge([$employee->id], $employee->mutual_calendar_blocking_employees);
+        return Appointment::where(function ($query) use ($appointment) {
+            $query->whereBetween('start_at', [$appointment->start_at, $appointment->end_at])
+                ->orWhereBetween('end_at', [$appointment->start_at, $appointment->end_at])
+                ->orWhere(function ($query) use ($appointment) {
+                    $query->where('start_at', '<=', $appointment->start_at)
+                        ->where('end_at', '>=', $appointment->end_at);
+                });
+        })->whereIn("employee_id", $mutualCalendarEmployees)->where("status", AppointmentStatus::OK)->exists();
     }
 
     public static function addServiceToAppointment(Appointment $appointment, Service $service): ?\Theme\Models\Appointment\AppointmentService
@@ -203,14 +229,14 @@ class AppointmentService
      */
     public static function updateVacation(Appointment|int $appointment, int|Employee $employee, Carbon $startAt, Carbon $endAt = null, ?string $note = null, bool $notifyEmployee = false): array
     {
-        if(is_int($appointment)) {
+        if (is_int($appointment)) {
             $appointment = Appointment::where("id", $appointment)->where("status", AppointmentStatus::OK)->first();
-            if(!$appointment) throw new AppointmentNotFoundException();
+            if (!$appointment) throw new AppointmentNotFoundException();
         }
 
-        if(is_int($employee)) {
+        if (is_int($employee)) {
             $employee = Employee::where("id", $employee)->first();
-            if(!$employee) throw new EmployeeNotFoundException();
+            if (!$employee) throw new EmployeeNotFoundException();
         }
 
         if ($endAt !== null && $startAt->diffInMinutes($endAt, false) < 5) {
@@ -225,7 +251,7 @@ class AppointmentService
         ]);
         $changes = $appointment->getChangedColumns();
         $appointment->save();
-        
+
         if ($notifyEmployee) {
             if (!EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::UPDATED)) {
                 main()->log()->errorDB("Nepodarilo sa odoslať email o upravení voľna na pracovníkov email: {$appointment->employee->email}, Voľno: {$appointment->log_string}", resources: [$appointment, $appointment->employee]);
@@ -239,7 +265,7 @@ class AppointmentService
     {
         do {
             $token = Str::random(128);
-        } while(Appointment::where("cancel_token", $token)->first());
+        } while (Appointment::where("cancel_token", $token)->first());
 
         return $token;
     }
@@ -273,7 +299,7 @@ class AppointmentService
             $obsadeneArr = [];
             foreach ($appointments as $appointment) {
 
-                if($appointment->type === AppointmentType::VACATION && $appointment->employee_id !== $currentEmployee->id) {
+                if ($appointment->type === AppointmentType::VACATION && $appointment->employee_id !== $currentEmployee->id) {
                     continue;
                 }
 
@@ -357,7 +383,7 @@ class AppointmentService
                     $currentEnd = $currentTime->modify("+" . $serviceDuration . " minutes")->modify("+" . self::getBreakForDuration($serviceDuration, $breaks) . " minutes")->format("H:i");
 
                     //2hrs added bcs of Slovakia timezone
-                    if($currentTime->lt(Carbon::now()->addHours(2))) {
+                    if ($currentTime->lt(Carbon::now()->addHours(2))) {
                         continue;
                     }
 
@@ -424,10 +450,11 @@ class AppointmentService
         return collect($finalDates);
     }
 
-    public static function getBreaks() {
+    public static function getBreaks()
+    {
         $breaks = get_field("breaks_after_appointment", "option") ?? [];
 
-        usort($breaks, function($a, $b) {
+        usort($breaks, function ($a, $b) {
             return $a['duration'] <=> $b['duration'];
         });
 
@@ -436,12 +463,12 @@ class AppointmentService
 
     public static function getBreakForDuration($duration, $breaks = []): int
     {
-        if(empty($breaks)) {
+        if (empty($breaks)) {
             $breaks = self::getBreaks();
         }
 
         foreach ($breaks as $break) {
-            if($duration <= $break['duration']) {
+            if ($duration <= $break['duration']) {
                 return intval($break['break']);
             }
         }
@@ -459,8 +486,8 @@ class AppointmentService
      */
     public static function cancelAppointment(Appointment $appointment, bool $notifyCustomer = false, bool $notifyEmployee = false, $isCancelledByEmployee = false): void
     {
-        if($appointment->type === AppointmentType::VACATION) {
-            if($notifyEmployee) {
+        if ($appointment->type === AppointmentType::VACATION) {
+            if ($notifyEmployee) {
                 EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::CANCELLED);
             }
 
@@ -470,11 +497,11 @@ class AppointmentService
 
         $appointment->update(['status' => AppointmentStatus::CANCELLED]);
 
-        if($notifyEmployee) {
+        if ($notifyEmployee) {
             EmailService::notifyEmployee($appointment, AppointmentEmployeeNotificationType::CANCELLED, ['isCancelledByEmployee' => $isCancelledByEmployee]);
         }
 
-        if($notifyCustomer) {
+        if ($notifyCustomer) {
             EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::CANCELLED, ['isCancelledByEmployee' => $isCancelledByEmployee]);
         }
     }
@@ -482,7 +509,8 @@ class AppointmentService
     /**
      * @throws Exception
      */
-    public static function notifyAllAppointments() : int {
+    public static function notifyAllAppointments(): int
+    {
         $appointments = Appointment::where("has_been_reminded", false)
             ->with(["services", "employee", "customer"])
             ->where("status", AppointmentStatus::OK)
@@ -491,7 +519,7 @@ class AppointmentService
             ->whereDate('start_at', '>', Carbon::now()->subDay()->toDateString())
             ->get();
 
-        if(!$appointments->count()) {
+        if (!$appointments->count()) {
             return 0;
         }
 
@@ -500,7 +528,7 @@ class AppointmentService
             $emailReminder = EmailService::notifyCustomer($appointment, AppointmentCustomerNotificationType::REMIND);
             $smsReminder = SmsService::notifyCustomer($appointment, AppointmentCustomerNotificationType::REMIND);
 
-            if($emailReminder || $smsReminder) {
+            if ($emailReminder || $smsReminder) {
                 $appointment->update(['has_been_reminded' => true]);
                 $notified++;
             }
@@ -548,7 +576,7 @@ class AppointmentService
      */
     private static function calculateDuration(Carbon $startAt, ?Carbon $endAt, iterable $services): array
     {
-        if(!$endAt) {
+        if (!$endAt) {
             $duration = $services->sum("duration");
             $endAt = $startAt->copy()->addMinutes($duration);
         } else {
@@ -565,16 +593,16 @@ class AppointmentService
      */
     private static function getEmployee(Employee|int $employee): Employee|int
     {
-        if(is_int($employee)) {
+        if (is_int($employee)) {
             $employee = Employee::where("id", $employee)->first();
 
-            if(!$employee) throw new EmployeeNotFoundException();
+            if (!$employee) throw new EmployeeNotFoundException();
         }
 
         return $employee;
     }
 
-    public static function getAppointmentBreak(float $duration, iterable $services) : null|int
+    public static function getAppointmentBreak(float $duration, iterable $services): null|int
     {
         foreach ($services as $service) {
             $break = $service->serviceCategory->static_break;
@@ -586,7 +614,7 @@ class AppointmentService
         return AppointmentService::getBreakForDuration($duration);
     }
 
-    public static function syncPaymentsWithAppointment(Appointment $appointment, iterable $payments = []) : void
+    public static function syncPaymentsWithAppointment(Appointment $appointment, iterable $payments = []): void
     {
         $submittedPaymentIDs = collect($payments)->pluck("id")->filter();
 
@@ -611,7 +639,8 @@ class AppointmentService
         ModelRelationsHelper::deleteNotSubmittedRelatedRecords($appointment, 'payments', $submittedPaymentIDs);
     }
 
-    public static function calculateTotal(iterable $appointmentServices): int {
+    public static function calculateTotal(iterable $appointmentServices): int
+    {
         return collect($appointmentServices)->sum("price");
     }
 

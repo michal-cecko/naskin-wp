@@ -2,6 +2,7 @@
 
 namespace Theme\Modules\Role;
 
+use Exception;
 use Saurus\App\Main;
 use Theme\Enum\User\Role;
 use Theme\Users\Admin;
@@ -141,5 +142,27 @@ class Roles
         }
 
         return null;
+    }
+
+    /**
+     * @action acf/save_post 20
+     *
+     * @param $post_id
+     * @return void
+     * @throws Exception
+     */
+    public function update_user_acf_fields_action($post_id): void
+    {
+        if (str_starts_with($post_id, 'user_')) {
+            $user_id = str_replace('user_', '', $post_id);
+
+            $employees = Employee::all();
+            if ($employee = $employees->where("ID", $user_id)->first()) {
+                $mutuals = implode(", ", array_map(fn($mutual) => $employees->where("ID", $mutual)->first()?->first_name, $employee->mutual_calendar_blocking_employees));
+                $allowedServices = $employee->allowed_services->map(fn($service) => $service->title)->implode(", ");
+
+                main()->log()->warningDB("Aktualizovaný pracovník {$employee->first_name}. Aktuálne dáta sú - Spoločný kalendár: {$mutuals} - Služby ktoré vykonáva: {$allowedServices} - Pracovný čas: od {$employee->worktime['start']} do {$employee->worktime['end']} - Prestávka: od " . (!empty($start = $employee->lunchtime['start']) ? $start : "neurčené") . " do " . (!empty($end = $employee->lunchtime['end']) ? $end : "neurčené"), null, [$employee]);
+            }
+        }
     }
 }

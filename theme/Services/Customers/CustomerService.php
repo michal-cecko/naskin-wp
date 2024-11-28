@@ -20,6 +20,7 @@ class CustomerService {
 
             $customer = Customer::create([
                 'post_title' => $name,
+                'post_content' => "",
                 'post_status' => 'publish',
             ]);
 

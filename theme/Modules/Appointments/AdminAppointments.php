@@ -11,6 +11,7 @@ use Saurus\App\Traits\Validation;
 use Theme\Enum\AppointmentSource;
 use Theme\Enum\AppointmentStatus;
 use Theme\Enum\AppointmentType;
+use Theme\Exceptions\Appointment\AppointmentOverlapException;
 use Theme\Models\Appointment\Appointment;
 use Theme\PostTypes\Service;
 use Theme\Requests\Appointments\Admin\AppointmentAdminCancelRequest;
@@ -48,20 +49,24 @@ class AdminAppointments
 
             $services = Service::whereIn("id", $data['services'])->get();
 
-            $appointment = AppointmentService::createReservation(
-                employeeID: $data['employeeID'],
-                startAt: Carbon::parse($data['date']['start']),
-                customer: $data['customer'],
-                endAt: Carbon::parse($data['date']['end']),
-                note: $data['note'],
-                services: $services,
-                payments: $data['payments'] ?? [],
-                productSales: $data['productSales'] ?? [],
-                source: AppointmentSource::getCaseFromValue($data['source']),
-                notifyCustomer: $data['notify_customer'],
-                notifyEmployee: $data['notify_employee'],
-                createdBy: "employee"
-            );
+            try {
+                $appointment = AppointmentService::createReservation(
+                    employeeID: $data['employeeID'],
+                    startAt: Carbon::parse($data['date']['start']),
+                    customer: $data['customer'],
+                    endAt: Carbon::parse($data['date']['end']),
+                    note: $data['note'],
+                    services: $services,
+                    payments: $data['payments'] ?? [],
+                    productSales: $data['productSales'] ?? [],
+                    source: AppointmentSource::getCaseFromValue($data['source']),
+                    notifyCustomer: $data['notify_customer'],
+                    notifyEmployee: $data['notify_employee'],
+                    createdBy: "employee"
+                );
+            } catch (AppointmentOverlapException $e) {
+                wp_send_json_error($e->getMessage());
+            }
 
             main()->log()->infoDB("Vytvorená rezervácia pracovníkom, {$appointment->log_string}. Služby: {$appointment->log_services_string}", resources: [$appointment, $appointment->customer]);
 
