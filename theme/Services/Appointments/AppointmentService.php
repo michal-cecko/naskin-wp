@@ -177,7 +177,7 @@ class AppointmentService
 
     public static function checkIfAppointmentDoesNotOverlap(Appointment $appointment, Employee $employee): bool
     {
-        $mutualCalendarEmployees = array_merge([$employee->id], $employee->mutual_calendar_blocking_employees);
+        $mutualCalendarEmployees = $employee->mutual_calendar_blocking_employees;
         return Appointment::where(function ($query) use ($appointment) {
             $query->whereBetween('start_at', [$appointment->start_at, $appointment->end_at])
                 ->orWhereBetween('end_at', [$appointment->start_at, $appointment->end_at])
@@ -185,7 +185,15 @@ class AppointmentService
                     $query->where('start_at', '<=', $appointment->start_at)
                         ->where('end_at', '>=', $appointment->end_at);
                 });
-        })->whereIn("employee_id", $mutualCalendarEmployees)->where("status", AppointmentStatus::OK)->exists();
+        })->when(!empty($mutualCalendarEmployees), function ($query) use ($mutualCalendarEmployees, $employee) {
+            $query->where(function ($sq) use ($mutualCalendarEmployees, $employee) {
+                $sq->where(function ($sqq) use ($mutualCalendarEmployees) {
+                    $sqq->whereIn("employee_id", $mutualCalendarEmployees)->where("type", AppointmentType::RESERVATION);
+                })->orWhere("employee_id", $employee->id);
+            });
+        })->when(empty($mutualCalendarEmployees), function ($query) use ($employee) {
+            $query->where("employee_id", $employee->id);
+        })->where("status", AppointmentStatus::OK)->exists();
     }
 
     public static function addServiceToAppointment(Appointment $appointment, Service $service): ?\Theme\Models\Appointment\AppointmentService
