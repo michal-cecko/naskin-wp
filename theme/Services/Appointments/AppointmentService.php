@@ -59,12 +59,8 @@ class AppointmentService
             'cancel_token' => self::generateCancelToken()
         ]);
 
-        if (self::checkIfAppointmentDoesNotOverlap($appointment, $employee)) {
-            if($createdBy == "employee") {
-                throw new AppointmentOverlapException("Termín od {$startAt->format('H:i')} do {$endAt->format('H:i')} je už obsadený. Obnovte stránku.");
-            } else {
-                throw new AppointmentOverlapException("Termín od {$startAt->format('H:i')} do {$endAt->format('H:i')} sa medzičasom stihol obsadiť. Vyberte prosím iný termín.");
-            }
+        if ($createdBy !== "employee" && self::checkIfAppointmentDoesNotOverlap($appointment, $employee)) {
+            throw new AppointmentOverlapException("Termín od {$startAt->format('H:i')} do {$endAt->format('H:i')} sa medzičasom stihol obsadiť. Vyberte prosím iný termín.");
         }
 
         $appointment->save();
@@ -179,11 +175,17 @@ class AppointmentService
     {
         $mutualCalendarEmployees = $employee->mutual_calendar_blocking_employees;
         return Appointment::where(function ($query) use ($appointment) {
-            $query->whereBetween('start_at', [$appointment->start_at, $appointment->end_at])
-                ->orWhereBetween('end_at', [$appointment->start_at, $appointment->end_at])
+            $query->where(function ($query) use ($appointment) {
+                $query->where('start_at', '>', $appointment->start_at)
+                    ->where('start_at', '<', $appointment->end_at);
+            })
                 ->orWhere(function ($query) use ($appointment) {
-                    $query->where('start_at', '<=', $appointment->start_at)
-                        ->where('end_at', '>=', $appointment->end_at);
+                    $query->where('end_at', '>', $appointment->start_at)
+                        ->where('end_at', '<', $appointment->end_at);
+                })
+                ->orWhere(function ($query) use ($appointment) {
+                    $query->where('start_at', '<', $appointment->start_at)
+                        ->where('end_at', '>', $appointment->end_at);
                 });
         })->when(!empty($mutualCalendarEmployees), function ($query) use ($mutualCalendarEmployees, $employee) {
             $query->where(function ($sq) use ($mutualCalendarEmployees, $employee) {
@@ -388,10 +390,14 @@ class AppointmentService
                 while ($currentTime->format("H:i") < $workEndWhile) :
 
                     $currentStart = $currentTime->format("H:i");
-                    $currentEnd = $currentTime->modify("+" . $serviceDuration . " minutes")->modify("+" . self::getBreakForDuration($serviceDuration, $breaks) . " minutes")->format("H:i");
+                    $currentEnd = $currentTime->modify("+" . $serviceDuration . " minutes")
+                        /*Vypnuté prestávky*/
+                        /*->modify("+" . self::getBreakForDuration($serviceDuration, $breaks) . " minutes")*/
+                        ->format("H:i");
 
-                    //2hrs added bcs of Slovakia timezone
-                    if ($currentTime->lt(Carbon::now()->addHours(2))) {
+                    //Added one hour gap, and Two or one hour for DST UTC+2 timezone
+                    $hoursToAdd = Carbon::now("Europe/Bratislava")->isDST() ? 3 : 2;
+                    if ($currentTime->lte(Carbon::now()->addHours($hoursToAdd))) {
                         continue;
                     }
 
