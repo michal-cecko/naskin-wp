@@ -5,20 +5,23 @@
     <meta name="format-detection" content="telephone=no"/>
     <style>
         /* Reset styles */
-        body {
-            margin: 0;
-            padding: 0;
-            min-width: 100%;
-            width: 100% !important;
-            height: 100% !important;
-        }
-
         body, table, td, div, p, a {
             -webkit-font-smoothing: antialiased;
             text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
             -webkit-text-size-adjust: 100%;
+            line-height: 1.5; /* Adjusted line-height */
+        }
+
+        img, .emoji {
+            border: 0;
             line-height: 100%;
+            outline: none;
+            text-decoration: none;
+            -ms-interpolation-mode: bicubic;
+            max-width: none;
+            display: inline-block;
+            vertical-align: middle;
         }
 
         table, td {
@@ -28,54 +31,13 @@
             border-spacing: 0;
         }
 
-        img {
-            border: 0;
-            line-height: 100%;
-            outline: none;
-            text-decoration: none;
-            -ms-interpolation-mode: bicubic;
-        }
-
-        .container img {
-            width: 100%;
-            height: auto;
-        }
-
-        #outlook a {
-            padding: 0;
-        }
-
-        .ReadMsgBody {
-            width: 100%;
-        }
-
-        .ExternalClass {
-            width: 100%;
-        }
-
-        .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
-            line-height: 100%;
-        }
-
-        /* Rounded corners for advanced mail clients only */
-        @media all and (min-width: 560px) {
+        /* For mobile responsiveness and better layout */
+        @media (max-width: 600px) {
             .container {
-                border-radius: 8px;
-                -webkit-border-radius: 8px;
-                -moz-border-radius: 8px;
-                -khtml-border-radius: 8px;
+                width: 100% !important;
+                max-width: 100% !important;
             }
         }
-
-        /* Set color for auto links (addresses, dates, etc.) */
-        a, a:hover {
-            color: #127DB3;
-        }
-
-        .footer a, .footer a:hover {
-            color: #999999;
-        }
-
     </style>
 
 </head>
