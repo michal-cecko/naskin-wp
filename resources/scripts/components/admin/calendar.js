@@ -169,8 +169,8 @@ class ReservationCalendar extends Commons {
                             _thisVue.resetEmployeeInFormsBySelectedEmployeeOnView()
 
                             _thisVue.appointment.datetime = {
-                                start: moment(info.start, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.input),
-                                end: moment(info.end, _thisVue.dateFormat.table_select).format(_thisVue.dateFormat.input),
+                                start: moment(info.start, _thisVue.dateFormat.table_select).toDate(),
+                                end: moment(info.end, _thisVue.dateFormat.table_select).toDate(),
                                 end_with_break: null,
                             };
 
@@ -767,8 +767,8 @@ class ReservationCalendar extends Commons {
                     this.appointment.type = type
                     this.appointment.note = appToEdit.extendedProps.note
                     this.appointment.datetime = {
-                        start: moment(appToEdit.start).format(this.dateFormat.input),
-                        end: moment(appToEdit.end).format(this.dateFormat.input),
+                        start: moment(appToEdit.start).toDate(),
+                        end: moment(appToEdit.end).toDate(),
                         end_with_break: appToEdit.extendedProps.end_with_break ?? null,
                     }
                 },
@@ -1045,7 +1045,7 @@ class ReservationCalendar extends Commons {
 
                     let start = this.appointment.datetime.start
                     if (start && this.appointment.type === "reservation") {
-                        this.appointment.datetime.end = moment(start, this.dateFormat.input).add(this.getTotalDuration(newServices), "minutes").format(this.dateFormat.input)
+                        this.appointment.datetime.end = moment(start, this.dateFormat.input).add(this.getTotalDuration(newServices), "minutes").toDate()
                     }
                 },
                 'appointment.datetime.start'(newStart) {
@@ -1054,7 +1054,7 @@ class ReservationCalendar extends Commons {
                     let start = newStart
                     let services = this.appointment?.services ?? [];
                     if (services.length && start && this.appointment.type === "reservation") {
-                        this.appointment.datetime.end = moment(start, this.dateFormat.input).add(this.getTotalDuration(services), "minutes").format(this.dateFormat.input)
+                        this.appointment.datetime.end = moment(start, this.dateFormat.input).add(this.getTotalDuration(services), "minutes").toDate()
                     }
                 },
             },

@@ -212,6 +212,34 @@ export default class Commons {
         }
     }
 
+    addMinutesToDate(date, minutes) {
+        return new Date(date.getTime() + minutes * 60000);
+    }
+
+    getDifferenceInMinutes(end, start) {
+        return Math.abs(Math.round((end - start) / (1000 * 60)));
+    }
+
+    formatDate(date, format = "YYYY-MM-DD") {
+        const dateObject = new Date(date);
+
+        // Map format strings to Intl.DateTimeFormat options
+        const formatOptionsMap = {
+            "YYYY-MM-DD": { year: "numeric", month: "2-digit", day: "2-digit" },
+            "HH:mm": { hour: "2-digit", minute: "2-digit", hour12: false },
+            "YYYY-MM-DD HH:mm": {
+                year: "numeric", month: "2-digit", day: "2-digit",
+                hour: "2-digit", minute: "2-digit", hour12: false
+            },
+        };
+
+        // Ensure the format is mapped or fallback to a default format
+        const options = formatOptionsMap[format] || formatOptionsMap["YYYY-MM-DD"];
+
+        // Format and return the date using Intl.DateTimeFormat
+        return new Intl.DateTimeFormat("en-CA", options).format(dateObject);
+    }
+
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
