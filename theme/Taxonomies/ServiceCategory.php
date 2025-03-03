@@ -10,6 +10,12 @@ class ServiceCategory extends TaxonomyType
 {
     const DEFAULT_COLOR = "#000000";
 
+    public function getMutualCalendarBlockingCategoriesAttribute(): array
+    {
+        $value = get_field("blocking-calendar", $this->acf_id) ?? [];
+        return empty($value) ? [] : $value;
+    }
+
     public function getImageAttribute(): ?string
     {
         $color = get_field("image", $this->acf_id);

@@ -23,6 +23,7 @@ use Theme\Services\Customers\CustomerService;
 use Theme\Services\Employees\EmployeeService;
 use Theme\Services\Notifications\Email\EmailService;
 use Theme\Services\Notifications\Sms\SmsService;
+use Theme\Taxonomies\ServiceCategory;
 use Theme\Users\Employee;
 
 class AppointmentService
@@ -289,6 +290,18 @@ class AppointmentService
         $breaks = self::getBreaks();
         $finalDates = [];
         $b = 0;
+
+        $serviceCategory = $services->first()->service_category;
+        $mutualServiceCategories = $serviceCategory->mutual_calendar_blocking_categories;
+        $mutualServices = collect();
+        foreach ($mutualServiceCategories as $mutualServiceCategory) {
+            $foundMutualServices = Service::whereHas('taxonomies.term', function ($query) use ($mutualServiceCategory) {
+                $query->where('taxonomy', ServiceCategory::getTaxonomySlug())
+                    ->where('term_id', $mutualServiceCategory->term_id);;
+            })->get();
+            $mutualServices = $mutualServices->merge($foundMutualServices);
+        }
+
         while (($employee === "ANY" && $b < count($employees)) || ($employee instanceof Employee && $b < 1)) :
             $currentDate = Carbon::now()->startOfDay();
 
@@ -298,13 +311,30 @@ class AppointmentService
                 $currentEmployee = $employee;
             }
 
-            $appointments = Appointment::where(function ($query) use ($currentEmployee, $currentDate) {
-                $query->whereDate('start_at', '>=', $currentDate->toDateString())
-                    ->orWhereDate('end_at', '>=', $currentDate->toDateString());
-            })->whereIn('employee_id', [$currentEmployee->id, ...$currentEmployee->mutual_calendar_blocking_employees])
+            $appointments = Appointment::query()
+                ->where(function ($query) use ($currentEmployee, $currentDate) {
+                    $query->whereDate('start_at', '>=', $currentDate->toDateString())
+                        ->orWhereDate('end_at', '>=', $currentDate->toDateString());
+                })
+                ->whereIn('employee_id', [$currentEmployee->id, ...$currentEmployee->mutual_calendar_blocking_employees])
                 ->where("status", AppointmentStatus::OK)
                 ->orderBy("id", "DESC")
                 ->get();
+
+            if (!empty($mutualServices)) {
+                $mutualBlockingServicesAppointments = Appointment::query()
+                    ->where("status", AppointmentStatus::OK)
+                    ->where("type", AppointmentType::RESERVATION)
+                    ->where(function ($query) use ($currentDate) {
+                        $query->whereDate('start_at', '>=', $currentDate->toDateString())
+                            ->orWhereDate('end_at', '>=', $currentDate->toDateString());
+                    })
+                    ->whereHas('services', function ($query) use ($mutualServices) {
+                        $query->whereIn('service_id', $mutualServices->pluck('ID'));
+                    })->get();
+
+                $appointments = $appointments->merge($mutualBlockingServicesAppointments);
+            }
 
             $obsadeneArr = [];
             foreach ($appointments as $appointment) {

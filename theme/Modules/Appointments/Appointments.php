@@ -42,7 +42,7 @@ class Appointments
         $data = $request->validated();
 
         $employee = $data['employee_id'] === -1 ? "ANY" : Employee::where("ID", $data['employee_id'])->first();
-        $services = Service::whereIn("id", $data['services'])->get();
+        $services = Service::whereIn("id", $data['services'])->with("taxonomies.term")->get();
 
         if (!$employee || empty($services)) {
             wp_send_json_error(__('Nebol nájdený pracovník alebo služby.', THEME_DOMAIN), 404);
