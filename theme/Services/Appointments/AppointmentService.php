@@ -420,20 +420,19 @@ class AppointmentService
                 while ($currentTime->format("H:i") < $workEndWhile) :
 
                     $currentStart = $currentTime->format("H:i");
-                    $currentEnd = $currentTime->modify("+" . $serviceDuration . " minutes")
-                        /*Vypnuté prestávky*/
-                        /*->modify("+" . self::getBreakForDuration($serviceDuration, $breaks) . " minutes")*/
-                        ->format("H:i");
+                    $currentEnd = $currentTime->copy()->modify("+" . $serviceDuration . " minutes")->format("H:i");
 
                     //Added one hour gap, and Two or one hour for DST UTC+2 timezone
                     $hoursToAdd = Carbon::now("Europe/Bratislava")->isDST() ? 3 : 2;
                     if ($currentTime->lte(Carbon::now()->addHours($hoursToAdd))) {
+                        $currentTime->modify("+10 minutes");
                         continue;
                     }
 
                     if ($lunchStart && $lunchEnd) {
                         $canEnd = $currentEnd <= $lunchStart || $currentStart >= $lunchEnd;
                         if (!$canEnd) {
+                            $currentTime->modify("+10 minutes");
                             continue;
                         }
                     }
@@ -445,9 +444,6 @@ class AppointmentService
                             $terminEnd = $time['end'];
 
                             $canEnd = $currentEnd <= $terminStart || $currentStart >= $terminEnd;
-                            //echo "$currentEnd <= $terminStart " . " || " . " $currentStart >= $terminEnd \n";
-                            //echo !$canEnd ? "obsadenie broke this. \n" : "";
-
                             if (!$canEnd) {
                                 $ok = false;
                                 break;
@@ -481,6 +477,9 @@ class AppointmentService
                     if ($finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat]['isAvailable'] != 1 && $ok) {
                         $finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat]['isAvailable'] = 1;
                     }
+
+                    // Increment by 10 minutes
+                    $currentTime->modify("+10 minutes");
                 endwhile;
 
                 if (!isset($finalDates[$currentDate->format("Y")][$currentDate->format("n")][$dateFormat]['isAvailable'])) {
