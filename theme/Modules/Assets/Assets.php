@@ -133,7 +133,7 @@ class Assets extends SaurusAssets
     }
 
     private function enqueueVue() : void {
-        wp_enqueue_script('vue-js', 'https://unpkg.com/vue@3/dist/vue.global.js');
+        wp_enqueue_script('vue-js', 'https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.3/vue.global.min.js');
     }
 
     private function enqueueMomentJS() : void {
@@ -146,8 +146,9 @@ class Assets extends SaurusAssets
     }
 
     private function enqueuePrimevue() : void {
-        wp_enqueue_script('primevue-js', 'https://unpkg.com/primevue/umd/primevue.min.js');
-        wp_enqueue_script('primevue-aura-js', 'https://unpkg.com/@primevue/themes/umd/aura.min.js');
+        // Enqueue PrimeVue JS
+        wp_enqueue_script('primevue-js', 'https://cdnjs.cloudflare.com/ajax/libs/primevue/4.2.5/umd/primevue.min.js');
+        wp_enqueue_script('primevue-theme', 'https://cdn.jsdelivr.net/npm/@primevue/themes@4.2.5/umd/aura.min.js');
     }
 }
 
