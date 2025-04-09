@@ -283,11 +283,12 @@ class AppointmentService
 
     public static function getAvailableDates(Collection $services, string|Employee $employee = "ANY"): Collection
     {
+        $breaks = self::getBreaks();
         $serviceDuration = $services->sum("duration");
+        $break = self::getBreakForDuration($serviceDuration, $breaks);
         $employees = EmployeeService::getEmployeesWithServices($services);
         $weekendWork = get_field('weekend_work', 'option') ?? ['saturday' => false, 'sunday' => false];
         $daysAvailableToReserve = get_field('days_available_to_reserve', 'option') ?? 60;
-        $breaks = self::getBreaks();
         $finalDates = [];
         $b = 0;
 
@@ -420,7 +421,7 @@ class AppointmentService
                 while ($currentTime->format("H:i") < $workEndWhile) :
 
                     $currentStart = $currentTime->format("H:i");
-                    $currentEnd = $currentTime->copy()->modify("+" . $serviceDuration . " minutes")->format("H:i");
+                    $currentEnd = $currentTime->copy()->modify("+" . ($serviceDuration + $break) . " minutes")->format("H:i");
 
                     //Added one hour gap, and Two or one hour for DST UTC+2 timezone
                     $hoursToAdd = Carbon::now("Europe/Bratislava")->isDST() ? 3 : 2;
