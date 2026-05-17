@@ -39,7 +39,7 @@
 
     <div class="bg-light-beige copyright">
         <div class="container">
-            <p>2024 &copy; NASKINcare. Všetky práva vyhradené. | Made by <a href="https://synapps.sk">Synapps</a></p>
+            <p>2024 &copy; NASKINcare. Všetky práva vyhradené. | Made by <a href="https://cecko.dev" target="_blank" rel="noopener">Michal Čečko</a></p>
         </div>
     </div>
 </footer>
