@@ -2,16 +2,13 @@
 
 /**
  * Powered by Bulkgate - https://bulkgate.com
+ *
+ * Define NASKIN_BULKGATE_APP_TOKEN, NASKIN_BULKGATE_APP_ID
+ * and NASKIN_BULKGATE_ANDROID_KEY in wp-config.php.
  */
 
 return [
-    //Naskin
-    'app_token' => '***REMOVED***',
-    'android_app_key' => '985J4K5XJ3',
-    'app_id' => 33177, //PHP SDK App ID
-
-    //Mišove test
-    //'app_id' => 25237, //PHP SDK App ID
-    //'app_token' => '***REMOVED***',
-    //'android_app_key' => '985BID9BGQ',
+    'app_token' => defined('NASKIN_BULKGATE_APP_TOKEN') ? NASKIN_BULKGATE_APP_TOKEN : '',
+    'android_app_key' => defined('NASKIN_BULKGATE_ANDROID_KEY') ? NASKIN_BULKGATE_ANDROID_KEY : '',
+    'app_id' => defined('NASKIN_BULKGATE_APP_ID') ? (int) NASKIN_BULKGATE_APP_ID : 0,
 ];

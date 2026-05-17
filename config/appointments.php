@@ -9,6 +9,6 @@ return [
         'city' => 'Považská Bystrica',
         'zip' => '017 01',
     ],
-    'cron-notifications-token' => '***REMOVED***',
-    'cron-ics-token' => '***REMOVED***',
+    'cron-notifications-token' => defined('NASKIN_CRON_NOTIFICATIONS_TOKEN') ? NASKIN_CRON_NOTIFICATIONS_TOKEN : '',
+    'cron-ics-token' => defined('NASKIN_CRON_ICS_TOKEN') ? NASKIN_CRON_ICS_TOKEN : '',
 ];
